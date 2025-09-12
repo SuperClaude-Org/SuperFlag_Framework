@@ -126,7 +126,7 @@ Then restart VS Code and type `@` in Continue chat to access MCP tools.
 
 **Development**: For local development, use `pip install -e .` instead of pipx.
 
-**Configuration Updates**: Edit `~/.context/flags.yaml` and restart MCP server to apply changes.
+**Configuration Updates**: Edit `~/.context-engine/flags.yaml` and restart MCP server to apply changes.
 
 ### Optional MCP Servers
 
@@ -174,7 +174,7 @@ Example: `"Fix this bug --auto"` → AI might choose `--analyze`, `--strict`, `-
     ├── sequential-thinking.yaml
     └── context7.yaml
 
-~/.context/
+~/.context-engine/
 └── flags.yaml          # Flag definitions
 ```
 
@@ -188,7 +188,7 @@ context-engine uninstall
 pipx uninstall context-engine-mcp
 ```
 
-**Note**: During uninstallation, `~/.context/flags.yaml` is backed up to `~/flags.yaml.backup_YYYYMMDD_HHMMSS` before removal. During installation, existing flags.yaml is automatically backed up and updated to the latest version.
+**Note**: During uninstallation, `~/.context-engine/flags.yaml` is backed up to `~/flags.yaml.backup_YYYYMMDD_HHMMSS` before removal. During installation, existing flags.yaml is automatically backed up and updated to the latest version.
 
 ## License
 

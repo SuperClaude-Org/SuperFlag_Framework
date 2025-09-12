@@ -66,3 +66,6 @@ nul
 # Project specific
 storage/
 resources/
+test-pip-env/
+*-env/
+*_env/

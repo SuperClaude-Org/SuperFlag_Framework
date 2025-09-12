@@ -118,7 +118,7 @@ def load_config() -> Dict[str, Any]:
     
     # Try multiple potential locations for the config file
     config_paths = [
-        str(home / ".context" / "flags.yaml"),  # User editable location
+        str(home / ".context-engine" / "flags.yaml"),  # User editable location
         os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "flags.yaml"),
         os.path.join(os.getcwd(), "flags.yaml"),
         "flags.yaml"

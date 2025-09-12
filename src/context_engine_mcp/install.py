@@ -177,7 +177,7 @@ def setup_continue_mcp_servers():
 
 # --- Option 1: Standard Python installation ---
 name: Context Engine MCP
-version: 1.0.4
+version: 1.0.6
 schema: v1
 mcpServers:
 - name: context-engine
@@ -188,7 +188,7 @@ mcpServers:
 # --- Option 2: UV (Python package manager) ---
 # Requires: uv in PATH or use full path like ~/.cargo/bin/uv
 # name: Context Engine MCP
-# version: 1.0.4
+# version: 1.0.6
 # schema: v1
 # mcpServers:
 # - name: context-engine
@@ -198,7 +198,7 @@ mcpServers:
 
 # --- Option 3: Development mode (pip install -e) ---
 # name: Context Engine MCP
-# version: 1.0.4
+# version: 1.0.6
 # schema: v1
 # mcpServers:
 # - name: context-engine
