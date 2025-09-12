@@ -30,9 +30,9 @@ def setup_flags_yaml():
     home = get_home_dir()
     target_dir = home / ".context-engine"
     target_dir.mkdir(parents=True, exist_ok=True)
-    
+
     target_file = target_dir / "flags.yaml"
-    
+
     # Always update to latest flags.yaml (backup if exists)
     if target_file.exists():
         from datetime import datetime
@@ -41,19 +41,32 @@ def setup_flags_yaml():
         shutil.copy2(target_file, backup_file)
         print(f"✓ Backed up existing flags.yaml to {backup_file.name}")
         print(f"✓ Updating flags.yaml with latest version")
-    
-    # Try multiple locations for flags.yaml
-    possible_paths = [
-        Path(__file__).parent.parent.parent / "flags.yaml",  # Development
-        Path(sys.prefix) / "share" / "context-engine-mcp" / "flags.yaml",  # Installed
-    ]
-    
+
+    # Prefer packaged resource (works from wheels)
     source_file = None
-    for path in possible_paths:
-        if path.exists():
-            source_file = path
-            break
-    
+    try:
+        from importlib.resources import files as pkg_files, as_file
+        try:
+            with as_file(pkg_files('context_engine_mcp') / 'flags.yaml') as res_path:
+                if res_path.exists():
+                    source_file = res_path
+        except Exception:
+            pass
+    except Exception:
+        pass
+
+    # Fallbacks for dev/editable installs
+    if source_file is None:
+        possible_paths = [
+            Path(__file__).parent / 'flags.yaml',  # flags.yaml placed inside package
+            Path(__file__).parent.parent.parent / "flags.yaml",  # Development root
+            Path(sys.prefix) / "share" / "context-engine-mcp" / "flags.yaml",  # Legacy installed path
+        ]
+        for path in possible_paths:
+            if path.exists():
+                source_file = path
+                break
+
     if source_file:
         shutil.copy2(source_file, target_file)
         print(f"✓ Installed flags.yaml to {target_file}")
@@ -369,35 +382,69 @@ def install(target="claude-code"):
     print("-" * 50)
 
 def kill_context_engine_processes():
-    """Kill context-engine-mcp processes to unlock files"""
+    """Kill running context-engine-mcp server processes without killing shells or self
+
+    Safety rules:
+    - Skip current PID
+    - Skip common shells (bash, zsh, sh, fish, powershell, cmd)
+    - Only kill if the executable is python* with a cmdline referencing context_engine_mcp
+      or if the executable itself is context-engine-mcp
+    """
     killed = []
-    
+
     if psutil is None:
         return ["ℹ️ psutil not available - manual process termination may be needed"]
-    
+
     try:
+        current_pid = os.getpid()
+        shell_names = {
+            'bash', 'zsh', 'sh', 'fish', 'pwsh', 'powershell', 'cmd', 'cmd.exe', 'dash'
+        }
+
         for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
             try:
-                cmdline = proc.info['cmdline'] or []
-                name = proc.info['name'] or ''
-                
-                # Check if process is context-engine related
-                if ('context-engine-mcp' in ' '.join(cmdline) or 
-                    'context-engine' in ' '.join(cmdline) or
-                    'context-engine-mcp' in name or
-                    'context-engine' in name):
-                    
-                    proc.kill()
-                    killed.append(f"✅ Killed process {proc.info['name']} (PID: {proc.info['pid']})")
-                    
+                pid = proc.info.get('pid')
+                if pid == current_pid:
+                    continue
+
+                cmdline = proc.info.get('cmdline') or []
+                name = (proc.info.get('name') or '').lower()
+
+                if name in shell_names:
+                    # Never kill shells even if their command string mentions our name
+                    continue
+
+                exe = ''
+                if cmdline:
+                    exe = os.path.basename(cmdline[0]).lower()
+                if not exe:
+                    exe = name
+
+                joined = ' '.join(cmdline).lower()
+
+                is_server_wrapper = (
+                    'context-engine-mcp' in exe or 'context-engine-mcp' in name
+                )
+                is_python_running_server = (
+                    exe.startswith('python') and (
+                        'context-engine-mcp' in joined or 'context_engine_mcp' in joined
+                    )
+                )
+
+                if not (is_server_wrapper or is_python_running_server):
+                    continue
+
+                proc.kill()
+                killed.append(f"✅ Killed process {proc.info.get('name', 'unknown')} (PID: {pid})")
+
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 continue
-                
+
         if killed:
-            time.sleep(1)  # Wait for processes to fully terminate
-            
-        return killed if killed else ["ℹ️ No context-engine processes found running"]
-        
+            time.sleep(1)
+
+        return killed if killed else ["ℹ️ No context-engine-mcp processes found running"]
+
     except Exception as e:
         return [f"⚠️ Error killing processes: {str(e)}"]
 
@@ -588,23 +635,23 @@ def cleanup_common_files():
 
 def uninstall():
     """Main uninstall function - removes Context Engine from all environments"""
-    print("🗑️ Uninstalling Context Engine MCP...")
-    print("🔥 Force-killing processes and immediately removing files...")
+    print("Uninstalling Context Engine MCP...")
+    print("Force-killing processes and immediately removing files...")
     
     # 1. Claude Code cleanup
-    print("\n📝 Cleaning up Claude Code configuration...")
+    print("\nCleaning up Claude Code configuration...")
     claude_results = uninstall_claude_code()
     for result in claude_results:
         print(f"  {result}")
     
     # 2. Continue cleanup
-    print("\n🔧 Cleaning up Continue configuration...")
+    print("\nCleaning up Continue configuration...")
     continue_results = uninstall_continue()
     for result in continue_results:
         print(f"  {result}")
     
     # 3. Common files cleanup
-    print("\n🧹 Cleaning up common files...")
+    print("\nCleaning up common files...")
     cleanup_results = cleanup_common_files()
     for result in cleanup_results:
         print(f"  {result}")
@@ -614,22 +661,17 @@ def uninstall():
     failures = [r for r in all_results if r.startswith("❌")]
     
     if failures:
-        print(f"\n⚠️ {len(failures)} items could not be removed (files may be in use)")
-        print("💡 These will be cleaned up after restarting Claude Code/Continue")
+        print(f"\nWARNING: {len(failures)} items could not be removed (files may be in use)")
+        print("These will be cleaned up after restarting Claude Code/Continue")
     
-    print("\n✅ Context Engine MCP uninstall complete!")
+    print("\nContext Engine MCP uninstall complete!")
     
-    print("🏷️ Run 'pip uninstall context-engine-mcp -y' to remove Python package")
-    print("🔧 Manually remove MCP server: claude mcp remove context-engine")
-    print("💡 No restart needed - files unlocked immediately!")
+    print("Run 'pip uninstall context-engine-mcp -y' to remove Python package")
+    print("Manually remove MCP server: claude mcp remove context-engine")
+    print("No restart needed - files unlocked immediately!")
     
-    return {
-        "status": "success", 
-        "claude_code": claude_results,
-        "continue": continue_results,
-        "cleanup": cleanup_results,
-        "failures": failures
-    }
+    # Return True for successful uninstall
+    return True
 
 def main():
     """Main CLI entry point with subcommands"""
@@ -680,12 +722,8 @@ def main():
         install(args.target)
         return 0
     elif args.command == 'uninstall':
-        try:
-            uninstall()
-            return 0
-        except Exception as e:
-            print(f"❌ Error during uninstall: {str(e)}")
-            return 1
+        uninstall()
+        return 0
 
 
 if __name__ == "__main__":

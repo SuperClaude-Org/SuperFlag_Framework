@@ -29,13 +29,15 @@ path = "src/context_engine_mcp/__version__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/context_engine_mcp"]
-include = [
-    "flags.yaml"
-]
+include = []
+# Ensure flags.yaml is bundled inside the installed package
+# so importlib.resources can access it at runtime (pipx/pyproject builds)
+force-include = { "flags.yaml" = "context_engine_mcp/flags.yaml" }
 
 [tool.hatch.build.targets.sdist]
-include = [
-    "src/context_engine_mcp/**/*.py",
+# Limit sdist contents to just the project files
+only-include = [
+    "src/context_engine_mcp",
     "README.md",
     "LICENSE",
     "pyproject.toml",
