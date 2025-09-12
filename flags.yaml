@@ -7,7 +7,7 @@
 # ========================================
 server:
   name: "context-engine-mcp"
-  version: "1.0.0"
+  version: "1.0.3"
   description: "MCP-based contextual flag system for AI assistants"
   
 mcp:
