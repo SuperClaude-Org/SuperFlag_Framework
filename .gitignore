@@ -67,5 +67,7 @@ nul
 storage/
 resources/
 test-pip-env/
+test-pip-env-tp/
+pypi-env/
 *-env/
 *_env/

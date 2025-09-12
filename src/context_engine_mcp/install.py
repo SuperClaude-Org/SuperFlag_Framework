@@ -77,56 +77,46 @@ def setup_flags_yaml():
         return False
 
 def check_claude_cli():
-    """Check if Claude CLI is installed"""
+    """Check if Claude CLI is installed without spawning it"""
     try:
-        import subprocess
-        # Windows needs shell=True for npm-installed commands
-        result = subprocess.run(['claude', '--version'], capture_output=True, text=True, shell=True)
-        return result.returncode == 0
+        from shutil import which
+        return which('claude') is not None
     except Exception as e:
         print(f"Debug: Claude CLI check failed: {e}")
         return False
 
 
 def ensure_safe_installation():
-    """Ensure safe installation even if exe is running"""
-    import subprocess
-    import time
-    from pathlib import Path
-    
-    # First check if command already works
+    """Verify installation state without executing the MCP server.
+
+    Best practice: avoid spawning long-running entrypoints or self-reinstalling.
+    We check import availability and entrypoint presence on PATH.
+    """
     try:
-        result = subprocess.run(['context-engine-mcp', '--version'], 
-                              capture_output=True, text=True, shell=True, timeout=3)
-        if "context-engine-mcp" in result.stdout or result.returncode == 0:
-            print("✓ context-engine-mcp command already works")
+        from importlib.util import find_spec
+        from shutil import which
+
+        module_ok = find_spec('context_engine_mcp') is not None
+        exe_path = which('context-engine-mcp')
+
+        if module_ok and exe_path:
+            print(f"✓ context-engine-mcp is importable and on PATH: {exe_path}")
             return True
-    except:
-        pass
-    
-    # Try to install package safely
-    package_dir = Path(__file__).parent.parent.parent
-    
-    # Use --force-reinstall with --no-deps to avoid conflicts
-    print("📦 Installing context-engine-mcp package...")
-    try:
-        result = subprocess.run(
-            [sys.executable, '-m', 'pip', 'install', '-e', str(package_dir), 
-             '--force-reinstall', '--no-deps'],
-            capture_output=True, text=True
-        )
-        
-        if "Successfully installed" in result.stdout:
-            print("✓ Package installed successfully")
-            return True
-        elif "Device or resource busy" in result.stderr:
-            print("⚠ Executable is in use. This is normal if MCP is running.")
-            print("  The installation should still work correctly.")
-            return True
+
+        if module_ok and not exe_path:
+            print("⚠ context-engine-mcp module is importable, but entrypoint not found on PATH.")
+            print("  Ensure your Python Scripts directory is on PATH, then try again.")
+            print("  Example (PowerShell): $env:Path += ';' + (Split-Path $(python -c 'import sys;print(sys.executable)')) + '\\Scripts'")
+            return False
+
+        # Module not importable – likely not installed in current interpreter
+        print("⚠ context-engine-mcp is not installed in this Python environment.")
+        print("  Install or upgrade via: python -m pip install -U context-engine-mcp")
+        return False
+
     except Exception as e:
-        print(f"⚠ Installation warning: {e}")
-    
-    return False
+        print(f"⚠ Installation check error: {e}")
+        return False
 
 def stop_mcp_server(server_name):
     """Stop a running MCP server"""
@@ -177,7 +167,7 @@ def setup_continue_mcp_servers():
 
 # --- Option 1: Standard Python installation ---
 name: Context Engine MCP
-version: 1.0.6
+version: 1.0.7
 schema: v1
 mcpServers:
 - name: context-engine
@@ -188,7 +178,7 @@ mcpServers:
 # --- Option 2: UV (Python package manager) ---
 # Requires: uv in PATH or use full path like ~/.cargo/bin/uv
 # name: Context Engine MCP
-# version: 1.0.6
+# version: 1.0.7
 # schema: v1
 # mcpServers:
 # - name: context-engine
@@ -198,7 +188,7 @@ mcpServers:
 
 # --- Option 3: Development mode (pip install -e) ---
 # name: Context Engine MCP
-# version: 1.0.6
+# version: 1.0.7
 # schema: v1
 # mcpServers:
 # - name: context-engine
