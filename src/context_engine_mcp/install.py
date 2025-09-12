@@ -74,16 +74,6 @@ def check_claude_cli():
         print(f"Debug: Claude CLI check failed: {e}")
         return False
 
-def check_existing_mcp_servers():
-    """Check which MCP servers are already installed"""
-    import subprocess
-    try:
-        result = subprocess.run(['claude', 'mcp', 'list'], capture_output=True, text=True, shell=True)
-        if result.returncode == 0:
-            return result.stdout
-        return ""
-    except:
-        return ""
 
 def ensure_safe_installation():
     """Ensure safe installation even if exe is running"""
@@ -141,59 +131,11 @@ def stop_mcp_server(server_name):
 
 def install_mcp_servers_via_cli():
     """Install MCP servers using Claude CLI"""
-    import subprocess
-    
-    # Check existing servers
-    existing = check_existing_mcp_servers()
-    
     # Ensure Python package is installed
     ensure_safe_installation()
     
-    # Only install NPM-based servers automatically
-    # For context-engine, let user decide between uv/python
-    servers = [
-        {
-            "name": "sequential-thinking", 
-            "package": "@modelcontextprotocol/server-sequential-thinking",
-            "description": "Sequential problem solving"
-        },
-        {
-            "name": "context7",
-            "package": "@upstash/context7-mcp",
-            "description": "Documentation and examples"
-        }
-    ]
-    
-    for server in servers:
-        # Skip if already installed
-        if server['name'] in existing:
-            print(f"✓ {server['name']} already installed, skipping...")
-            continue
-        print(f"\n📦 Installing {server['name']}...")
-        
-        if 'package' in server:
-            # NPM-based MCP server
-            cmd = ['claude', 'mcp', 'add', '-s', 'user', '--', 
-                   server['name'], 'npx', '-y', server['package']]
-        else:
-            # This shouldn't happen since we only have NPM servers now
-            print(f"⚠ Skipping {server['name']} - manual configuration needed")
-            continue
-        
-        try:
-            # Windows needs shell=True
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=120, shell=True)
-            if result.returncode == 0:
-                print(f"✓ {server['name']} installed successfully")
-            else:
-                print(f"⚠ Failed to install {server['name']}: {result.stderr}")
-        except subprocess.TimeoutExpired:
-            print(f"⚠ Installation of {server['name']} timed out")
-        except Exception as e:
-            print(f"⚠ Error installing {server['name']}: {e}")
-    
     # Inform user about context-engine setup
-    print("\n📌 For context-engine MCP server:")
+    print("📌 For context-engine MCP server:")
     print("   Choose your installation method:")
     print("   • Python: claude mcp add -s user -- context-engine context-engine-mcp")
     print("   • UV: claude mcp add -s user -- context-engine uv run context-engine-mcp")
@@ -251,47 +193,6 @@ mcpServers:
 #   args: ["-m", "context_engine_mcp"]
 #   env: {}
 
-"""
-        },
-        {
-            "filename": "sequential-thinking.yaml",
-            "content": """# Sequential Thinking MCP - Step-by-step problem solving
-# This server helps break down complex problems into manageable steps
-
-name: Sequential Thinking MCP
-version: 0.0.1
-schema: v1
-mcpServers:
-- name: sequential-thinking
-  command: npx
-  args: ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-  env: {}
-
-# Usage in Continue:
-# 1. Type @ in the chat
-# 2. Select "MCP"
-# 3. Use sequential thinking for complex problems
-"""
-        },
-        {
-            "filename": "context7.yaml",
-            "content": """# Context7 MCP - Up-to-date documentation and code examples
-# Provides access to the latest library documentation
-
-name: Context7 MCP
-version: 0.0.1
-schema: v1
-mcpServers:
-- name: context7
-  command: npx
-  args: ["-y", "@upstash/context7-mcp"]
-  env: {}
-
-# Usage in Continue:
-# 1. Type @ in the chat
-# 2. Select "MCP"
-# 3. Ask for documentation about any library
-# Example: "Get React hooks documentation"
 """
         }
     ]
@@ -408,12 +309,7 @@ def install(target="claude-code"):
         if check_claude_cli():
             print("✓ Claude CLI found")
             
-            # Automatically install MCP servers via CLI
-            print("\n📦 Installing MCP servers to Claude Code (user scope)...")
-            print("  - context-engine (contextual flag system)")
-            print("  - sequential-thinking (problem solving)")
-            print("  - context7 (documentation)")
-            
+            # Setup MCP server instruction
             install_mcp_servers_via_cli()
             
             # Setup CLAUDE.md
@@ -454,7 +350,7 @@ def install(target="claude-code"):
         print("\n🎯 Next steps for Claude Code:")
         print("1. Restart Claude Code if it's running")
         print("2. Use the MCP tools in your conversations:")
-        print("   • list_available_flags() - View all 16 available flags")
+        print("   • list_available_flags() - View all 17 available flags")
         print("   • get_directives(['--analyze', '--performance']) - Activate modes")
         print("   • Use '--auto' to let AI select optimal flags")
         print("\n📚 Documentation: ~/.claude/CONTEXT-ENGINE.md")
@@ -466,8 +362,8 @@ def install(target="claude-code"):
         print("\n2. 🔄 Restart VS Code")
         print("\n3. 💬 In Continue chat:")
         print("   • Type @ and select 'MCP'")
-        print("   • Available servers: context-engine, sequential-thinking, context7")
-        print("\n📚 All configuration files: ~/.continue/mcpServers/")
+        print("   • Available server: context-engine")
+        print("\n📚 Configuration file: ~/.continue/mcpServers/context-engine.yaml")
     
     print("\n✅ Context Engine MCP installation completed!")
     print("-" * 50)

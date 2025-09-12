@@ -121,12 +121,30 @@ Then restart VS Code and type `@` in Continue chat to access MCP tools.
 ```
 
 ### MCP Tools (Called by AI)
-- `list_available_flags()` - Shows all 16 flags
+- `list_available_flags()` - Shows all 17 flags
 - `get_directives(['--flag1', '--flag2'])` - Activates flags
 
 **Development**: For local development, use `pip install -e .` instead of pipx.
 
 **Configuration Updates**: Edit `~/.context/flags.yaml` and restart MCP server to apply changes.
+
+### Optional MCP Servers
+
+For enhanced functionality with specific flags, consider installing these additional MCP servers:
+
+#### For `--research` flag:
+```bash
+# Documentation and examples server
+claude mcp add -s user -- context7 npx -y @upstash/context7-mcp
+```
+
+#### For `--seq` flag:
+```bash
+# Sequential thinking server  
+claude mcp add -s user -- sequential-thinking npx -y @modelcontextprotocol/server-sequential-thinking
+```
+
+These servers provide specialized tools that complement the respective flags but are not required for basic functionality.
 
 ### Session Management
 - Duplicate flags show REMINDER only (saves tokens)
