@@ -45,6 +45,13 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+# Generic virtualenv name patterns (anywhere in repo)
+.venv*/
+venv*/
+*-venv/
+*_venv/
+# Common virtualenv marker/file (ignore even if a custom name is used)
+**/pyvenv.cfg
 
 # IDE
 .vscode/
@@ -71,3 +78,4 @@ test-pip-env-tp/
 pypi-env/
 *-env/
 *_env/
+RELEASE_GUIDE_KO.md

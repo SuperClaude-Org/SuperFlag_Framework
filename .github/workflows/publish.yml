@@ -5,6 +5,10 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   gate:
     name: Require CI success for this commit
@@ -78,8 +82,9 @@ print(ns.get('__version__',''))
 PY
 )
           echo "Tag: $TAG, __version__: $PKG_VER"
-          # Accept vX.Y.Z or vX.Y.Z-<suffix> (e.g., rc.1) for TestPyPI
-          if [[ "$TAG" != "v${PKG_VER}" && ! "$TAG" =~ ^v${PKG_VER}- ]]; then
+          # Require exact match between tag (without leading v) and package version
+          # Supports PEP 440 pre-releases like 1.2.3rc1, 1.2.3a1, 1.2.3b1, 1.2.3.dev1
+          if [[ "v${PKG_VER}" != "$TAG" ]]; then
             echo "Version mismatch: tag $TAG vs __version__ $PKG_VER" >&2
             exit 1
           fi
@@ -96,8 +101,12 @@ PY
   publish-testpypi:
     name: Publish to TestPyPI
     needs: build
-    if: contains(github.ref_name, '-')
+    # Pre-releases (rc, a, b, dev) go to TestPyPI
+    if: contains(github.ref_name, 'rc') || contains(github.ref_name, 'a') || contains(github.ref_name, 'b') || contains(github.ref_name, 'dev')
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4
@@ -109,13 +118,16 @@ PY
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
-          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
 
   publish-pypi:
     name: Publish to PyPI
     needs: build
-    if: ${{ !contains(github.ref_name, '-') }}
+    # Stable releases (no pre-release marker) go to PyPI
+    if: ${{ !contains(github.ref_name, 'rc') && !contains(github.ref_name, 'a') && !contains(github.ref_name, 'b') && !contains(github.ref_name, 'dev') }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4
@@ -125,5 +137,3 @@ PY
 
       - name: Publish (PyPI)
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
