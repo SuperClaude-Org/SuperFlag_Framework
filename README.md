@@ -13,10 +13,10 @@ Gives AI specialized working modes through flags. Like `--strict` for zero error
 pipx install context-engine-mcp
 
 # For Claude Code
-context-engine-install
+context-engine install
 
 # For Continue 
-context-engine-install --target cn
+context-engine install --target cn
 ```
 
 Then use in AI:
@@ -56,7 +56,7 @@ Then use in AI:
 pipx install context-engine-mcp
 
 # Install configuration files
-context-engine-install
+context-engine install
 ```
 
 **⚠️ Important**: After installation, you must manually add the MCP server:
@@ -82,7 +82,7 @@ This creates MCP server configuration and installs to `~/.claude/`.
 pipx install context-engine-mcp
 
 # Install configuration files
-context-engine-install --target cn
+context-engine install --target cn
 ```
 
 **⚠️ Configuration Required**: Edit `~/.continue/mcpServers/context-engine.yaml` and uncomment ONE option:
@@ -181,11 +181,11 @@ Example: `"Fix this bug --auto"` → AI might choose `--analyze`, `--strict`, `-
 ## Uninstallation
 
 ```bash
-# Uninstall (recommended)
-context-engine-install --uninstall
+# Complete uninstall from all environments (Claude Code + Continue)
+context-engine uninstall
 
 # Remove Python package
-pip uninstall context-engine-mcp -y
+pipx uninstall context-engine-mcp
 ```
 
 **Note**: During uninstallation, `~/.context/flags.yaml` is backed up to `~/flags.yaml.backup_YYYYMMDD_HHMMSS` before removal. During installation, existing flags.yaml is automatically backed up and updated to the latest version.

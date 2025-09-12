@@ -630,51 +630,55 @@ def uninstall():
     }
 
 def main():
-    """Main entry point for the installer"""
+    """Main CLI entry point with subcommands"""
     import argparse
+    
     try:
         from .__version__ import __version__
     except ImportError:
         __version__ = "unknown"
     
-    parser = argparse.ArgumentParser(description="Install/Uninstall Context Engine MCP")
+    parser = argparse.ArgumentParser(
+        prog="context-engine",
+        description="Context Engine MCP - Contextual flag system for AI assistants"
+    )
     parser.add_argument(
         "--version", "-v",
         action="version",
         version=f"context-engine-mcp {__version__}"
     )
-    parser.add_argument(
+    
+    subparsers = parser.add_subparsers(
+        dest='command',
+        help='Available commands',
+        required=True
+    )
+    
+    # Install subcommand
+    install_parser = subparsers.add_parser(
+        'install',
+        help='Install Context Engine MCP'
+    )
+    install_parser.add_argument(
         "--target", 
         choices=["claude-code", "cn"], 
         default="claude-code",
         help="Installation target - claude-code or cn (Continue) (default: claude-code)"
     )
+    
+    # Uninstall subcommand
+    uninstall_parser = subparsers.add_parser(
+        'uninstall',
+        help='Uninstall Context Engine MCP from all environments'
+    )
+    
     args = parser.parse_args()
-    install(args.target)
+    
+    if args.command == 'install':
+        install(args.target)
+    elif args.command == 'uninstall':
+        uninstall()
 
-def uninstall_main():
-    """Entry point for context-engine-uninstall command"""
-    import argparse
-    
-    try:
-        from .__version__ import __version__
-    except ImportError:
-        __version__ = "unknown"
-    
-    parser = argparse.ArgumentParser(description="Uninstall Context Engine MCP")
-    parser.add_argument(
-        "--version", "-v",
-        action="version",
-        version=f"context-engine-mcp {__version__}"
-    )
-    parser.add_argument(
-        "--target", 
-        choices=["claude-code", "cn"], 
-        default="claude-code",
-        help="Uninstall target - claude-code or cn (Continue) (default: claude-code)"
-    )
-    args = parser.parse_args()
-    uninstall()
 
 if __name__ == "__main__":
     main()
