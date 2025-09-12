@@ -28,7 +28,7 @@ def get_home_dir():
 def setup_flags_yaml():
     """Copy flags.yaml to user's home directory for editing"""
     home = get_home_dir()
-    target_dir = home / ".context"
+    target_dir = home / ".context-engine"
     target_dir.mkdir(parents=True, exist_ok=True)
     
     target_file = target_dir / "flags.yaml"
@@ -164,7 +164,7 @@ def setup_continue_mcp_servers():
 
 # --- Option 1: Standard Python installation ---
 name: Context Engine MCP
-version: 1.0.3
+version: 1.0.4
 schema: v1
 mcpServers:
 - name: context-engine
@@ -175,7 +175,7 @@ mcpServers:
 # --- Option 2: UV (Python package manager) ---
 # Requires: uv in PATH or use full path like ~/.cargo/bin/uv
 # name: Context Engine MCP
-# version: 1.0.3
+# version: 1.0.4
 # schema: v1
 # mcpServers:
 # - name: context-engine
@@ -185,7 +185,7 @@ mcpServers:
 
 # --- Option 3: Development mode (pip install -e) ---
 # name: Context Engine MCP
-# version: 1.0.3
+# version: 1.0.4
 # schema: v1
 # mcpServers:
 # - name: context-engine
@@ -383,7 +383,9 @@ def kill_context_engine_processes():
                 
                 # Check if process is context-engine related
                 if ('context-engine-mcp' in ' '.join(cmdline) or 
-                    'context-engine-mcp' in name):
+                    'context-engine' in ' '.join(cmdline) or
+                    'context-engine-mcp' in name or
+                    'context-engine' in name):
                     
                     proc.kill()
                     killed.append(f"✅ Killed process {proc.info['name']} (PID: {proc.info['pid']})")
@@ -555,9 +557,9 @@ def cleanup_common_files():
             success, message = delete_with_retry(exe_path)
             results.append(message)
         
-        # Remove .context directory with backup
+        # Remove .context-engine directory with backup
         home = get_home_dir()
-        context_dir = home / ".context"
+        context_dir = home / ".context-engine"
         if context_dir.exists():
             try:
                 # Backup flags.yaml if it exists
@@ -569,13 +571,13 @@ def cleanup_common_files():
                     shutil.copy2(flags_file, backup_file)
                     results.append(f"✅ Backed up flags.yaml to ~/{backup_file.name}")
                 
-                # Remove the entire .context directory
+                # Remove the entire .context-engine directory
                 shutil.rmtree(context_dir)
-                results.append("✅ Removed ~/.context directory (flags.yaml, etc.)")
+                results.append("✅ Removed ~/.context-engine directory (flags.yaml, etc.)")
             except Exception as e:
-                results.append(f"⚠️ Could not remove .context directory: {str(e)}")
+                results.append(f"⚠️ Could not remove .context-engine directory: {str(e)}")
         else:
-            results.append("ℹ️ .context directory not found")
+            results.append("ℹ️ .context-engine directory not found")
         
         results.append("ℹ️ Run 'pip uninstall context-engine-mcp -y' to remove Python package")
         
@@ -676,9 +678,15 @@ def main():
     
     if args.command == 'install':
         install(args.target)
+        return 0
     elif args.command == 'uninstall':
-        uninstall()
+        try:
+            uninstall()
+            return 0
+        except Exception as e:
+            print(f"❌ Error during uninstall: {str(e)}")
+            return 1
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
