@@ -19,6 +19,7 @@ email = "your.email@example.com"
 [project.scripts]
 context-engine-mcp = "context_engine_mcp.__main__:main"
 context-engine-install = "context_engine_mcp.install:main"
+context-engine-uninstall = "context_engine_mcp.install:uninstall_main"
 
 [build-system]
 requires = ["hatchling"]

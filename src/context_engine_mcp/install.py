@@ -427,25 +427,7 @@ def uninstall_claude_code():
     results.extend(kill_context_engine_processes())
     
     try:
-        # 1. Remove from ~/.claude.json
-        claude_config_path = home / ".claude.json"
-        if claude_config_path.exists():
-            with open(claude_config_path, 'r', encoding='utf-8') as f:
-                config = json.load(f)
-            
-            if 'mcpServers' in config and 'context-engine' in config['mcpServers']:
-                del config['mcpServers']['context-engine']
-                
-                with open(claude_config_path, 'w', encoding='utf-8') as f:
-                    json.dump(config, f, indent=2, ensure_ascii=False)
-                
-                results.append("✅ Removed context-engine from ~/.claude.json")
-            else:
-                results.append("ℹ️ context-engine not found in ~/.claude.json")
-        else:
-            results.append("ℹ️ ~/.claude.json not found")
-        
-        # 2. Remove @CONTEXT-ENGINE.md reference from CLAUDE.md
+        # 1. Remove @CONTEXT-ENGINE.md reference from CLAUDE.md
         claude_md = home / ".claude" / "CLAUDE.md"
         if claude_md.exists():
             content = claude_md.read_text(encoding='utf-8')
@@ -636,6 +618,7 @@ def uninstall():
     print("\n✅ Context Engine MCP uninstall complete!")
     
     print("🏷️ Run 'pip uninstall context-engine-mcp -y' to remove Python package")
+    print("🔧 Manually remove MCP server: claude mcp remove context-engine")
     print("💡 No restart needed - files unlocked immediately!")
     
     return {
@@ -666,17 +649,32 @@ def main():
         default="claude-code",
         help="Installation target - claude-code or cn (Continue) (default: claude-code)"
     )
+    args = parser.parse_args()
+    install(args.target)
+
+def uninstall_main():
+    """Entry point for context-engine-uninstall command"""
+    import argparse
+    
+    try:
+        from .__version__ import __version__
+    except ImportError:
+        __version__ = "unknown"
+    
+    parser = argparse.ArgumentParser(description="Uninstall Context Engine MCP")
     parser.add_argument(
-        "--uninstall", "-u",
-        action="store_true", 
-        help="Uninstall Context Engine MCP"
+        "--version", "-v",
+        action="version",
+        version=f"context-engine-mcp {__version__}"
+    )
+    parser.add_argument(
+        "--target", 
+        choices=["claude-code", "cn"], 
+        default="claude-code",
+        help="Uninstall target - claude-code or cn (Continue) (default: claude-code)"
     )
     args = parser.parse_args()
-    
-    if args.uninstall:
-        uninstall()
-    else:
-        install(args.target)
+    uninstall()
 
 if __name__ == "__main__":
     main()
