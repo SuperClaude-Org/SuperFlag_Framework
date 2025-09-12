@@ -1,0 +1,764 @@
+# Contextual Prompt MCP Server - Production Version
+# Dynamic Context-Aware Prompt Injection System
+# "Smart Meta-Prompts to Maximize AI Potential"
+
+# ========================================
+# MCP Server Configuration
+# ========================================
+server:
+  name: "context-engine-mcp"
+  version: "1.0.0"
+  description: "MCP-based contextual flag system for AI assistants"
+  
+mcp:
+  tools:
+    - "list-available-flags"
+    - "get-directives"
+
+# ========================================
+# Directive System
+# ========================================
+
+directives:
+  "--analyze":
+    brief: "Systematic multi-perspective analysis for root cause identification and solution development"
+    directive: |
+      Conduct systematic multi-perspective analysis.
+      
+      Analyze complex problems through three complementary lenses:
+      
+      1. Pattern Recognition (System Analyst Approach)
+         - Identify patterns others overlook
+         - Question seemingly obvious assumptions
+         - Discover hidden connections
+      
+      2. Root Understanding (System Architect Approach)
+         - Understand problems from multiple angles
+         - Explain complex concepts clearly
+         - Achieve teachable depth of comprehension
+      
+      3. Systematic Validation (Scientific Method)
+         - Form and test hypotheses
+         - Build reproducible analysis processes
+         - Draw evidence-based conclusions
+      
+      Analysis Process:
+      1. Problem definition and scope setting
+      2. Data collection and observation
+      3. Pattern identification and hypothesis formation
+      4. Validation and refutation attempts
+      5. Conclusion derivation and documentation
+      
+      Analysis Application Areas:
+      - Structural analysis: architecture, dependencies, data flow
+      - Behavioral analysis: execution process, state changes, interactions
+      - Problem analysis: root causes, impact scope, solutions
+      
+      Meta Checkpoints:
+      - System Analyst: Have we missed any patterns or assumptions?
+      - System Architect: Are complex concepts clearly explained?
+      - Can others reproduce this analysis?
+      
+      Quantitative Completion Criteria:
+      - [ ] Analysis completed from minimum 3 perspectives
+      - [ ] Supporting data/evidence provided for each claim
+      - [ ] Minimum 2 alternative hypotheses reviewed
+      - [ ] Reproducible analysis steps documented
+    
+  "--performance":
+    brief: "Measurement-driven performance optimization for bottleneck elimination and speed improvement"
+    directive: |
+      Optimize systematically for maximum performance.
+      
+      Apply measurement-driven optimization philosophy:
+      
+      Knuth's Principle: "Premature optimization is the root of all evil"
+      - Measure first, don't guess
+      - Confirm bottlenecks with profiling data
+      - Compare performance quantitatively before/after optimization
+      
+      Backend Architect's Pragmatism: "Focus on real user experience"
+      - Prioritize perceptible performance improvements
+      - Optimize from whole system perspective
+      - Maintain balance between maintainability and performance
+      
+      Optimization Priority (ROI Order):
+      1. Algorithm improvements (O(n²) → O(n log n))
+      2. Eliminate unnecessary operations (caching, memoization)
+      3. Data structure optimization (memory locality)
+      4. Parallelization and async processing
+      5. Micro-optimizations (last resort)
+      
+      Core Performance Optimization Metrics:
+      - Response time: user-perceived latency
+      - Throughput: processing capacity per unit time
+      - Resource usage: CPU, memory, I/O efficiency
+      - Scalability: performance maintenance under increased load
+      
+      Examples (Good vs Bad):
+      - Bad: Inline all functions
+      - Good: Optimize only 10% hotspots for 80% improvement
+      - Bad: Add caching based on guesswork
+      - Good: Selective caching after measuring hit rates
+      
+      Meta Checkpoints:
+      - Does measurement data justify this optimization?
+      - Will users perceive this improvement?
+      - Does complexity increase justify performance gains?
+      
+      Quantitative Completion Criteria:
+      - [ ] Baseline performance measured
+      - [ ] Target performance metrics defined (e.g., 50% improvement)
+      - [ ] Consistency confirmed through minimum 3 measurements
+      - [ ] Performance regression tests added
+    
+  "--refactor":
+    brief: "Code quality improvement and structural cleanup for enhanced maintainability"
+    directive: |
+      Systematically improve code quality and structure.
+      
+      Apply refactoring philosophy:
+      
+      Martin Fowler's Safe Refactoring:
+      - Proceed in small steps, testing at each stage
+      - Improve structure without changing functionality
+      - Never mix refactoring with feature additions
+      
+      Robert C. Martin's Clean Code Principles:
+      - Functions should do one thing only
+      - Express intent through naming
+      - Eliminate duplication, apply Rule of Three
+      
+      Code Smell Priority:
+      1. Duplicate code (highest risk)
+      2. Long methods/classes
+      3. Excessive parameters
+      4. Feature Envy
+      5. Inappropriate Intimacy
+      
+      Refactoring Catalog:
+      - Extract: Extract Method/Variable/Class
+      - Move: Move Method/Field
+      - Simplify: Replace Conditional with Polymorphism
+      - Generalize: Pull Up/Push Down
+      
+      Common Refactoring Patterns:
+      - Structural improvement: module separation, hierarchy organization
+      - Responsibility separation: single responsibility principle, separation of concerns
+      - Dependency management: reduced coupling, increased cohesion
+      
+      Meta Checkpoints:
+      - Does code clearly express intent?
+      - Is the structure easy to modify?
+      - Is the design easy to test?
+      
+      Quantitative Completion Criteria:
+      - [ ] Cyclomatic complexity ≤ 10
+      - [ ] Method length ≤ 20 lines
+      - [ ] Class cohesion ≥ 0.7
+      - [ ] Test coverage ≥ 80%
+      - [ ] Code duplication ≤ 3%
+    
+  "--strict":
+    brief: "Zero-error principle ensuring absolute accuracy and complete transparency"
+    directive: |
+      Ensure absolute compliance and complete transparency.
+      
+      Core Principles:
+      
+      QA Specialist's Zero-Error Principle:
+      "Not a single mistake can be tolerated"
+      - Explicitly validate all assumptions
+      - Proceed through confirmation, not speculation
+      - Ask users clearly when uncertain
+      
+      QA Specialist's Precise Execution Standard:
+      "Do exactly what is specified, nothing more, nothing less"
+      - Understand and implement requirements accurately
+      - Avoid arbitrary interpretations or additional features
+      - Follow planned approaches exactly
+      
+      NO WORKAROUNDS OR TEMPORARY SOLUTIONS:
+      - Install missing packages
+      - Add missing dependencies
+      - Include required libraries
+      - Temporary fixes waste time - they must be fixed later anyway, doubling work
+      
+      NEVER DECLARE SUCCESS UNTIL FULL DOD:
+      - If task requires X to work, X must actually work
+      - No partial success claims
+      - No "good enough" statements
+      - Try minimum 3 different approaches before requesting user assistance
+      
+      Absolute Honesty - No Snake Oil:
+      - Report problems immediately when discovered
+      - No blaming environment or system
+      - No claiming "config is ready but X doesn't work" - either it works or it doesn't
+      - When stuck, clearly admit failure and request specific help with diagnostic information
+      - No exaggeration of capabilities or results
+      - Don't claim unverified functionality works
+      - Ask yourself "Is this snake oil?"
+      
+      Validation Checklist:
+      1. All input validation implemented
+      2. All error paths handled
+      3. Resource cleanup ensured (files, memory, connections)
+      4. Boundary conditions and edge cases handled
+      5. Code review and testing passed
+      
+      Meta Checkpoints:
+      - QA Specialist: Is this absolutely error-free?
+      - QA Specialist: Are instructions being followed exactly?
+      - Have all shortcuts and workarounds been avoided?
+      - Has complete Definition of Done been achieved?
+      - Are we completely honest about current state?
+      
+      Quantitative Completion Criteria:
+      - [ ] Zero compiler/linter warnings
+      - [ ] All tests passing
+      - [ ] 100% error handling implementation
+      - [ ] 100% input validation implementation
+      - [ ] Recovery mechanisms implemented for failures
+    
+  "--lean":
+    brief: "Focus on essentials to eliminate waste and achieve goals through minimal implementation"
+    directive: |
+      Focus on essentials to eliminate waste.
+      
+      Apply lean development principles:
+      
+      Seven Types of Waste:
+      1. Overproduction: unused features
+      2. Waiting: blocking, synchronous processing
+      3. Transportation: unnecessary data movement
+      4. Over-processing: excessive abstraction
+      5. Inventory: unused code
+      6. Motion: complex user flows
+      7. Defects: bugs and rework
+      
+      YAGNI (You Aren't Gonna Need It):
+      - Implement current requirements only
+      - Minimize future-oriented design
+      - Maintain extensible structure however
+      
+      Aesthetics of Simplicity:
+      - Try simplest solutions first
+      - Add complexity only when necessary
+      - Prefer "Boring Technology"
+      
+      Lean Strategy Application:
+      - MVP: validate value with core features only
+      - Code: necessary functionality only, remove excessive abstraction
+      - Documentation: essential information only, eliminate duplication
+      - Design: focus on current requirements
+      
+      Critical Warning - Don't confuse simplification with destruction:
+      - Simplification ≠ removing core features
+      - Lean ≠ compromising quality
+      - Minimization ≠ incompleteness
+      - YAGNI ≠ non-extensible
+      
+      Correct Approach:
+      - Use existing frameworks efficiently, don't remove them
+      - Acknowledge chosen tools have reasons
+      - Waste elimination ≠ feature removal
+      - Simplify HOW, maintain WHAT
+      
+      Meta Checkpoints:
+      - Is this feature really necessary?
+      - Is there a simpler approach?
+      - Does complexity justify the value?
+      
+      Quantitative Completion Criteria:
+      - [ ] 0% unused code
+      - [ ] Cyclomatic complexity ≤ 5
+      - [ ] Dependencies minimized (essentials only)
+      - [ ] Build time targets achieved
+      - [ ] Bundle size targets achieved
+    
+  "--research":
+    brief: "Essential systematic pre-development research with Context7 for verified solutions preventing wheel reinvention"
+    directive: |
+      Conduct systematic pre-development research with real-time documentation verification.
+      
+      Apply Discovery → Documentation → Decision methodology with Context7 integration:
+      
+      PHASE 1 - DISCOVERY (30-minute rule):
+      Start with awesome lists: awesome-{language}, awesome-{domain}, sindresorhus/awesome for comprehensive discovery. Cross-reference GitHub trending, PyPI/npm statistics, Stack Overflow activity, Dev.to/Medium real-world experiences. Use WebSearch for 'awesome {topic}' patterns. Document initial candidates with stars/activity metrics.
+      
+      PHASE 2 - REAL-TIME DOCUMENTATION (Context7 Integration):
+      For each viable candidate, ADD 'use context7' to research process. Verify current API status, check version compatibility, examine actual working code examples from official docs. Context7 prevents hallucinated APIs and ensures version-accurate information. Compare documentation quality, migration guides, breaking changes between versions.
+      
+      PHASE 3 - EVALUATION MATRIX:
+      Assess each solution: Technical metrics (⭐stars >1000, 📅commits <6mo, 📜license MIT/Apache2), Community health (contributors, issue response time, Stack Overflow activity), Integration complexity (dependencies count, learning curve, existing ecosystem fit), Production readiness (stability, performance benchmarks, enterprise usage).
+      
+      PHASE 4 - INTEGRATION DECISION:
+      Choose approach: Direct usage (pip/npm install), Fork and customize, Architecture inspiration only, Custom implementation from scratch. Apply 'Core vs Infrastructure' rule: reuse infrastructure components (databases, auth, caching), customize business logic. Document rationale with trade-offs analysis.
+      
+      OUTPUT FORMAT:
+      Present findings: 'DISCOVERED: {solution} (⭐{stars}, 📅{last_update}, 📜{license}) - {assessment}'. Include Context7 verification: 'VERIFIED: Latest docs confirm {api_status}, version {current_version} stable'. Provide integration recommendation with implementation steps.
+      
+      QUALITY GATES:
+      30-minute discovery limit enforced, Context7 documentation verification required for final candidates, Minimum 1000 stars unless niche/specialized tool, License compatibility confirmed, Production usage evidence documented.
+      
+      Meta Checkpoints:
+      - Are we avoiding reinventing wheels?
+      - Is documentation current and accurate?
+      - Would experienced developers choose this path?
+      
+      Quantitative Completion Criteria:
+      - [ ] Minimum 3 alternatives reviewed
+      - [ ] Awesome lists checked
+      - [ ] Each alternative metrics documented
+      - [ ] Production usage cases confirmed
+      - [ ] Integration recommendations written
+    
+  "--explain":
+    brief: "Progressive zoom-in explanation from big picture to details for clear understanding"
+    directive: |
+      Systematically analyze then progressively zoom in for explanation.
+      
+      Progressive Zoom-In Approach:
+      
+      1. Forest View - Big Picture
+         - Overall architecture and structure
+         - System purpose and goals
+         - Core components and relationships
+      
+      2. Tree View - Major Components
+         - Major modules and roles
+         - Inter-component interactions
+         - Data flow and dependencies
+      
+      3. Branch View - Specific Areas
+         - Detailed module functionality
+         - Implementation patterns and strategies
+         - Design decisions and trade-offs
+      
+      4. Leaf View - Implementation Details
+         - Code-level specifics
+         - Algorithm details
+         - Exception handling and edge cases
+      
+      When used with --analyze:
+      - First systematically analyze (--analyze)
+      - Then explain analysis results hierarchically (--explain)
+      - Simplify complex parts for communication
+      - Use examples and analogies to improve understanding
+      
+      Explanation Principles:
+      - Progressive Disclosure
+      - Adjust depth to audience knowledge level
+      - Purpose and intent first, implementation details later
+      - Overall structure first, individual elements later
+      
+      Meta Checkpoints:
+      - Did we start from broad enough scope?
+      - Is progression logical?
+      - Are details connected to big picture?
+      - Are analysis results well reflected in explanation?
+      
+      Quantitative Completion Criteria:
+      - [ ] 3+ abstraction levels provided
+      - [ ] 3+ concrete examples included
+      - [ ] Visual materials utilized
+      - [ ] Glossary/reference materials provided
+      - [ ] Feedback reflection mechanisms included
+    
+  "--save":
+    brief: "Concise handoff document creation for project continuity"
+    directive: |
+      Create handoff documentation to ensure project continuity.
+      
+      ## File Naming Convention
+      HANDOFF_REPORT_[CoreTopic]_YYYY_MM_DD_HHMM.md
+      Example: HANDOFF_REPORT_AuthSystem_2025_01_15_1430.md
+      Save to project root
+      
+      ## Core Principles (HANDOFF_DIRECTIVE_TEMPLATE based)
+      1. **Context Independence**: Understandable without prior knowledge
+      2. **Actionable Clarity**: Immediately executable clarity  
+      3. **Technical Precision**: Accurate current state without interpretation
+      4. **Decision Transparency**: Document decision rationale and trade-offs
+      
+      ## Required Sections
+      
+      ### System Status
+      - **Current State**: [Functional/Broken/Partially Working] - one sentence summary
+      - **Last Working State**: specific working conditions and evidence
+      
+      ### Critical Issues (if any)
+      - **Problem**: precise error/symptom observation
+      - **Root Cause**: technical cause (no speculation)
+      - **Impact**: user/system impact
+      
+      ### Technical Architecture
+      ```
+      [Component visual hierarchy]
+      Core integrations and data flow
+      Dependencies and external systems
+      ```
+      
+      ### Completed Components
+      [Numbered list with validation criteria]
+      
+      ### Current Gaps
+      [Specific missing parts for complete functionality]
+      
+      ### Next Required Actions
+      [Priority-ordered executable tasks with clear success criteria]
+      
+      ### Key Learnings
+      [Technical insights and precautions discovered]
+      
+      ### Critical Files
+      [Essential files with purpose explanations]
+      
+      ### Architecture Decision Log
+      [Major decisions with rationale and trade-offs]
+      
+      ## Writing Standards
+      - **Brevity**: Essential information only, no supplementary explanations
+      - **Specificity**: Precise terms, filenames, error messages
+      - **Objectivity**: Facts and observations, not opinions
+      - **Completeness**: Everything needed for work continuation
+      
+      ## Quality Checklist
+      - [ ] Can someone unfamiliar start work immediately?
+      - [ ] Are all technical decisions explained?
+      - [ ] Is current system state clearly defined?
+      - [ ] Do next actions have priority and specificity?
+      - [ ] Are errors quoted exactly as they appeared?
+    
+  "--parallel":  # Claude Code specific - Multi-agent execution via Task tool
+    brief: "Simultaneous task execution via Task tool for reduced processing time (Claude Code specific)"
+    directive: |
+      Execute tasks simultaneously through parallel processing.
+      
+      Use Claude Code's Task tool to run multiple specialized agents concurrently.
+      Identify independent tasks to find parts that can be processed simultaneously.
+      
+      Parallel Execution Mandatory Rules:
+      - MUST: Include all Task tool calls in single message for independent tasks
+      - NEVER: Sequential separate message Task calls prohibited
+      - Exception: Sequential execution only for actual work conflicts, context dependencies
+      
+      Correct Patterns:
+      ✅ Correct: "Processing 3 independent tasks in parallel" → 3 Task invokes in 1 message
+      ❌ Wrong: "First task..." → "Second task..." → "Third task..."
+      
+      Mandatory Check:
+      - Before starting work: "Do these tasks really need sequential execution?"
+      - Default: parallel execution (sequential needs justification)
+      - Time waste = performance failure
+      
+      Task-Agent Matching:
+      - Code quality issues → refactoring-expert
+      - Performance problems → performance-engineer
+      - System design → system-architect
+      - Complex analysis → root-cause-analyst
+      - Security review → security-engineer
+      - Requirements analysis → requirements-analyst
+      
+      Usage Methods:
+      - Auto-optimization: --parallel (AI determines needed agent count)
+      - User-specified: --parallel n (specify n agents)
+      
+      Sequential Dependencies:
+      1. Properly decompose tasks to find independent parts
+      2. Adjust order through dependency chains
+      3. Maximize parallel processing possibilities
+      
+      Meta Checkpoints:
+      - Which tasks can execute simultaneously?
+      - What's the most suitable agent for each task?
+      - Can we parallelize without dependency conflicts?
+      
+      Quantitative Completion Criteria:
+      - [ ] Independent task identification complete
+      - [ ] Appropriate agent assignment
+      - [ ] Time reduction through parallel execution
+    
+  "--todo":  # Claude Code specific - TodoWrite tool
+    brief: "Complex task management and progress tracking via TodoWrite tool (Claude Code specific)"
+    directive: |
+      Use TodoWrite tool for systematic task management and tracking.
+      
+      Task Management Principles:
+      - Break tasks into small, measurable units
+      - Clarify priorities and dependencies
+      - Update progress in real-time
+      
+      Task Classification:
+      - Apply urgent/important matrix
+      - Specify estimated time requirements
+      - Set assignees and deadlines
+      
+      Meta Checkpoints:
+      - Are all tasks executable?
+      - Are priorities clear?
+      - Can progress be tracked?
+      
+      Quantitative Completion Criteria:
+      - [ ] Clear completion conditions per task
+      - [ ] Actual time vs estimated time tracking
+      - [ ] Daily progress rate updates
+    
+  "--seq":  # MCP tool - sequential_thinking
+    brief: "Complex problem systematic decomposition and logical reasoning (MCP tool)"
+    directive: |
+      Activate systematic sequential thinking.
+      
+      Use mcp__sequential-thinking__sequentialthinking tool for
+      step-by-step analysis and structured reasoning chain construction.
+      
+      Logically decompose complex problems:
+      1. Systematically divide problems into small steps
+      2. Construct logical connections between steps
+      3. Generate structured thought processes
+      4. Modify and improve reasoning processes as needed
+      
+      Application Situations:
+      - Architecture design decisions
+      - Complex bug debugging
+      - Multi-step problem solving
+      - Cases requiring systematic analysis over intuition
+      
+      Meta Checkpoints:
+      - Is each step independently verifiable?
+      - Is the logical sequence correct?
+      - Are there any missing steps?
+      
+      Quantitative Completion Criteria:
+      - [ ] All steps documented
+      - [ ] Success conditions defined per step
+      - [ ] Complete flowchart created
+    
+  "--concise":
+    brief: "Minimal comments and concise expression for self-evident code and documentation"
+    directive: |
+      Write code and documentation concisely and self-evidently.
+      
+      Code Comments:
+      - Use minimal comments only
+      - Only where truly necessary (complex business logic, special algorithms)
+      - Remove need for comments through self-evident code writing
+      - Replace explanations with clear naming and structure
+      
+      Technical Documentation:
+      - Remove duplicate explanations
+      - Keep core content brief
+      - Self-explanatory structure
+      - Exclude unnecessary verbose descriptions
+      
+      General Documentation:
+      - One idea per paragraph
+      - Under 20 words per sentence
+      - Use active voice
+      - Choose specific terms
+      
+      Note: This directive affects generated code and documents.
+      
+      Meta Checkpoints:
+      - Is this code/document self-evident?
+      - Am I adding unnecessary comments or explanations?
+      - Are there parts that can be removed?
+      
+      Quantitative Completion Criteria:
+      - [ ] Readability score > 60
+      - [ ] Average sentence length < 20 words
+      - [ ] Passive voice usage < 10%
+    
+  "--git":
+    brief: "Professional version control and technical commit message creation"
+    directive: |
+      Perform version control professionally.
+      
+      Commit Message Rules:
+      ```
+      <type>(<scope>): <subject>
+      
+      <body>
+      
+      <footer>
+      ```
+      
+      Types:
+      - feat: new features
+      - fix: bug fixes
+      - docs: documentation changes only
+      - style: formatting, semicolons, etc.
+      - refactor: refactoring
+      - test: test additions/modifications
+      - chore: build, package manager, etc.
+      
+      Anonymity Principles:
+      - Commit messages contain purely technical content
+      - Absolutely prohibit author mentions, signatures, decorative elements
+      
+      Branch Strategy:
+      - main: production-ready state
+      - develop: next release development
+      - feature/*: feature development
+      - hotfix/*: emergency fixes
+      
+      Meta Checkpoints:
+      - Are commits atomic?
+      - Do messages describe changes?
+      - Can history be rolled back?
+      - Do commits contain purely technical content?
+      
+      Quantitative Completion Criteria:
+      - [ ] One logical change per commit
+      - [ ] All tests passing
+      - [ ] Commit message convention compliance
+      - [ ] Anonymity principle compliance (no author/signature mentions)
+    
+  "--readonly":
+    brief: "Read-only mode performing analysis and review without file modifications"
+    directive: |
+      Perform analysis and review only.
+      
+      Read-only Operations:
+      - Code review and analysis
+      - Document review
+      - Performance profiling
+      - Dependency analysis
+      
+      Restrictions:
+      - No file modifications
+      - No write operations
+      - No commits/pushes
+      
+      Meta Checkpoints:
+      - Is analysis sufficiently deep?
+      - Are all perspectives considered?
+      
+      Quantitative Completion Criteria:
+      - [ ] Complete codebase scan
+      - [ ] Issue list creation
+      - [ ] Improvement proposal documentation
+    
+  "--load":
+    brief: "Load handoff documents for project context restoration and work continuity"
+    directive: |
+      Load project handoff documents to restore context.
+      
+      ## Knowledge Continuity Philosophy
+      System Architect's Information Architecture: maximizing connected information value
+      System Architect's Associative Thinking: supporting human associative thinking through information connections
+      System Architect's Knowledge Augmentation: continuity through human-computer cooperation
+      
+      ## Handoff Document Discovery Process
+      **Step 1: Document Location Scan**
+      - Check project root directory
+      - Search for documents with `HANDOFF_REPORT_[topic]_YYYY_MM_DD_HHMM.md` pattern
+      - Analyze timestamp in filename (YYYY_MM_DD_HHMM)
+      - Auto-identify most recent document
+      
+      **Step 2: Document Validity Verification**
+      - Verify document accessibility
+      - Check content completeness (required sections exist)
+      - Confirm project match (current directory alignment)
+      - Verify undamaged structural integrity
+      
+      ## Context Restoration Matrix
+      **System State Restoration**:
+      - Current operational state and known issues
+      - Last successful build and test result state
+      - Active branch and ongoing work scope
+      - Environment configuration and dependency status
+      - Performance metrics and SLA baselines
+      
+      **Technical Architecture Understanding**:
+      - System component structure and interrelationships
+      - API endpoints and data model schema
+      - Technology stack and framework versions
+      - Integration points and external service dependencies
+      - Security framework and authentication mechanisms
+      
+      **Work History Comprehension**:
+      - Completed tasks and implementation details
+      - Ongoing tasks and expected completion times
+      - Technical decisions and background rationale
+      - Problems discovered and applied solutions
+      - Backlog and priority matrix
+      
+      ## Session Integration and Work Preparation
+      **Project Memory Restoration**:
+      - Project-specific coding patterns and conventions
+      - Team preferences and style guides
+      - Known issues and avoidance methods list
+      - Optimization opportunities and improvement areas identification
+      - Performance bottlenecks and resolution strategies
+      
+      **Immediate Work Readiness**:
+      - Development environment state verification and setup
+      - Required tools and dependency confirmation
+      - Test data and scenario preparation
+      - Next task priority setting
+      - Risk factors and mitigation plans
+      
+      ## Context Application Strategy
+      **Progressive Context Activation**:
+      1. Core information priority load (system state, current tasks)
+      2. Technical detail secondary load (architecture, API)
+      3. History information background load (decision rationale, learnings)
+      4. Complete context integration and readiness
+      
+      **Work Continuity Assurance**:
+      - Resume exactly from last session's final state
+      - Identify precise point of interrupted work
+      - Specify next steps for incomplete tasks
+      - Configure seamless workflow continuation
+      
+      Meta Checkpoints:
+      - Was document successfully discovered and loaded?
+      - Is all core context restored?
+      - Did we accurately identify where previous worker stopped?
+      - Are we ready to start work immediately?
+      
+      Quantitative Completion Criteria:
+      - [ ] Latest handoff document discovered and loaded
+      - [ ] All core sections parsed (System Status, Architecture, Components, Actions)
+      - [ ] 100% system state information restored
+      - [ ] Ongoing work identified and next steps specified
+      - [ ] Development environment readiness verification complete
+
+# ========================================
+# MCP Integration Configuration  
+# ========================================
+# Simplified configuration using only 2 tools
+# list-available-flags: provides available flag list
+# get-directives: returns directives for selected flags
+
+  "--reset":
+    brief: "Flag session reset for directive re-output: session (re)start, /clear, /compact causing existing directive non-recognition, or user specification required"
+    directive: |
+      Flag session reset completed.
+
+  "--auto":
+    brief: "AI workflow: analyze task context to automatically select optimal flag combinations"
+    directive: |
+      --auto workflow activated: reference '--auto WORKFLOW' section in <system-reminder>. AI analyzes task context to select optimal flag combinations.
+
+# Meta-directive - included in all tool responses
+meta_instructions:
+  list_available_flags: |
+    ===
+    Flag Selection Guide:
+    - Clearly identify core purpose of current task to select most suitable flags
+    - Multiple flags can be combined, using complementary flags together is more effective
+    - --auto allows AI to automatically select appropriate flags
+    - When uncertain, recommend starting with --analyze to first identify the problem
+    - Reference each flag's brief description to verify alignment with task purpose
+    
+  get_directives: |
+    ===
+    Context Application Guidelines:
+    Apply these directives to current task context:
+    - Understand and reflect current codebase structure and style
+    - Comply with project's existing patterns and conventions
+    - Maintain consistency with files in working directory
+    - Flexibly interpret and apply directive principles to situation
+    - Implement optimally considering domain characteristics

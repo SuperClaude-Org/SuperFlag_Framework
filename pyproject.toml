@@ -1,0 +1,43 @@
+[project]
+name = "context-engine-mcp"
+dynamic = ["version"]
+description = "MCP-based contextual flag system for AI assistants"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+dependencies = [
+    "mcp[cli]>=1.0.0",
+    "fastmcp>=2.0.0,<3.0.0",
+    "PyYAML>=6.0.0",
+    "psutil>=5.0.0"
+]
+
+[[project.authors]]
+name = "Your Name"
+email = "your.email@example.com"
+
+[project.scripts]
+context-engine-mcp = "context_engine_mcp.__main__:main"
+context-engine-install = "context_engine_mcp.install:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "src/context_engine_mcp/__version__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/context_engine_mcp"]
+include = [
+    "flags.yaml"
+]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/context_engine_mcp/**/*.py",
+    "README.md",
+    "LICENSE",
+    "pyproject.toml",
+    "flags.yaml"
+]
