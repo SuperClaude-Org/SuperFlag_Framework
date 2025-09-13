@@ -362,7 +362,7 @@ directives:
       </verify>
 
   "--git":
-    brief: "Commit with technical precision and anonymity"
+    brief: "Anonymous commit messages with technical precision"
     directive: |
       <task>
       Professional commits with complete anonymity and ASCII-only text.

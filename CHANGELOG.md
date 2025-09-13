@@ -1,5 +1,11 @@
 Changelog
 
+## 2.1.3 (2025-09-14)
+
+### Changed
+- Update git flag description for improved clarity
+- Add critical release checklist to prevent deployment errors
+
 ## 2.1.2 (2025-09-14)
 
 ### Fixed
