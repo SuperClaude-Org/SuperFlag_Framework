@@ -342,15 +342,6 @@ def install(target="claude-code"):
         print("1. Register 'context-engine-mcp' as an MCP stdio server in your Gemini CLI.")
         print("2. If Gemini CLI supports config files, add it there; otherwise use the CLI's add command if available.")
         print("3. Run Gemini CLI and verify the MCP tools are available (list_available_flags, get_directives).")
-        print("\n[NEXT] Next steps for Continue:")
-        print("1. [EDIT] Edit context-engine configuration:")
-        print("   ~/.continue/mcpServers/context-engine.yaml")
-        print("   (Choose and uncomment ONE option)")
-        print("\n2. [RESTART] Restart VS Code")
-        print("\n3. [CHAT] In Continue chat:")
-        print("   - Type @ and select 'MCP'")
-        print("   - Available server: context-engine")
-        print("\n[DOCS] Configuration file: ~/.continue/mcpServers/context-engine.yaml")
     
     print("\n[COMPLETE] Context Engine MCP installation completed")
     print("-" * 50)
@@ -399,6 +390,10 @@ def kill_context_engine_processes():
                     exe = name
 
                 joined = ' '.join(cmdline).lower()
+
+                # Skip the uninstall command itself
+                if 'uninstall' in joined:
+                    continue
 
                 is_server_wrapper = (
                     'context-engine-mcp' in exe or 'context-engine-mcp' in name
@@ -650,30 +645,46 @@ def uninstall():
     """Main uninstall function - removes Context Engine from all environments"""
     print("Uninstalling Context Engine MCP...")
     print("Force-killing processes and immediately removing files...")
-    
-    # 1. Claude Code cleanup
-    print("\nCleaning up Claude Code configuration...")
-    claude_results = uninstall_claude_code()
-    for result in claude_results:
-        print(f"  {result}")
+
+    try:
+        # 1. Claude Code cleanup
+        print("\nCleaning up Claude Code configuration...")
+        claude_results = uninstall_claude_code()
+        for result in claude_results:
+            print(f"  {result}")
+    except Exception as e:
+        print(f"  [ERROR] Failed to clean Claude Code: {str(e)}")
+        claude_results = []
     
     # 2. Continue cleanup
-    print("\nCleaning up Continue configuration...")
-    continue_results = uninstall_continue()
-    for result in continue_results:
-        print(f"  {result}")
+    try:
+        print("\nCleaning up Continue configuration...")
+        continue_results = uninstall_continue()
+        for result in continue_results:
+            print(f"  {result}")
+    except Exception as e:
+        print(f"  [ERROR] Failed to clean Continue: {str(e)}")
+        continue_results = []
 
     # 3. Gemini cleanup
-    print("\nCleaning up Gemini configuration...")
-    gemini_results = uninstall_gemini()
-    for result in gemini_results:
-        print(f"  {result}")
+    try:
+        print("\nCleaning up Gemini configuration...")
+        gemini_results = uninstall_gemini()
+        for result in gemini_results:
+            print(f"  {result}")
+    except Exception as e:
+        print(f"  [ERROR] Failed to clean Gemini: {str(e)}")
+        gemini_results = []
 
     # 4. Common files cleanup
-    print("\nCleaning up common files...")
-    cleanup_results = cleanup_common_files()
-    for result in cleanup_results:
-        print(f"  {result}")
+    try:
+        print("\nCleaning up common files...")
+        cleanup_results = cleanup_common_files()
+        for result in cleanup_results:
+            print(f"  {result}")
+    except Exception as e:
+        print(f"  [ERROR] Failed to clean common files: {str(e)}")
+        cleanup_results = []
     
     # Check for any failures
     all_results = claude_results + continue_results + gemini_results + cleanup_results
