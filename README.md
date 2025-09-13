@@ -266,6 +266,11 @@ These are optional; Context Engine works without them.
 ## `--auto`
 `--auto` instructs the assistant to analyze the task and pick appropriate flags (do not include `--auto` in get_directives calls).
 
+Behavior
+- `--auto` only: the assistant selects a full set of flags automatically.
+- `--auto --flag1 --flag2`: the assistant applies `--flag1`, `--flag2` and may add additional flags if helpful. User‑specified flags take priority when there is overlap or conflict.
+- `--flag1 --flag2` (without `--auto`): only the specified flags are applied.
+
 ## Files Created
 
 ```

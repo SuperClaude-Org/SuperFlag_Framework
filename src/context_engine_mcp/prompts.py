@@ -122,14 +122,14 @@ CONTINUE_RULES = [
 def setup_claude_context_files():
     """Set up CLAUDE.md with @CONTEXT-ENGINE.md reference"""
     from pathlib import Path
-    
+
     claude_dir = Path.home() / ".claude"
     claude_md = claude_dir / "CLAUDE.md"
     context_engine_md = claude_dir / "CONTEXT-ENGINE.md"
-    
+
     # Ensure directory exists
     claude_dir.mkdir(parents=True, exist_ok=True)
-    
+
     # Always update CONTEXT-ENGINE.md (allows updates)
     try:
         with open(context_engine_md, 'w', encoding='utf-8') as f:
@@ -137,6 +137,25 @@ def setup_claude_context_files():
         print(f"✓ Updated {context_engine_md}")
     except Exception as e:
         print(f"⚠ Could not write CONTEXT-ENGINE.md: {e}")
+        return False
+
+    # Ensure CLAUDE.md references CONTEXT-ENGINE.md
+    reference = "@CONTEXT-ENGINE.md"
+    if claude_md.exists():
+        content = claude_md.read_text(encoding='utf-8')
+        if reference in content:
+            print("✓ CLAUDE.md already references CONTEXT-ENGINE.md")
+            return True
+
+    try:
+        with open(claude_md, 'a', encoding='utf-8') as f:
+            if claude_md.exists() and claude_md.stat().st_size > 0:
+                f.write("\n\n")
+            f.write(reference)
+        print(f"✓ Added @CONTEXT-ENGINE.md reference to CLAUDE.md")
+        return True
+    except Exception as e:
+        print(f"⚠ Could not update CLAUDE.md: {e}")
         return False
 
 def setup_gemini_context_files():

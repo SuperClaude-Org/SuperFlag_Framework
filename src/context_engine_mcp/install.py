@@ -15,10 +15,10 @@ try:
 except ImportError:
     psutil = None
 try:
-    from .prompts import setup_claude_context_files, setup_continue_config
+    from .prompts import setup_claude_context_files, setup_continue_config, setup_gemini_context_files
 except ImportError:
     # For direct script execution
-    from prompts import setup_claude_context_files, setup_continue_config
+    from prompts import setup_claude_context_files, setup_continue_config, setup_gemini_context_files
 
 def get_home_dir():
     """Get the user's home directory"""
@@ -144,6 +144,21 @@ def install_mcp_servers_via_cli():
     print("   • UV: claude mcp add -s user -- context-engine uv run context-engine-mcp")
     print("   • Custom: claude mcp add -s user -- context-engine <your-command>")
 
+def install_gemini_cli_instructions():
+    """Show instructions to register the MCP server with Gemini CLI.
+
+    We don't modify Gemini CLI config files here. This prints clear, minimal
+    steps so users can register the stdio MCP server command.
+    """
+    print("\n📌 For Gemini CLI (generic MCP stdio):")
+    print("   Register the server command in your Gemini CLI MCP configuration:")
+    print("   • Command: context-engine-mcp")
+    print("   • Args: []")
+    print("   • Transport: stdio (default for FastMCP)")
+    print("\nIf Gemini CLI supports a config file for MCP servers, add an entry ")
+    print("pointing to 'context-engine-mcp'. If it supports environment variables,")
+    print("you can set any needed env for advanced scenarios.")
+
 def setup_continue_mcp_servers():
     """Set up Continue extension MCP server configurations"""
     home = get_home_dir()
@@ -167,7 +182,7 @@ def setup_continue_mcp_servers():
 
 # --- Option 1: Standard Python installation ---
 name: Context Engine MCP
-version: 1.0.7
+version: 1.0.8rc1
 schema: v1
 mcpServers:
 - name: context-engine
@@ -178,7 +193,7 @@ mcpServers:
 # --- Option 2: UV (Python package manager) ---
 # Requires: uv in PATH or use full path like ~/.cargo/bin/uv
 # name: Context Engine MCP
-# version: 1.0.7
+# version: 1.0.8rc1
 # schema: v1
 # mcpServers:
 # - name: context-engine
@@ -188,7 +203,7 @@ mcpServers:
 
 # --- Option 3: Development mode (pip install -e) ---
 # name: Context Engine MCP
-# version: 1.0.7
+# version: 1.0.8rc1
 # schema: v1
 # mcpServers:
 # - name: context-engine
@@ -229,62 +244,7 @@ mcpServers:
     
     return success
 
-def setup_claude_code_user_scope():
-    """Set up Claude Code user-scope configuration"""
-    # Claude Code configuration is typically in:
-    # Windows: %APPDATA%\Claude\claude_desktop_config.json
-    # Mac: ~/Library/Application Support/Claude/claude_desktop_config.json
-    # Linux: ~/.config/Claude/claude_desktop_config.json
     
-    config_paths = {
-        'win32': Path(os.environ.get('APPDATA', '')) / 'Claude' / 'claude_desktop_config.json',
-        'darwin': Path.home() / 'Library' / 'Application Support' / 'Claude' / 'claude_desktop_config.json',
-        'linux': Path.home() / '.config' / 'Claude' / 'claude_desktop_config.json'
-    }
-    
-    # Determine platform
-    platform = sys.platform
-    if platform.startswith('linux'):
-        platform = 'linux'
-    
-    config_path = config_paths.get(platform)
-    
-    if not config_path:
-        print(f"⚠ Unknown platform: {platform}")
-        return False
-    
-    # Create directory if it doesn't exist
-    config_path.parent.mkdir(parents=True, exist_ok=True)
-    
-    # Load existing config or create new one
-    config = {}
-    if config_path.exists():
-        try:
-            with open(config_path, 'r', encoding='utf-8') as f:
-                config = json.load(f)
-        except Exception as e:
-            print(f"⚠ Could not read existing config: {e}")
-            config = {}
-    
-    # Add our MCP server to the config
-    if 'mcpServers' not in config:
-        config['mcpServers'] = {}
-    
-    # Add context-engine-mcp
-    config['mcpServers']['context-engine'] = {
-        "command": "context-engine-mcp",
-        "description": "Contextual flag system for AI assistants"
-    }
-    
-    # Write updated config
-    try:
-        with open(config_path, 'w', encoding='utf-8') as f:
-            json.dump(config, f, indent=2, ensure_ascii=False)
-        print(f"✓ Claude Code configuration updated: {config_path}")
-        return True
-    except Exception as e:
-        print(f"⚠ Could not write config: {e}")
-        return False
 
 def install(target="claude-code"):
     """Main installation function
@@ -342,9 +302,18 @@ def install(target="claude-code"):
         else:
             print("⚠ Failed to create Continue MCP server configurations")
     
+    elif target == "gemini-cli":
+        # Provide generic instructions and set up context files in ~/.gemini
+        install_gemini_cli_instructions()
+        print("\n📝 Setting up Gemini context files...")
+        if setup_gemini_context_files():
+            print("✓ Gemini context files configured")
+        else:
+            print("⚠ Could not configure Gemini context files")
+
     else:
         print(f"⚠ Unknown target: {target}")
-        print("Supported targets: claude-code, cn (Continue)")
+        print("Supported targets: claude-code, cn (Continue), gemini-cli")
         return
     
     print("\n✅ Installation complete!")
@@ -358,6 +327,21 @@ def install(target="claude-code"):
         print("   • Use '--auto' to let AI select optimal flags")
         print("\n📚 Documentation: ~/.claude/CONTEXT-ENGINE.md")
     elif target == "cn":
+        print("\n🎯 Next steps for Continue:")
+        print("1. 🔧 Edit context-engine configuration:")
+        print("   ~/.continue/mcpServers/context-engine.yaml")
+        print("   (Choose and uncomment ONE option)")
+        print("\n2. 🔄 Restart VS Code")
+        print("\n3. 💬 In Continue chat:")
+        print("   • Type @ and select 'MCP'")
+        print("   • Available server: context-engine")
+        print("\n📚 Configuration file: ~/.continue/mcpServers/context-engine.yaml")
+
+    elif target == "gemini-cli":
+        print("\n🎯 Next steps for Gemini CLI:")
+        print("1. Register 'context-engine-mcp' as an MCP stdio server in your Gemini CLI.")
+        print("2. If Gemini CLI supports config files, add it there; otherwise use the CLI's add command if available.")
+        print("3. Run Gemini CLI and verify the MCP tools are available (list_available_flags, get_directives).")
         print("\n🎯 Next steps for Continue:")
         print("1. 🔧 Edit context-engine configuration:")
         print("   ~/.continue/mcpServers/context-engine.yaml")
@@ -577,6 +561,41 @@ def uninstall_continue():
     
     return results
 
+def uninstall_gemini():
+    """Remove Context Engine references from Gemini configuration (~/.gemini)
+
+    - Remove @CONTEXT-ENGINE.md reference from GEMINI.md (if present)
+    - Remove CONTEXT-ENGINE.md file
+    - Be forgiving if files/dirs don't exist
+    """
+    results = []
+    home = get_home_dir()
+
+    try:
+        gemini_md = home / ".gemini" / "GEMINI.md"
+        if gemini_md.exists():
+            content = gemini_md.read_text(encoding='utf-8')
+            if "@CONTEXT-ENGINE.md" in content:
+                new_content = (
+                    content
+                    .replace("\n\n@CONTEXT-ENGINE.md", "")
+                    .replace("\n@CONTEXT-ENGINE.md", "")
+                    .replace("@CONTEXT-ENGINE.md", "")
+                )
+                gemini_md.write_text(new_content, encoding='utf-8')
+                results.append("✅ Removed @CONTEXT-ENGINE.md reference from GEMINI.md")
+            else:
+                results.append("ℹ️ @CONTEXT-ENGINE.md reference not found in GEMINI.md")
+
+        context_engine_md = home / ".gemini" / "CONTEXT-ENGINE.md"
+        success, message = delete_with_retry(context_engine_md)
+        results.append(message)
+
+    except Exception as e:
+        results.append(f"❌ Error removing Gemini config: {str(e)}")
+
+    return results
+
 def cleanup_common_files():
     """Clean up common files and executables"""
     results = []
@@ -639,15 +658,21 @@ def uninstall():
     continue_results = uninstall_continue()
     for result in continue_results:
         print(f"  {result}")
-    
-    # 3. Common files cleanup
+
+    # 3. Gemini cleanup
+    print("\nCleaning up Gemini configuration...")
+    gemini_results = uninstall_gemini()
+    for result in gemini_results:
+        print(f"  {result}")
+
+    # 4. Common files cleanup
     print("\nCleaning up common files...")
     cleanup_results = cleanup_common_files()
     for result in cleanup_results:
         print(f"  {result}")
     
     # Check for any failures
-    all_results = claude_results + continue_results + cleanup_results
+    all_results = claude_results + continue_results + gemini_results + cleanup_results
     failures = [r for r in all_results if r.startswith("❌")]
     
     if failures:
@@ -694,10 +719,10 @@ def main():
         help='Install Context Engine MCP'
     )
     install_parser.add_argument(
-        "--target", 
-        choices=["claude-code", "cn"], 
+        "--target",
+        choices=["claude-code", "cn", "gemini-cli"],
         default="claude-code",
-        help="Installation target - claude-code or cn (Continue) (default: claude-code)"
+        help="Installation target - claude-code, cn (Continue), or gemini-cli (default: claude-code)"
     )
     
     # Uninstall subcommand

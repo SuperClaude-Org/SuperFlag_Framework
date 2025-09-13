@@ -11,3 +11,12 @@ Changelog
 Notes
 - No breaking changes; requires Python >= 3.10.
 - TestPyPI and PyPI packages built with Hatchling; `twine check` passed.
+## 1.0.8rc1 (Pre-release)
+
+- Add `context-engine install --target gemini-cli`:
+  - Appends `@CONTEXT-ENGINE.md` to `~/.gemini/GEMINI.md` (idempotent)
+  - Writes latest instructions to `~/.gemini/CONTEXT-ENGINE.md`
+- Uninstall cleans Gemini context files:
+  - Removes reference from `~/.gemini/GEMINI.md`
+  - Deletes `~/.gemini/CONTEXT-ENGINE.md` (with clear status messages)
+- No automatic edits to `~/.gemini/settings.json` (user config is left untouched)

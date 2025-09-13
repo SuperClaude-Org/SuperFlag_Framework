@@ -1,3 +1,3 @@
 """Version information for context-engine-mcp."""
 
-__version__ = "1.0.7"
+__version__ = "1.0.8rc1"
