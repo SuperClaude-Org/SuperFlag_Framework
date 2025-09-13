@@ -685,8 +685,8 @@ def uninstall():
     print("Manually remove MCP server: claude mcp remove context-engine")
     print("No restart needed - files unlocked immediately")
     
-    # Return True for successful uninstall
-    return True
+    # Return 0 for successful uninstall
+    return 0
 
 def main():
     """Main CLI entry point with subcommands"""
@@ -733,12 +733,20 @@ def main():
     
     args = parser.parse_args()
     
-    if args.command == 'install':
-        install(args.target)
-        return 0
-    elif args.command == 'uninstall':
-        uninstall()
-        return 0
+    try:
+        if args.command == 'install':
+            install(args.target)
+            return 0
+        elif args.command == 'uninstall':
+            result = uninstall()
+            return result if isinstance(result, int) else 0
+        else:
+            # Should not reach here with required=True
+            print(f"Unknown command: {args.command}")
+            return 1
+    except Exception as e:
+        print(f"Error: {e}")
+        return 1
 
 
 if __name__ == "__main__":
