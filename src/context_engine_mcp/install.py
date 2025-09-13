@@ -144,6 +144,147 @@ def install_mcp_servers_via_cli():
     print("   - UV: claude mcp add -s user -- context-engine uv run context-engine-mcp")
     print("   - Custom: claude mcp add -s user -- context-engine <your-command>")
 
+def setup_claude_code_hooks():
+    """Setup Claude Code Hooks for automatic flag detection"""
+    home = get_home_dir()
+    claude_dir = home / ".claude"
+
+    # Check if Claude Code is installed
+    if not claude_dir.exists():
+        print("[WARN] Claude Code directory not found (~/.claude missing)")
+        return False
+
+    try:
+        # 1. Create hooks directory
+        hooks_dir = claude_dir / "hooks"
+        hooks_dir.mkdir(parents=True, exist_ok=True)
+
+        # 2. Copy hook file
+        hook_file = hooks_dir / "context-engine-hook.py"
+
+        # Read the hook content from our package
+        try:
+            # Try to import and use the hook from our package
+            from . import claude_hook
+            import inspect
+            hook_content = inspect.getsource(claude_hook)
+        except ImportError:
+            # If import fails, use embedded content
+            hook_content = get_hook_content()
+
+        # Write hook file
+        with open(hook_file, 'w', encoding='utf-8') as f:
+            f.write(hook_content)
+
+        print(f"[OK] Created hook file: {hook_file}")
+
+        # 3. Update settings.json to register the hook
+        settings_file = claude_dir / "settings.json"
+        settings = {}
+
+        # Load existing settings if they exist
+        if settings_file.exists():
+            with open(settings_file, 'r', encoding='utf-8') as f:
+                try:
+                    settings = json.load(f)
+                except json.JSONDecodeError:
+                    settings = {}
+
+        # Add or update hooks section
+        if 'hooks' not in settings:
+            settings['hooks'] = {}
+
+        # Register our hook in UserPromptSubmit array
+        if 'UserPromptSubmit' not in settings['hooks']:
+            settings['hooks']['UserPromptSubmit'] = []
+
+        # Remove any existing context-engine hooks first
+        settings['hooks']['UserPromptSubmit'] = [
+            hook for hook in settings['hooks']['UserPromptSubmit']
+            if not (isinstance(hook, dict) and
+                   'hooks' in hook and
+                   len(hook['hooks']) > 0 and
+                   'context-engine-hook.py' in str(hook['hooks'][0].get('command', '')))
+        ]
+
+        # Add our hook
+        settings['hooks']['UserPromptSubmit'].append({
+            "matcher": "",
+            "hooks": [
+                {
+                    "type": "command",
+                    "command": f'python "{hook_file}"'
+                }
+            ]
+        })
+
+        # Save updated settings
+        with open(settings_file, 'w', encoding='utf-8') as f:
+            json.dump(settings, f, indent=2)
+
+        print(f"[OK] Registered hook in: {settings_file}")
+
+        # 4. Verify hook installation
+        if verify_claude_hook(hook_file):
+            print("[OK] Hook installation verified")
+            return True
+        else:
+            print("[WARN] Hook verification failed, but installation completed")
+            return True
+
+    except Exception as e:
+        print(f"[ERROR] Failed to setup Claude Code hooks: {e}")
+        return False
+
+def verify_claude_hook(hook_file: Path) -> bool:
+    """Verify that the Claude Code hook is properly installed"""
+    try:
+        # Check hook file exists and is readable
+        if not hook_file.exists():
+            return False
+
+        # Try to run the hook with test input
+        result = subprocess.run(
+            [sys.executable, str(hook_file)],
+            input="test --auto --analyze",
+            text=True,
+            capture_output=True,
+            timeout=5
+        )
+
+        # Check if it runs without error
+        if result.returncode not in [0, 1, 130]:
+            return False
+
+        # Check if flags.yaml exists
+        flags_path = Path.home() / ".context-engine" / "flags.yaml"
+        if not flags_path.exists():
+            print("[INFO] flags.yaml will be created during setup")
+
+        return True
+
+    except Exception as e:
+        print(f"[DEBUG] Hook verification error: {e}", file=sys.stderr)
+        return False
+
+def get_hook_content() -> str:
+    """Get the hook content from the actual source file"""
+    try:
+        # Always use the actual claude_hook.py file
+        from . import claude_hook
+        hook_path = Path(claude_hook.__file__)
+        with open(hook_path, 'r', encoding='utf-8') as f:
+            return f.read()
+    except Exception as e:
+        print(f"[ERROR] Could not read claude_hook.py: {e}")
+        # Return minimal fallback that just passes through
+        return '''#!/usr/bin/env python3
+# Fallback hook - installation error
+import sys
+print("{}")
+sys.exit(0)
+'''
+
 def install_gemini_cli_instructions():
     """Show instructions to register the MCP server with Gemini CLI.
 
@@ -287,6 +428,13 @@ def install(target="claude-code"):
                 print("[OK] Claude context files configured")
             else:
                 print("[WARN] Could not configure Claude context files")
+
+            # Setup Claude Code Hooks
+            print("\n[HOOKS] Setting up Claude Code hooks...")
+            if setup_claude_code_hooks():
+                print("[OK] Claude Code hooks installed successfully")
+            else:
+                print("[WARN] Could not setup Claude Code hooks (MCP will still work)")
         else:
             print("[WARN] Claude CLI not found")
             print("\nClaude Code CLI is required for MCP server installation.")
@@ -328,7 +476,7 @@ def install(target="claude-code"):
         print("\n[NEXT] Next steps for Claude Code:")
         print("1. Restart Claude Code if it's running")
         print("2. Use the MCP tools in your conversations:")
-        print("   - list_available_flags() - View all 17 available flags")
+        print("   - Available flags are listed in system prompt")
         print("   - get_directives(['--analyze', '--performance']) - Activate modes")
         print("   - Use '--auto' to let AI select optimal flags")
         print("\n[DOCS] Documentation: ~/.claude/CONTEXT-ENGINE.md")
@@ -347,7 +495,7 @@ def install(target="claude-code"):
         print("\n[NEXT] Next steps for Gemini CLI:")
         print("1. Register 'context-engine-mcp' as an MCP stdio server in your Gemini CLI.")
         print("2. If Gemini CLI supports config files, add it there; otherwise use the CLI's add command if available.")
-        print("3. Run Gemini CLI and verify the MCP tools are available (list_available_flags, get_directives).")
+        print("3. Run Gemini CLI and verify the MCP tool is available (get_directives).")
     
     print("\n[COMPLETE] Context Engine MCP installation completed")
     print("-" * 50)
@@ -465,8 +613,48 @@ def uninstall_claude_code():
                 results.append("[COMPLETE] Removed @CONTEXT-ENGINE.md reference from CLAUDE.md")
             else:
                 results.append("[INFO] @CONTEXT-ENGINE.md reference not found in CLAUDE.md")
-        
-        # 3. Remove CONTEXT-ENGINE.md file with retry
+
+        # 2. Remove hook from Claude Code settings.json
+        settings_path = home / ".claude" / "settings.json"
+        if settings_path.exists():
+            try:
+                with open(settings_path, 'r', encoding='utf-8') as f:
+                    settings = json.load(f)
+
+                # Remove from UserPromptSubmit array
+                if 'hooks' in settings and 'UserPromptSubmit' in settings['hooks']:
+                    original_count = len(settings['hooks']['UserPromptSubmit'])
+
+                    # Filter out our hook
+                    settings['hooks']['UserPromptSubmit'] = [
+                        hook for hook in settings['hooks']['UserPromptSubmit']
+                        if not (isinstance(hook, dict) and
+                               'hooks' in hook and
+                               len(hook['hooks']) > 0 and
+                               'context-engine-hook.py' in str(hook['hooks'][0].get('command', '')))
+                    ]
+
+                    if len(settings['hooks']['UserPromptSubmit']) < original_count:
+                        # Write updated settings
+                        with open(settings_path, 'w', encoding='utf-8') as f:
+                            json.dump(settings, f, indent=2)
+                        results.append("[COMPLETE] Removed Context Engine hook from settings.json")
+                    else:
+                        results.append("[INFO] Context Engine hook not found in settings.json")
+                else:
+                    results.append("[INFO] No UserPromptSubmit hooks found in settings.json")
+            except Exception as e:
+                results.append(f"[WARNING] Error removing hook from settings: {str(e)}")
+
+        # 3. Remove hook file
+        hook_file = home / ".claude" / "hooks" / "context-engine-hook.py"
+        if hook_file.exists():
+            success, message = delete_with_retry(hook_file)
+            results.append(message)
+        else:
+            results.append("[INFO] Hook file not found")
+
+        # 4. Remove CONTEXT-ENGINE.md file with retry
         context_engine_md = home / ".claude" / "CONTEXT-ENGINE.md"
         success, message = delete_with_retry(context_engine_md)
         results.append(message)
@@ -523,8 +711,7 @@ def uninstall_continue():
                     if line.startswith('- '):
                         # Check if this rule contains Context Engine content
                         # It might be an escaped string on one line
-                        if ("Context Engine" in line or 
-                            "list_available_flags" in line or
+                        if ("Context Engine" in line or
                             "get_directives" in line):
                             skip_current_rule = True
                             continue

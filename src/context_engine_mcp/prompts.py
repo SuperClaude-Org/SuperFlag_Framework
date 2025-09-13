@@ -1,21 +1,93 @@
 """
 Context Engine MCP - Prompts
-Modular structure with XML organization
+"""
+import yaml
+from pathlib import Path
+
+def generate_available_flags_section():
+    """Generate available flags section from flags.yaml"""
+    flags_path = Path.home() / ".context-engine" / "flags.yaml"
+
+    if not flags_path.exists():
+        return ""
+
+    try:
+        with open(flags_path, 'r', encoding='utf-8') as f:
+            config = yaml.safe_load(f)
+
+        directives = config.get('directives', {})
+
+        # Build available flags section
+        flags_section = ["<available_flags>"]
+        flags_section.append("# Available Context Engine Flags")
+        flags_section.append("")
+
+        for flag, data in directives.items():
+            brief = data.get('brief', 'No description available')
+            flags_section.append(f"{flag}: {brief}")
+
+        flags_section.append("")
+        flags_section.append("META FLAG (Do not pass to get_directives):")
+        flags_section.append("--auto: When detected, analyze context and select appropriate flags from above list, then call get_directives([selected_flags]) instead of get_directives(['--auto'])")
+        flags_section.append("</available_flags>")
+
+        return "\n".join(flags_section)
+
+    except Exception as e:
+        print(f"[WARN] Could not generate flags section: {e}")
+        return ""
+
+def generate_flag_selection_strategy():
+    """Generate flag selection strategy section for --auto"""
+    return """
+<flag_selection_strategy>
+# Autonomous Flag Selection Strategy
+
+When --auto detected: You receive FULL CONTEXTUAL AUTHORITY to select optimal flags.
+
+## Task Pattern Matching (flexible guidelines, not rigid rules):
+• Performance/Speed issues → Consider: --performance, --analyze, --strict
+• Debugging/Error fixing → Consider: --analyze, --seq, --todo
+• Documentation tasks → Consider: --explain, --concise, --readonly
+• Code quality improvement → Consider: --refactor, --strict, --analyze
+• Research/Understanding → Consider: --discover, --explain, --readonly
+• Complex multi-step tasks → Consider: --seq, --todo, --parallel
+
+## Selection Principles:
+1. SELECT: Choose 1-3 complementary flags maximum
+2. BALANCE: Rotate selections to prevent repetitive patterns
+3. ENHANCE: Add value without overwhelming the user
+4. ADAPT: Consider user's existing flags if any provided
+
+## Examples:
+• "Fix slow function --auto" → Select: --performance + --analyze
+• "Document API --auto --concise" → Keep --concise, add --explain
+• "Understand codebase --auto" → Select: --analyze + --readonly
+
+Remember: Apply CONTEXTUAL INTELLIGENCE. These are flexible guidelines.
+</flag_selection_strategy>
 """
 
-# XML structure for clear organization
-BASE_PROMPT_CONTENT = """
-<system>
+# Generate base prompt with available flags
+def get_base_prompt_content():
+    """Get base prompt content with available flags dynamically included"""
+    available_flags = generate_available_flags_section()
+    flag_selection_strategy = generate_flag_selection_strategy()
+
+    return f"""
 # Context Engine Flag System
-MCP Protocol: list_available_flags(), get_directives([flags])
-</system>
+MCP Protocol: get_directives([flags])
+
+{available_flags}
+
+{flag_selection_strategy}
 
 <core_workflow>
 MANDATORY WORKFLOW - NEVER SKIP:
 
 When --flag detected:
 1. STOP immediately - no task execution before directives
-2. Call MCP tool: list_available_flags() for unknowns
+2. For --auto: Skip get_directives(['--auto']). Reference <available_flags> and <flag_selection_strategy> above, then execute get_directives([selected_flags])
 3. CRITICAL: Check for "duplicate" error response
    - IF duplicate AND directives NOT in <system-reminder>:
      IMMEDIATE: get_directives(['--reset', ...flags])
@@ -24,87 +96,68 @@ When --flag detected:
 6. Verify compliance continuously
 
 Response format: "Applying: --flag1 (purpose1), --flag2 (purpose2)..."
-
-ATTENTION TRIGGER: "duplicate" → --reset mandatory
 </core_workflow>
 
-<flag_behaviors>
---auto: Analyze task → Select optimal flags → Enhance user flags
---reset: Clear session → Force fresh directives → Restore context
-  CRITICAL: If flags show as "duplicate" but directives NOT in <system-reminder>, MUST call --reset
-  Use when: /clear or /compact executed, directives not recognized, context lost
---strict: Zero errors → Full transparency → No Snake Oil
---collab: Partner mode → Quantitative metrics → Trust-based iteration
+<meta_intelligence>
+ADAPTIVE OPTIMIZATION ENGINE:
+• Analyze user intent beyond literal requests
+• Synthesize optimal flag combinations dynamically
+• Learn from task outcomes and user feedback
+• Self-evolve strategies based on success patterns
 
-Priority: User flags > Auto flags | Constraints > Style
-</flag_behaviors>
+CONTEXTUAL AWARENESS:
+• Project type recognition (React, Python, docs, etc.)
+• Task complexity assessment (simple, complex, research)
+• User skill level inference (explicit help vs autonomous work)
+• Historical interaction patterns
 
-<examples>
-Input: "--auto"
-Output: AI selects complete optimal flag set
+CORE PRINCIPLES:
+• Context awareness over rigid patterns
+• User success over system consistency
+• Natural utility over forced diversity
+• Continuous learning and adaptation
 
-Input: "--auto --strict"
-Output: Apply --strict + AI adds complementary flags
-
-Input: "Optimize this slow function"
-Output: --auto selects [--performance, --refactor]
-
-Input: "Explain the architecture"
-Output: --auto selects [--analyze, --explain]
-
-Input: "--collab Let's improve this system"
-Output: Partner mode activated with quantitative metrics
-
-Input: "--collab --strict"
-Output: Collaborative development with zero-error enforcement
-
-Input: "--reset --git"
-Output: Fresh session with git directives
-</examples>
+INTELLIGENCE DIRECTIVES:
+✓ Trust your analysis capabilities
+✓ Consider task complexity and user skill level
+✓ Rotate selections to prevent monotony
+✓ Prioritize effectiveness over variety for variety's sake
+</meta_intelligence>
 
 <enforcement>
 ABSOLUTE RULES:
 ✗ Working without directives
-✗ Using cached directives
-✗ Partial application
-✗ Ignoring constraints
+✗ Ignoring user corrections
+✗ Repetitive flag patterns
+✗ Context-blind selections
+
+META-RULES:
+✓ Evolve based on outcomes
+✓ Prioritize user success over system consistency
+✓ Adapt to project-specific needs
+✓ Learn from every interaction
 
 VERIFICATION:
-☐ Flags identified via list_available_flags()
+☐ Flags retrieved from <available_flags> section in CONTEXT-ENGINE.md
 ☐ Directives obtained via get_directives()
 ☐ Work plan aligned with directives
 ☐ Continuous compliance during execution
 </enforcement>
 
-<algorithm>
-# Reset Detection - Highest Priority
-if response_contains("duplicate") and directives_not_in_system_reminder:
-    IMMEDIATE: get_directives(['--reset'] + requested_flags)
-
-if context_lost or "/clear" or "/compact":
-    MANDATORY: get_directives(['--reset'] + needed_flags)
-
-# Auto Flag Processing
-if "--auto" in input:
-    flags = list_available_flags()  # MCP tool call
-    analysis = analyze_task_requirements()
-    selected = match_flags_to_task(flags, analysis)
-    if user_flags:
-        selected = user_flags + context_appropriate_additions
-    directives = get_directives(selected)  # MCP tool call
-    STRICTLY_APPLY(directives)
-</algorithm>
 """
 
-# Platform-specific formats remain unchanged
-CLAUDE_SYSTEM_PROMPT = BASE_PROMPT_CONTENT
+# Generate prompt content dynamically when accessed
+def get_prompt_content():
+    """Get the current prompt content with available flags"""
+    return get_base_prompt_content()
 
-CONTINUE_RULES = [
-    {
-        "name": "Context Engine Flags",
-        "rule": BASE_PROMPT_CONTENT
-    }
-]
+# For backward compatibility
+BASE_PROMPT_CONTENT = None  # Will be generated on first use
+
+# Platform configurations - use function calls
+CLAUDE_SYSTEM_PROMPT = None  # Will be set when needed
+
+CONTINUE_RULES = None  # Will be set when needed
 
 def setup_claude_context_files():
     """Set up CLAUDE.md with @CONTEXT-ENGINE.md reference"""
@@ -119,8 +172,10 @@ def setup_claude_context_files():
 
     # Always update CONTEXT-ENGINE.md (allows updates)
     try:
+        # Generate content at setup time
+        content = get_prompt_content()
         with open(context_engine_md, 'w', encoding='utf-8') as f:
-            f.write(BASE_PROMPT_CONTENT)
+            f.write(content)
         print(f"[OK] Updated {context_engine_md}")
     except Exception as e:
         print(f"[WARN] Could not write CONTEXT-ENGINE.md: {e}")
@@ -158,8 +213,10 @@ def setup_gemini_context_files():
 
     # Always update CONTEXT-ENGINE.md (allows updates)
     try:
+        # Generate content at setup time
+        content = get_prompt_content()
         with open(context_engine_md, 'w', encoding='utf-8') as f:
-            f.write(BASE_PROMPT_CONTENT)
+            f.write(content)
         print(f"[OK] Updated {context_engine_md}")
     except Exception as e:
         print(f"[WARN] Could not write CONTEXT-ENGINE.md: {e}")
@@ -207,7 +264,7 @@ def setup_continue_config(continue_dir):
         config['rules'] = []
 
     # Extract rule text (using the unified base content)
-    context_engine_rule = BASE_PROMPT_CONTENT
+    context_engine_rule = get_prompt_content()
 
     # Find and update or add rule
     rule_updated = False

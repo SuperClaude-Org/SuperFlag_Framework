@@ -508,10 +508,10 @@ directives:
       Use when context lost or directives not recognized.
 
   "--auto":
-    brief: "AI selects optimal flags for current task"
+    brief: "META FLAG: Grants autonomous flag selection authority (reference <available_flags> and <flag_selection_strategy> in CONTEXT-ENGINE.md)"
     directive: |
-      AI analyzes task and selects best flag combination.
-      Can be combined with user flags for enhancement.
+      META FLAG: Skip get_directives(['--auto']). Instead, use <available_flags> and <flag_selection_strategy> from CONTEXT-ENGINE.md.
+      Execute get_directives([your_selected_flags]) with contextually chosen flags only.
 
 # ========================================
 # Meta Instructions
@@ -532,3 +532,28 @@ meta_instructions:
     Maintain ALL constraints throughout execution.
     Verify compliance at every checkpoint.
     </enforcement>
+
+# ========================================
+# Hook Messages (Claude Code Only)
+# ========================================
+hook_messages:
+  auto_authority:
+    flags: ["--auto"]
+    message: "AUTONOMOUS MODE: Skip get_directives(['--auto']). Reference <available_flags> and <flag_selection_strategy> in CONTEXT-ENGINE.md to select flags, then execute get_directives([selected_flags])."
+
+  auto_with_context:
+    # When auto is used with other flags
+    message: "AUTONOMOUS MODE: Skip get_directives(['--auto']). Reference <available_flags> and <flag_selection_strategy> in CONTEXT-ENGINE.md with {other_flags} context, then execute get_directives([selected_flags])."
+
+  reset_protocol:
+    flags: ["--reset"]
+    message: "Execute get_directives({flag_list}) to reset session state and apply directives."
+
+  standard_execution:
+    # All other known flags
+    flags: ["--analyze", "--performance", "--refactor", "--strict", "--lean", "--discover", "--explain", "--save", "--parallel", "--todo", "--seq", "--concise", "--git", "--readonly", "--load", "--collab"]
+    message: "Execute get_directives({flag_list}) for systematic implementation."
+
+  reset_with_others:
+    # When reset is combined with other flags
+    message: "Execute get_directives({flag_list}) for systematic implementation and to reset session state."

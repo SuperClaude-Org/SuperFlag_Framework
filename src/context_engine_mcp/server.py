@@ -143,30 +143,6 @@ except Exception as e:
     raise
 
 @mcp.tool()
-def list_available_flags() -> Dict[str, Any]:
-    """
-    Returns all available flags with their brief descriptions.
-    """
-    flags = []
-    
-    # Extract flag information from directives
-    for flag_name, flag_data in DIRECTIVES.items():
-        flags.append({
-            "flag": flag_name,
-            "brief": flag_data.get('brief', 'No description available')
-        })
-    
-    
-    # Sort flags alphabetically
-    flags.sort(key=lambda x: x['flag'])
-    
-    # Return with meta guide
-    return {
-        "meta_guide": META_INSTRUCTIONS.get('list_available_flags', ''),
-        "flags": flags
-    }
-
-@mcp.tool()
 def get_directives(flags: List[str]) -> Dict[str, str]:
     """
     Returns combined directives for selected flags.
@@ -235,7 +211,7 @@ def get_directives(flags: List[str]) -> Dict[str, str]:
         # Simplified error response format - removed available_flags field
         return {
             "error": f"Unknown flags: {not_found_flags}. Available flags: {', '.join(DIRECTIVES.keys())}",
-            "hint": "Use list_available_flags() to see all available flags"
+            "hint": "Reference <available_flags> section in <system-reminder>'s CONTEXT-ENGINE.md"
         }
     
     # Update session with used flags
@@ -251,9 +227,9 @@ def get_directives(flags: List[str]) -> Dict[str, str]:
         
         # Compact header
         if duplicate_flags and new_flags:
-            reminder_parts.append(f"[WARN] FLAGS: {len(duplicate_flags)} ACTIVE, {len(new_flags)} NEW")
+            reminder_parts.append(f"[CACHE] FLAGS: {len(duplicate_flags)} ACTIVE, {len(new_flags)} NEW")
         elif duplicate_flags:
-            reminder_parts.append(f"[WARN] {len(duplicate_flags)} FLAGS ALREADY ACTIVE")
+            reminder_parts.append(f"[CACHE] {len(duplicate_flags)} FLAGS ALREADY ACTIVE")
         
         # Duplicate flags (compact format)
         if duplicate_flags and duplicate_info is not None:
@@ -280,7 +256,7 @@ def get_directives(flags: List[str]) -> Dict[str, str]:
         
         # Compact AI guidance (only if duplicates)
         if duplicate_flags:
-            reminder_parts.append(f"--reset if: context_change|conflict|stale. Else: use_existing")
+            reminder_parts.append(f"IF duplicate AND directives NOT in <system-reminder>: IMMEDIATE get_directives(['--reset', ...flags])")
         
         response["REMINDER"] = ". ".join(reminder_parts)
     
