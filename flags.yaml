@@ -539,21 +539,29 @@ meta_instructions:
 hook_messages:
   auto_authority:
     flags: ["--auto"]
-    message: "AUTONOMOUS MODE: Skip get_directives(['--auto']). Reference <available_flags> and <flag_selection_strategy> in CONTEXT-ENGINE.md to select flags, then execute get_directives([selected_flags])."
+    message: |
+      Activating FULL CONTEXTUAL AUTHORITY for autonomous flag selection.
+      Reference <available_flags> and <flag_selection_strategy> in CONTEXT-ENGINE.md.
+
+      Execute: get_directives([...selected_flags])
 
   auto_with_context:
     # When auto is used with other flags
-    message: "AUTONOMOUS MODE: Skip get_directives(['--auto']). Reference <available_flags> and <flag_selection_strategy> in CONTEXT-ENGINE.md with {other_flags} context, then execute get_directives([selected_flags])."
+    message: |
+      Enhancing {other_flags} with contextual flags.
+      Reference <available_flags> and <flag_selection_strategy> in CONTEXT-ENGINE.md.
+
+      Execute: get_directives([{other_flags}, ...additional_flags])
 
   reset_protocol:
     flags: ["--reset"]
-    message: "Execute get_directives({flag_list}) to reset session state and apply directives."
+    message: "Execute get_directives([{flag_list}]) to reset session state and apply directives."
 
   standard_execution:
     # All other known flags
     flags: ["--analyze", "--performance", "--refactor", "--strict", "--lean", "--discover", "--explain", "--save", "--parallel", "--todo", "--seq", "--concise", "--git", "--readonly", "--load", "--collab"]
-    message: "Execute get_directives({flag_list}) for systematic implementation."
+    message: "Execute get_directives([{flag_list}]) for systematic implementation."
 
   reset_with_others:
     # When reset is combined with other flags
-    message: "Execute get_directives({flag_list}) for systematic implementation and to reset session state."
+    message: "Execute get_directives([{flag_list}]) for systematic implementation and to reset session state."
