@@ -138,7 +138,7 @@ def install_mcp_servers_via_cli():
     ensure_safe_installation()
     
     # Inform user about context-engine setup
-    print("📌 For context-engine MCP server:")
+    print("[INFO] For context-engine MCP server:")
     print("   Choose your installation method:")
     print("   • Python: claude mcp add -s user -- context-engine context-engine-mcp")
     print("   • UV: claude mcp add -s user -- context-engine uv run context-engine-mcp")
@@ -150,7 +150,7 @@ def install_gemini_cli_instructions():
     We don't modify Gemini CLI config files here. This prints clear, minimal
     steps so users can register the stdio MCP server command.
     """
-    print("\n📌 For Gemini CLI (generic MCP stdio):")
+    print("\n[INFO] For Gemini CLI (generic MCP stdio):")
     print("   Register the server command in your Gemini CLI MCP configuration:")
     print("   • Command: context-engine-mcp")
     print("   • Args: []")
@@ -167,7 +167,7 @@ def setup_continue_mcp_servers():
     # Create directory if it doesn't exist
     continue_dir.mkdir(parents=True, exist_ok=True)
     
-    print("📁 Creating Continue MCP configuration files...")
+    print("[CREATE] Creating Continue MCP configuration files...")
     print("  Location: ~/.continue/mcpServers/")
     
     # Define server configurations with clear examples
@@ -290,7 +290,7 @@ def install(target="claude-code"):
     
     elif target == "cn":
         # Install for Continue extension
-        print("\n📦 Setting up MCP servers for Continue extension...")
+        print("\n[SETUP] Setting up MCP servers for Continue extension...")
         if setup_continue_mcp_servers():
             # Setup config.yaml with rules
             print("\n[CONFIG] Setting up global rules...")
@@ -325,17 +325,17 @@ def install(target="claude-code"):
         print("   • list_available_flags() - View all 17 available flags")
         print("   • get_directives(['--analyze', '--performance']) - Activate modes")
         print("   • Use '--auto' to let AI select optimal flags")
-        print("\n📚 Documentation: ~/.claude/CONTEXT-ENGINE.md")
+        print("\n[DOCS] Documentation: ~/.claude/CONTEXT-ENGINE.md")
     elif target == "cn":
         print("\n[NEXT] Next steps for Continue:")
-        print("1. 🔧 Edit context-engine configuration:")
+        print("1. [EDIT] Edit context-engine configuration:")
         print("   ~/.continue/mcpServers/context-engine.yaml")
         print("   (Choose and uncomment ONE option)")
-        print("\n2. 🔄 Restart VS Code")
-        print("\n3. 💬 In Continue chat:")
+        print("\n2. [RESTART] Restart VS Code")
+        print("\n3. [CHAT] In Continue chat:")
         print("   • Type @ and select 'MCP'")
         print("   • Available server: context-engine")
-        print("\n📚 Configuration file: ~/.continue/mcpServers/context-engine.yaml")
+        print("\n[DOCS] Configuration file: ~/.continue/mcpServers/context-engine.yaml")
 
     elif target == "gemini-cli":
         print("\n[NEXT] Next steps for Gemini CLI:")
@@ -343,14 +343,14 @@ def install(target="claude-code"):
         print("2. If Gemini CLI supports config files, add it there; otherwise use the CLI's add command if available.")
         print("3. Run Gemini CLI and verify the MCP tools are available (list_available_flags, get_directives).")
         print("\n[NEXT] Next steps for Continue:")
-        print("1. 🔧 Edit context-engine configuration:")
+        print("1. [EDIT] Edit context-engine configuration:")
         print("   ~/.continue/mcpServers/context-engine.yaml")
         print("   (Choose and uncomment ONE option)")
-        print("\n2. 🔄 Restart VS Code")
-        print("\n3. 💬 In Continue chat:")
+        print("\n2. [RESTART] Restart VS Code")
+        print("\n3. [CHAT] In Continue chat:")
         print("   • Type @ and select 'MCP'")
         print("   • Available server: context-engine")
-        print("\n📚 Configuration file: ~/.continue/mcpServers/context-engine.yaml")
+        print("\n[DOCS] Configuration file: ~/.continue/mcpServers/context-engine.yaml")
     
     print("\n[COMPLETE] Context Engine MCP installation completed!")
     print("-" * 50)
