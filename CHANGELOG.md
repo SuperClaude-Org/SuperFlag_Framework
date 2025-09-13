@@ -1,5 +1,17 @@
 Changelog
 
+## 2.1.0 (2025-09-14)
+
+### Fixed
+- Resolve Claude Code hook message duplication issue
+- Remove duplicate user-visible output from hook system
+- Improve hook message templates with multiline format
+
+### Changed
+- Streamline message processing logic for auto flag handling
+- Hook outputs empty JSON only for Claude parsing
+- Enhance YAML-based configuration system
+
 ## 2.0.2 (2025-09-13)
 
 - Remove version metadata from flags.yaml to prevent version conflicts
