@@ -96,3 +96,18 @@ attached_assets/Pasted-*
 # Analysis and optimization documents
 OPTIMIZATION_ANALYSIS.md
 FINAL_VERSION_NOTES.md
+
+# Test files
+test_*.py
+test_input.txt
+*.test.py
+*_test.py
+
+# Documentation (except README, RELEASE_GUIDE_EN, CHANGELOG)
+HANDOFF_REPORT_*.md
+CONTEXT-ENGINE.md
+*.bak.md
+docs/*.md
+!README.md
+!RELEASE_GUIDE_EN.md
+!CHANGELOG.md
