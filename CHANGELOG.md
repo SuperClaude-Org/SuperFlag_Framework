@@ -1,5 +1,12 @@
 Changelog
 
+## 2.0.1 (2025-09-13)
+
+- Fix uninstall command terminating early without showing all cleanup messages
+- Add exception handling to prevent individual cleanup failures from stopping the process
+- Remove incorrect Continue instructions from gemini-cli installation output
+- Skip uninstall command itself during process termination to avoid self-kill
+
 ## 2.0.0 (2025-09-13)
 
 - Complete prompt system optimization with scientific NLP principles
