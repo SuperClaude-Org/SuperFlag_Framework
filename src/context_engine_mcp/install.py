@@ -366,6 +366,10 @@ def kill_context_engine_processes():
     """
     killed = []
 
+    # Skip process killing in CI environment to avoid self-termination
+    if os.environ.get('CI') == 'true' or os.environ.get('GITHUB_ACTIONS') == 'true':
+        return ["[INFO] Skipping process termination in CI environment"]
+
     if psutil is None:
         return ["[INFO] psutil not available - manual process termination may be needed"]
 
