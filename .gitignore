@@ -84,3 +84,7 @@ RELEASE_GUIDE_KO.md
 .replit
 replit.md
 uv.lock
+
+# Local test artifacts
+_home_test_*/
+pip/
