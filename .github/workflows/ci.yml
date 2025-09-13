@@ -32,8 +32,18 @@ jobs:
           python -m twine check dist/*
 
       - name: Install wheel and smoke test (pip)
+        shell: bash
         run: |
-          python -c "import glob,subprocess,sys; w=glob.glob('dist/*.whl')[0]; subprocess.check_call([sys.executable,'-m','pip','install','-U',w])"
+          # Check wheel exists and install safely
+          python -c "
+          import glob, subprocess, sys
+          wheels = glob.glob('dist/*.whl')
+          if not wheels:
+              print('ERROR: No wheel files found in dist/')
+              sys.exit(1)
+          print(f'Found wheel: {wheels[0]}')
+          subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-U', wheels[0]])
+          "
           python -m pip check
           # CLI via module to avoid PATH differences across OS
           python -m context_engine_mcp.install --version
@@ -62,6 +72,15 @@ jobs:
       - name: Install with pipx and smoke test
         shell: bash
         run: |
+          # Verify wheel exists before pipx install
+          python -c "
+          import glob, sys
+          wheels = glob.glob('dist/*.whl')
+          if not wheels:
+              print('ERROR: No wheel files found for pipx')
+              sys.exit(1)
+          print(f'Installing with pipx: {wheels[0]}')
+          "
           python -m pipx install dist/*.whl
           APP=$(python -c "import json, subprocess; j=json.loads(subprocess.check_output(['python','-m','pipx','list','--json'])); print(j['venvs']['context-engine-mcp']['metadata']['main_package']['app_paths'][0]['__Path__'])")
           "$APP" --version
