@@ -109,7 +109,7 @@ def ensure_safe_installation():
             print("  Example (PowerShell): $env:Path += ';' + (Split-Path $(python -c 'import sys;print(sys.executable)')) + '\\Scripts'")
             return False
 
-        # Module not importable – likely not installed in current interpreter
+        # Module not importable - likely not installed in current interpreter
         print("[WARN] context-engine-mcp is not installed in this Python environment.")
         print("  Install or upgrade via: python -m pip install -U context-engine-mcp")
         return False
@@ -140,9 +140,9 @@ def install_mcp_servers_via_cli():
     # Inform user about context-engine setup
     print("[INFO] For context-engine MCP server:")
     print("   Choose your installation method:")
-    print("   • Python: claude mcp add -s user -- context-engine context-engine-mcp")
-    print("   • UV: claude mcp add -s user -- context-engine uv run context-engine-mcp")
-    print("   • Custom: claude mcp add -s user -- context-engine <your-command>")
+    print("   - Python: claude mcp add -s user -- context-engine context-engine-mcp")
+    print("   - UV: claude mcp add -s user -- context-engine uv run context-engine-mcp")
+    print("   - Custom: claude mcp add -s user -- context-engine <your-command>")
 
 def install_gemini_cli_instructions():
     """Show instructions to register the MCP server with Gemini CLI.
@@ -152,9 +152,9 @@ def install_gemini_cli_instructions():
     """
     print("\n[INFO] For Gemini CLI (generic MCP stdio):")
     print("   Register the server command in your Gemini CLI MCP configuration:")
-    print("   • Command: context-engine-mcp")
-    print("   • Args: []")
-    print("   • Transport: stdio (default for FastMCP)")
+    print("   - Command: context-engine-mcp")
+    print("   - Args: []")
+    print("   - Transport: stdio (default for FastMCP)")
     print("\nIf Gemini CLI supports a config file for MCP servers, add an entry ")
     print("pointing to 'context-engine-mcp'. If it supports environment variables,")
     print("you can set any needed env for advanced scenarios.")
@@ -322,9 +322,9 @@ def install(target="claude-code"):
         print("\n[NEXT] Next steps for Claude Code:")
         print("1. Restart Claude Code if it's running")
         print("2. Use the MCP tools in your conversations:")
-        print("   • list_available_flags() - View all 17 available flags")
-        print("   • get_directives(['--analyze', '--performance']) - Activate modes")
-        print("   • Use '--auto' to let AI select optimal flags")
+        print("   - list_available_flags() - View all 17 available flags")
+        print("   - get_directives(['--analyze', '--performance']) - Activate modes")
+        print("   - Use '--auto' to let AI select optimal flags")
         print("\n[DOCS] Documentation: ~/.claude/CONTEXT-ENGINE.md")
     elif target == "cn":
         print("\n[NEXT] Next steps for Continue:")
@@ -333,8 +333,8 @@ def install(target="claude-code"):
         print("   (Choose and uncomment ONE option)")
         print("\n2. [RESTART] Restart VS Code")
         print("\n3. [CHAT] In Continue chat:")
-        print("   • Type @ and select 'MCP'")
-        print("   • Available server: context-engine")
+        print("   - Type @ and select 'MCP'")
+        print("   - Available server: context-engine")
         print("\n[DOCS] Configuration file: ~/.continue/mcpServers/context-engine.yaml")
 
     elif target == "gemini-cli":
@@ -348,8 +348,8 @@ def install(target="claude-code"):
         print("   (Choose and uncomment ONE option)")
         print("\n2. [RESTART] Restart VS Code")
         print("\n3. [CHAT] In Continue chat:")
-        print("   • Type @ and select 'MCP'")
-        print("   • Available server: context-engine")
+        print("   - Type @ and select 'MCP'")
+        print("   - Available server: context-engine")
         print("\n[DOCS] Configuration file: ~/.continue/mcpServers/context-engine.yaml")
     
     print("\n[COMPLETE] Context Engine MCP installation completed!")
@@ -367,7 +367,7 @@ def kill_context_engine_processes():
     killed = []
 
     if psutil is None:
-        return ["ℹ️ psutil not available - manual process termination may be needed"]
+        return ["[INFO] psutil not available - manual process termination may be needed"]
 
     try:
         current_pid = os.getpid()
@@ -417,10 +417,10 @@ def kill_context_engine_processes():
         if killed:
             time.sleep(1)
 
-        return killed if killed else ["ℹ️ No context-engine-mcp processes found running"]
+        return killed if killed else ["[INFO] No context-engine-mcp processes found running"]
 
     except Exception as e:
-        return [f"[WARN]️ Error killing processes: {str(e)}"]
+        return [f"[WARN] Error killing processes: {str(e)}"]
 
 def delete_with_retry(file_path, max_retries=3):
     """Delete file with retry logic for locked files"""
@@ -430,16 +430,16 @@ def delete_with_retry(file_path, max_retries=3):
                 file_path.unlink()
                 return True, f"[COMPLETE] Removed {file_path}"
             else:
-                return True, f"ℹ️ File not found: {file_path}"
+                return True, f"[INFO] File not found: {file_path}"
         except PermissionError as e:
             if attempt < max_retries - 1:
                 time.sleep(0.5)
                 continue
-            return False, f"❌ Could not delete {file_path} (in use): {str(e)}"
+            return False, f"[ERROR] Could not delete {file_path} (in use): {str(e)}"
         except Exception as e:
-            return False, f"❌ Error deleting {file_path}: {str(e)}"
+            return False, f"[ERROR] Error deleting {file_path}: {str(e)}"
     
-    return False, f"❌ Failed to delete {file_path} after {max_retries} attempts"
+    return False, f"[ERROR] Failed to delete {file_path} after {max_retries} attempts"
 
 def uninstall_claude_code():
     """Remove Context Engine from Claude Code configuration"""
@@ -459,7 +459,7 @@ def uninstall_claude_code():
                 claude_md.write_text(new_content, encoding='utf-8')
                 results.append("[COMPLETE] Removed @CONTEXT-ENGINE.md reference from CLAUDE.md")
             else:
-                results.append("ℹ️ @CONTEXT-ENGINE.md reference not found in CLAUDE.md")
+                results.append("[INFO] @CONTEXT-ENGINE.md reference not found in CLAUDE.md")
         
         # 3. Remove CONTEXT-ENGINE.md file with retry
         context_engine_md = home / ".claude" / "CONTEXT-ENGINE.md"
@@ -467,7 +467,7 @@ def uninstall_claude_code():
         results.append(message)
             
     except Exception as e:
-        results.append(f"❌ Error removing Claude Code config: {str(e)}")
+        results.append(f"[ERROR] Error removing Claude Code config: {str(e)}")
     
     return results
 
@@ -499,9 +499,9 @@ def uninstall_continue():
                         yaml.dump(config, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
                     results.append("[COMPLETE] Removed Context Engine rules from Continue config")
                 else:
-                    results.append("ℹ️ Context Engine rules not found in Continue config")
+                    results.append("[INFO] Context Engine rules not found in Continue config")
             else:
-                results.append("ℹ️ No rules section in Continue config")
+                results.append("[INFO] No rules section in Continue config")
                 
         except yaml.YAMLError as e:
             # If YAML parsing fails, try text-based removal
@@ -544,12 +544,12 @@ def uninstall_continue():
                 results.append("[COMPLETE] Removed Context Engine rules from Continue config (text-based)")
                 
             except Exception as text_error:
-                results.append(f"[WARN]️ Could not clean Continue config.yaml: {str(e)}")
+                results.append(f"[WARN] Could not clean Continue config.yaml: {str(e)}")
                 
         except Exception as e:
-            results.append(f"[WARN]️ Error processing Continue config: {str(e)}")
+            results.append(f"[WARN] Error processing Continue config: {str(e)}")
     else:
-        results.append("ℹ️ Continue config not found")
+        results.append("[INFO] Continue config not found")
     
     # 2. Remove MCP server configuration with retry (always attempt this)
     try:
@@ -557,7 +557,7 @@ def uninstall_continue():
         success, message = delete_with_retry(context_engine_yaml)
         results.append(message)
     except Exception as e:
-        results.append(f"[WARN]️ Error removing MCP server file: {str(e)}")
+        results.append(f"[WARN] Error removing MCP server file: {str(e)}")
     
     return results
 
@@ -585,14 +585,14 @@ def uninstall_gemini():
                 gemini_md.write_text(new_content, encoding='utf-8')
                 results.append("[COMPLETE] Removed @CONTEXT-ENGINE.md reference from GEMINI.md")
             else:
-                results.append("ℹ️ @CONTEXT-ENGINE.md reference not found in GEMINI.md")
+                results.append("[INFO] @CONTEXT-ENGINE.md reference not found in GEMINI.md")
 
         context_engine_md = home / ".gemini" / "CONTEXT-ENGINE.md"
         success, message = delete_with_retry(context_engine_md)
         results.append(message)
 
     except Exception as e:
-        results.append(f"❌ Error removing Gemini config: {str(e)}")
+        results.append(f"[ERROR] Error removing Gemini config: {str(e)}")
 
     return results
 
@@ -631,14 +631,14 @@ def cleanup_common_files():
                 shutil.rmtree(context_dir)
                 results.append("[COMPLETE] Removed ~/.context-engine directory (flags.yaml, etc.)")
             except Exception as e:
-                results.append(f"[WARN]️ Could not remove .context-engine directory: {str(e)}")
+                results.append(f"[WARN] Could not remove .context-engine directory: {str(e)}")
         else:
-            results.append("ℹ️ .context-engine directory not found")
+            results.append("[INFO] .context-engine directory not found")
         
-        results.append("ℹ️ Run 'pip uninstall context-engine-mcp -y' to remove Python package")
+        results.append("[INFO] Run 'pip uninstall context-engine-mcp -y' to remove Python package")
         
     except Exception as e:
-        results.append(f"❌ Error cleaning up files: {str(e)}")
+        results.append(f"[ERROR] Error cleaning up files: {str(e)}")
     
     return results
 
@@ -673,7 +673,7 @@ def uninstall():
     
     # Check for any failures
     all_results = claude_results + continue_results + gemini_results + cleanup_results
-    failures = [r for r in all_results if r.startswith("❌")]
+    failures = [r for r in all_results if r.startswith("[ERROR]")]
     
     if failures:
         print(f"\nWARNING: {len(failures)} items could not be removed (files may be in use)")
