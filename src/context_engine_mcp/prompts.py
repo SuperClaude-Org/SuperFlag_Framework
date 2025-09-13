@@ -134,9 +134,9 @@ def setup_claude_context_files():
     try:
         with open(context_engine_md, 'w', encoding='utf-8') as f:
             f.write(BASE_PROMPT_CONTENT)
-        print(f"✓ Updated {context_engine_md}")
+        print(f"[OK] Updated {context_engine_md}")
     except Exception as e:
-        print(f"⚠ Could not write CONTEXT-ENGINE.md: {e}")
+        print(f"[WARN] Could not write CONTEXT-ENGINE.md: {e}")
         return False
 
     # Ensure CLAUDE.md references CONTEXT-ENGINE.md
@@ -144,7 +144,7 @@ def setup_claude_context_files():
     if claude_md.exists():
         content = claude_md.read_text(encoding='utf-8')
         if reference in content:
-            print("✓ CLAUDE.md already references CONTEXT-ENGINE.md")
+            print("[OK] CLAUDE.md already references CONTEXT-ENGINE.md")
             return True
 
     try:
@@ -152,10 +152,10 @@ def setup_claude_context_files():
             if claude_md.exists() and claude_md.stat().st_size > 0:
                 f.write("\n\n")
             f.write(reference)
-        print(f"✓ Added @CONTEXT-ENGINE.md reference to CLAUDE.md")
+        print(f"[OK] Added @CONTEXT-ENGINE.md reference to CLAUDE.md")
         return True
     except Exception as e:
-        print(f"⚠ Could not update CLAUDE.md: {e}")
+        print(f"[WARN] Could not update CLAUDE.md: {e}")
         return False
 
 def setup_gemini_context_files():
@@ -177,9 +177,9 @@ def setup_gemini_context_files():
     try:
         with open(context_engine_md, 'w', encoding='utf-8') as f:
             f.write(BASE_PROMPT_CONTENT)
-        print(f"✓ Updated {context_engine_md}")
+        print(f"[OK] Updated {context_engine_md}")
     except Exception as e:
-        print(f"⚠ Could not write CONTEXT-ENGINE.md: {e}")
+        print(f"[WARN] Could not write CONTEXT-ENGINE.md: {e}")
         return False
 
     # Check and update GEMINI.md reference
@@ -187,7 +187,7 @@ def setup_gemini_context_files():
     if gemini_md.exists():
         content = gemini_md.read_text(encoding='utf-8')
         if reference in content:
-            print("✓ GEMINI.md already references CONTEXT-ENGINE.md")
+            print("[OK] GEMINI.md already references CONTEXT-ENGINE.md")
             return True
 
     # Append reference to GEMINI.md
@@ -196,10 +196,10 @@ def setup_gemini_context_files():
             if gemini_md.exists() and gemini_md.stat().st_size > 0:
                 f.write("\n\n")
             f.write(reference)
-        print(f"✓ Added @CONTEXT-ENGINE.md reference to GEMINI.md")
+        print(f"[OK] Added @CONTEXT-ENGINE.md reference to GEMINI.md")
         return True
     except Exception as e:
-        print(f"⚠ Could not update GEMINI.md: {e}")
+        print(f"[WARN] Could not update GEMINI.md: {e}")
         return False
 
 def setup_continue_config(continue_dir):
@@ -216,7 +216,7 @@ def setup_continue_config(continue_dir):
             with open(config_path, 'r', encoding='utf-8') as f:
                 config = yaml.safe_load(f) or {}
         except Exception as e:
-            print(f"⚠ Could not read config.yaml: {e}")
+            print(f"[WARN] Could not read config.yaml: {e}")
             return False
     
     # Ensure rules section exists
@@ -233,19 +233,19 @@ def setup_continue_config(continue_dir):
             # Update existing rule
             config['rules'][i] = context_engine_rule
             rule_updated = True
-            print("✓ Updated existing Context Engine rules")
+            print("[OK] Updated existing Context Engine rules")
             break
         elif isinstance(existing_rule, dict) and existing_rule.get('name') == "Context Engine Flags":
             # Update existing dict-format rule
             config['rules'][i] = context_engine_rule
             rule_updated = True
-            print("✓ Updated existing Context Engine rules")
+            print("[OK] Updated existing Context Engine rules")
             break
     
     if not rule_updated:
         # Add new rule
         config['rules'].append(context_engine_rule)
-        print("✓ Added Context Engine rules")
+        print("[OK] Added Context Engine rules")
     
     # Write updated config - manually format for readability
     try:
@@ -279,8 +279,8 @@ def setup_continue_config(continue_dir):
         with open(config_path, 'w', encoding='utf-8') as f:
             f.writelines(lines)
         
-        print(f"✓ Saved to {config_path}")
+        print(f"[OK] Saved to {config_path}")
         return True
     except Exception as e:
-        print(f"⚠ Could not write config.yaml: {e}")
+        print(f"[WARN] Could not write config.yaml: {e}")
         return False
