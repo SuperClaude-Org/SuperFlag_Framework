@@ -4,7 +4,6 @@ Context Engine MCP - Claude Code Hook
 Simple flag detection and message output for Claude Code
 """
 
-import re
 import sys
 import json
 import yaml
@@ -12,31 +11,37 @@ from pathlib import Path
 
 # Constants
 FLAGS_YAML_PATH = Path.home() / ".context-engine" / "flags.yaml"
-FLAG_PATTERN = r'--[a-zA-Z][\w-]*'
 AUTO_FLAG = '--auto'
 RESET_FLAG = '--reset'
-
-
-def extract_potential_flags(user_input):
-    """Extract potential flags from user input using regex"""
-    return re.findall(FLAG_PATTERN, user_input)
+EMPTY_JSON = '{}'
+EXIT_SUCCESS = 0
+EXIT_INTERRUPT = 130
+EXIT_ERROR = 1
 
 
 def load_config():
-    """Load YAML configuration file"""
+    """Load YAML configuration file
+
+    Returns:
+        dict: Configuration dictionary or None if loading fails
+    """
     if not FLAGS_YAML_PATH.exists():
         return None
 
     try:
         with open(FLAGS_YAML_PATH, 'r', encoding='utf-8') as f:
             return yaml.safe_load(f)
-    except Exception:
+    except (yaml.YAMLError, IOError) as e:
+        print(f"Config load error: {e}", file=sys.stderr)
         return None
 
 
-def filter_valid_flags(potential_flags, valid_flags):
-    """Keep only flags that exist in YAML directives"""
-    return [f for f in potential_flags if f in valid_flags]
+def extract_valid_flags(user_input, valid_flags):
+    """Extract flags using simple 'in' check - 100% coverage"""
+    # Use set to avoid duplicates, then convert back to list
+    found_flags = [flag for flag in valid_flags if flag in user_input]
+    # Preserve order from valid_flags but remove duplicates
+    return list(dict.fromkeys(found_flags))
 
 
 def get_auto_message(has_other_flags, other_flags, hook_messages):
@@ -44,16 +49,16 @@ def get_auto_message(has_other_flags, other_flags, hook_messages):
     if has_other_flags:
         # Auto with other flags
         config = hook_messages.get('auto_with_context', {})
+        # Format as comma-separated list instead of JSON array
+        other_flags_str = ', '.join(other_flags)
         return config.get('message', '').format(
-            other_flags=json.dumps(other_flags)
+            other_flags=other_flags_str
         )
     else:
         # Auto alone
         config = hook_messages.get('auto_authority', {})
-        return config.get('message', '').format(
-            flag_list=json.dumps([AUTO_FLAG]),
-            flags=AUTO_FLAG
-        )
+        # No formatting needed for auto alone message
+        return config.get('message', '')
 
 
 def get_other_flags_message(other_flags, hook_messages):
@@ -72,8 +77,9 @@ def get_other_flags_message(other_flags, hook_messages):
 
     message_template = config.get('message', '')
     if message_template:
+        # Format as comma-separated list instead of JSON array
         return message_template.format(
-            flag_list=json.dumps(other_flags),
+            flag_list=', '.join(other_flags),
             flags=', '.join(other_flags)
         )
     return None
@@ -93,25 +99,20 @@ def generate_messages(flags, hook_messages):
         auto_message = get_auto_message(bool(other_flags), other_flags, hook_messages)
         if auto_message:
             messages.append(auto_message)
+        # When --auto is detected, only show auto-related messages (skip other flags)
     else:
+        # Process remaining flags only if --auto is not present
         other_flags = flags
-
-    # Process remaining flags if any
-    if other_flags:
-        other_message = get_other_flags_message(other_flags, hook_messages)
-        if other_message:
-            messages.append(other_message)
+        if other_flags:
+            other_message = get_other_flags_message(other_flags, hook_messages)
+            if other_message:
+                messages.append(other_message)
 
     return messages
 
 
 def process_input(user_input):
     """Main processing logic"""
-    # Extract potential flags
-    potential_flags = extract_potential_flags(user_input)
-    if not potential_flags:
-        return None
-
     # Load configuration
     config = load_config()
     if not config:
@@ -121,8 +122,8 @@ def process_input(user_input):
     directives = config.get('directives', {})
     valid_flags = set(directives.keys())
 
-    # Filter to keep only valid flags
-    flags = filter_valid_flags(potential_flags, valid_flags)
+    # Extract valid flags directly (100% coverage approach)
+    flags = extract_valid_flags(user_input, valid_flags)
     if not flags:
         return None
 
@@ -131,44 +132,62 @@ def process_input(user_input):
     messages = generate_messages(flags, hook_messages)
 
     if messages:
-        return {
-            'flags': flags,
-            'messages': messages
-        }
+        return {'messages': messages}
     return None
+
+
+def parse_input(data):
+    """Parse input data which may be JSON or plain text"""
+    if not data:
+        return ""
+
+    # Try JSON parsing for Claude Code input format
+    if data.startswith('{') and data.endswith('}'):
+        try:
+            parsed = json.loads(data)
+            # Extract prompt/message/input field
+            return parsed.get('prompt', parsed.get('message', parsed.get('input', data)))
+        except json.JSONDecodeError:
+            return data
+    return data
+
+
+def format_output(messages):
+    """Format messages for output"""
+    if not messages:
+        return ""
+
+    if isinstance(messages, list):
+        return "\n".join([m for m in messages if m])
+    return str(messages)
 
 
 def main():
     """Main entry point for Claude Code Hook"""
     try:
-        # Read input from stdin
-        user_input = sys.stdin.read().strip()
+        # Read and parse input
+        data = sys.stdin.read().strip()
+        user_input = parse_input(data)
 
         # Process input
         result = process_input(user_input) if user_input else None
 
-        # Output result
+        # Output result (JSON only for Claude)
         if result and result.get('messages'):
-            # Print messages for user
-            for message in result['messages']:
-                print(message)
-        else:
-            # No valid flags or messages
-            print("{}")
+            pass  # Skip user-visible output
+        print(EMPTY_JSON)
 
-        return 0
+        return EXIT_SUCCESS
 
     except KeyboardInterrupt:
-        # User interrupted with Ctrl+C
-        print("{}")
-        return 130
+        print(EMPTY_JSON)
+        return EXIT_INTERRUPT
 
     except Exception as e:
-        # Log error to stderr (not visible in Claude Code output)
+        # Log error to stderr
         print(f"Hook error: {str(e)}", file=sys.stderr)
-        # Return safe empty JSON for Claude
-        print("{}")
-        return 1
+        print(EMPTY_JSON)
+        return EXIT_ERROR
 
 
 if __name__ == "__main__":
