@@ -1,4 +1,4 @@
-name: Publish (tags → TestPyPI/PyPI)
+name: Publish (tags -> TestPyPI/PyPI)
 
 on:
   push:

@@ -153,11 +153,11 @@ directives:
       - Is the design easy to test?
       
       Quantitative Completion Criteria:
-      - [ ] Cyclomatic complexity ≤ 10
-      - [ ] Method length ≤ 20 lines
-      - [ ] Class cohesion ≥ 0.7
-      - [ ] Test coverage ≥ 80%
-      - [ ] Code duplication ≤ 3%
+      - [ ] Cyclomatic complexity <= 10
+      - [ ] Method length <= 20 lines
+      - [ ] Class cohesion >= 0.7
+      - [ ] Test coverage >= 80%
+      - [ ] Code duplication <= 3%
     
   "--strict":
     brief: "Zero-error principle ensuring absolute accuracy and complete transparency"
@@ -253,15 +253,15 @@ directives:
       - Design: focus on current requirements
       
       Critical Warning - Don't confuse simplification with destruction:
-      - Simplification ≠ removing core features
-      - Lean ≠ compromising quality
-      - Minimization ≠ incompleteness
-      - YAGNI ≠ non-extensible
+      - Simplification != removing core features
+      - Lean != compromising quality
+      - Minimization != incompleteness
+      - YAGNI != non-extensible
       
       Correct Approach:
       - Use existing frameworks efficiently, don't remove them
       - Acknowledge chosen tools have reasons
-      - Waste elimination ≠ feature removal
+      - Waste elimination != feature removal
       - Simplify HOW, maintain WHAT
       
       Meta Checkpoints:
@@ -271,7 +271,7 @@ directives:
       
       Quantitative Completion Criteria:
       - [ ] 0% unused code
-      - [ ] Cyclomatic complexity ≤ 5
+      - [ ] Cyclomatic complexity <= 5
       - [ ] Dependencies minimized (essentials only)
       - [ ] Build time targets achieved
       - [ ] Bundle size targets achieved
