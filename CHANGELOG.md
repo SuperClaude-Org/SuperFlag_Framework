@@ -1,5 +1,11 @@
 Changelog
 
+## 2.1.1 (2025-09-14)
+
+### Fixed
+- Remove duplicate JSON output from Claude hook system
+- Simplify hook output to plain text only for better user experience
+
 ## 2.1.0 (2025-09-14)
 
 ### Fixed
