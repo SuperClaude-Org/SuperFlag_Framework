@@ -39,8 +39,8 @@ def setup_flags_yaml():
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         backup_file = target_dir / f"flags.yaml.backup_{timestamp}"
         shutil.copy2(target_file, backup_file)
-        print(f"✓ Backed up existing flags.yaml to {backup_file.name}")
-        print(f"✓ Updating flags.yaml with latest version")
+        print(f"[OK] Backed up existing flags.yaml to {backup_file.name}")
+        print(f"[OK] Updating flags.yaml with latest version")
 
     # Prefer packaged resource (works from wheels)
     source_file = None
@@ -69,11 +69,11 @@ def setup_flags_yaml():
 
     if source_file:
         shutil.copy2(source_file, target_file)
-        print(f"✓ Installed flags.yaml to {target_file}")
+        print(f"[OK] Installed flags.yaml to {target_file}")
         print("  You can edit this file to customize flag directives")
         return True
     else:
-        print(f"⚠ flags.yaml source not found in any expected location")
+        print(f"[WARN] flags.yaml source not found in any expected location")
         return False
 
 def check_claude_cli():
@@ -100,22 +100,22 @@ def ensure_safe_installation():
         exe_path = which('context-engine-mcp')
 
         if module_ok and exe_path:
-            print(f"✓ context-engine-mcp is importable and on PATH: {exe_path}")
+            print(f"[OK] context-engine-mcp is importable and on PATH: {exe_path}")
             return True
 
         if module_ok and not exe_path:
-            print("⚠ context-engine-mcp module is importable, but entrypoint not found on PATH.")
+            print("[WARN] context-engine-mcp module is importable, but entrypoint not found on PATH.")
             print("  Ensure your Python Scripts directory is on PATH, then try again.")
             print("  Example (PowerShell): $env:Path += ';' + (Split-Path $(python -c 'import sys;print(sys.executable)')) + '\\Scripts'")
             return False
 
         # Module not importable – likely not installed in current interpreter
-        print("⚠ context-engine-mcp is not installed in this Python environment.")
+        print("[WARN] context-engine-mcp is not installed in this Python environment.")
         print("  Install or upgrade via: python -m pip install -U context-engine-mcp")
         return False
 
     except Exception as e:
-        print(f"⚠ Installation check error: {e}")
+        print(f"[WARN] Installation check error: {e}")
         return False
 
 def stop_mcp_server(server_name):
@@ -126,7 +126,7 @@ def stop_mcp_server(server_name):
         result = subprocess.run(['claude', 'mcp', 'stop', server_name],
                               capture_output=True, text=True, shell=True, timeout=5)
         if result.returncode == 0:
-            print(f"✓ Stopped {server_name} server")
+            print(f"[OK] Stopped {server_name} server")
             return True
     except:
         pass
@@ -222,20 +222,20 @@ mcpServers:
         
         # Skip if file already exists
         if config_path.exists():
-            print(f"  ✓ {server['filename']} already exists, skipping...")
+            print(f"  [OK] {server['filename']} already exists, skipping...")
             continue
             
         try:
             # Write the content directly (already in YAML format)
             with open(config_path, 'w', encoding='utf-8') as f:
                 f.write(server["content"])
-            print(f"  ✓ Created: {config_path}")
+            print(f"  [OK] Created: {config_path}")
         except Exception as e:
-            print(f"  ⚠ Failed to create {server['filename']}: {e}")
+            print(f"  [WARN] Failed to create {server['filename']}: {e}")
             success = False
     
     if success:
-        print("\n📝 Configuration files created successfully!")
+        print("\n[CONFIG] Configuration files created successfully!")
         print("\nNext steps:")
         print("1. Edit ~/.continue/mcpServers/context-engine.yaml")
         print("   - Choose and uncomment ONE configuration option")
@@ -252,37 +252,37 @@ def install(target="claude-code"):
     Args:
         target: Installation target ('claude-code' or 'continue')
     """
-    print(f"\n🚀 Setting up Context Engine MCP for {target}...")
+    print(f"\n[SETUP] Setting up Context Engine MCP for {target}...")
     print("=" * 50)
     
     # Get home directory for later use
     home = get_home_dir()
     
     # 1. Set up flags.yaml
-    print("\n📋 Installing flags.yaml...")
+    print("\n[INSTALL] Installing flags.yaml...")
     if setup_flags_yaml():
-        print("✓ flags.yaml installed successfully")
+        print("[OK] flags.yaml installed successfully")
     else:
-        print("⚠ Could not install flags.yaml")
+        print("[WARN] Could not install flags.yaml")
     
     # 2. Install based on target
     if target == "claude-code":
         # Check for Claude CLI and install MCP servers
-        print("\n🔍 Checking for Claude CLI...")
+        print("\n[CHECK] Checking for Claude CLI...")
         if check_claude_cli():
-            print("✓ Claude CLI found")
+            print("[OK] Claude CLI found")
             
             # Setup MCP server instruction
             install_mcp_servers_via_cli()
             
             # Setup CLAUDE.md
-            print("\n📝 Setting up Claude context files...")
+            print("\n[CONFIG] Setting up Claude context files...")
             if setup_claude_context_files():
-                print("✓ Claude context files configured")
+                print("[OK] Claude context files configured")
             else:
-                print("⚠ Could not configure Claude context files")
+                print("[WARN] Could not configure Claude context files")
         else:
-            print("⚠ Claude CLI not found")
+            print("[WARN] Claude CLI not found")
             print("\nClaude Code CLI is required for MCP server installation.")
             print("Please install Claude Code first:")
             print("  npm install -g @anthropic/claude-code")
@@ -293,33 +293,33 @@ def install(target="claude-code"):
         print("\n📦 Setting up MCP servers for Continue extension...")
         if setup_continue_mcp_servers():
             # Setup config.yaml with rules
-            print("\n📝 Setting up global rules...")
+            print("\n[CONFIG] Setting up global rules...")
             continue_dir = home / ".continue"
             if setup_continue_config(continue_dir):
-                print("✓ Global rules configured")
+                print("[OK] Global rules configured")
             else:
-                print("⚠ Could not configure global rules")
+                print("[WARN] Could not configure global rules")
         else:
-            print("⚠ Failed to create Continue MCP server configurations")
+            print("[WARN] Failed to create Continue MCP server configurations")
     
     elif target == "gemini-cli":
         # Provide generic instructions and set up context files in ~/.gemini
         install_gemini_cli_instructions()
-        print("\n📝 Setting up Gemini context files...")
+        print("\n[CONFIG] Setting up Gemini context files...")
         if setup_gemini_context_files():
-            print("✓ Gemini context files configured")
+            print("[OK] Gemini context files configured")
         else:
-            print("⚠ Could not configure Gemini context files")
+            print("[WARN] Could not configure Gemini context files")
 
     else:
-        print(f"⚠ Unknown target: {target}")
+        print(f"[WARN] Unknown target: {target}")
         print("Supported targets: claude-code, cn (Continue), gemini-cli")
         return
     
-    print("\n✅ Installation complete!")
+    print("\n[COMPLETE] Installation complete!")
     
     if target == "claude-code":
-        print("\n🎯 Next steps for Claude Code:")
+        print("\n[NEXT] Next steps for Claude Code:")
         print("1. Restart Claude Code if it's running")
         print("2. Use the MCP tools in your conversations:")
         print("   • list_available_flags() - View all 17 available flags")
@@ -327,7 +327,7 @@ def install(target="claude-code"):
         print("   • Use '--auto' to let AI select optimal flags")
         print("\n📚 Documentation: ~/.claude/CONTEXT-ENGINE.md")
     elif target == "cn":
-        print("\n🎯 Next steps for Continue:")
+        print("\n[NEXT] Next steps for Continue:")
         print("1. 🔧 Edit context-engine configuration:")
         print("   ~/.continue/mcpServers/context-engine.yaml")
         print("   (Choose and uncomment ONE option)")
@@ -338,11 +338,11 @@ def install(target="claude-code"):
         print("\n📚 Configuration file: ~/.continue/mcpServers/context-engine.yaml")
 
     elif target == "gemini-cli":
-        print("\n🎯 Next steps for Gemini CLI:")
+        print("\n[NEXT] Next steps for Gemini CLI:")
         print("1. Register 'context-engine-mcp' as an MCP stdio server in your Gemini CLI.")
         print("2. If Gemini CLI supports config files, add it there; otherwise use the CLI's add command if available.")
         print("3. Run Gemini CLI and verify the MCP tools are available (list_available_flags, get_directives).")
-        print("\n🎯 Next steps for Continue:")
+        print("\n[NEXT] Next steps for Continue:")
         print("1. 🔧 Edit context-engine configuration:")
         print("   ~/.continue/mcpServers/context-engine.yaml")
         print("   (Choose and uncomment ONE option)")
@@ -352,7 +352,7 @@ def install(target="claude-code"):
         print("   • Available server: context-engine")
         print("\n📚 Configuration file: ~/.continue/mcpServers/context-engine.yaml")
     
-    print("\n✅ Context Engine MCP installation completed!")
+    print("\n[COMPLETE] Context Engine MCP installation completed!")
     print("-" * 50)
 
 def kill_context_engine_processes():
@@ -409,7 +409,7 @@ def kill_context_engine_processes():
                     continue
 
                 proc.kill()
-                killed.append(f"✅ Killed process {proc.info.get('name', 'unknown')} (PID: {pid})")
+                killed.append(f"[COMPLETE] Killed process {proc.info.get('name', 'unknown')} (PID: {pid})")
 
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 continue
@@ -420,7 +420,7 @@ def kill_context_engine_processes():
         return killed if killed else ["ℹ️ No context-engine-mcp processes found running"]
 
     except Exception as e:
-        return [f"⚠️ Error killing processes: {str(e)}"]
+        return [f"[WARN]️ Error killing processes: {str(e)}"]
 
 def delete_with_retry(file_path, max_retries=3):
     """Delete file with retry logic for locked files"""
@@ -428,7 +428,7 @@ def delete_with_retry(file_path, max_retries=3):
         try:
             if file_path.exists():
                 file_path.unlink()
-                return True, f"✅ Removed {file_path}"
+                return True, f"[COMPLETE] Removed {file_path}"
             else:
                 return True, f"ℹ️ File not found: {file_path}"
         except PermissionError as e:
@@ -457,7 +457,7 @@ def uninstall_claude_code():
             if "@CONTEXT-ENGINE.md" in content:
                 new_content = content.replace("\n\n@CONTEXT-ENGINE.md", "").replace("\n@CONTEXT-ENGINE.md", "").replace("@CONTEXT-ENGINE.md", "")
                 claude_md.write_text(new_content, encoding='utf-8')
-                results.append("✅ Removed @CONTEXT-ENGINE.md reference from CLAUDE.md")
+                results.append("[COMPLETE] Removed @CONTEXT-ENGINE.md reference from CLAUDE.md")
             else:
                 results.append("ℹ️ @CONTEXT-ENGINE.md reference not found in CLAUDE.md")
         
@@ -497,7 +497,7 @@ def uninstall_continue():
                 if len(config['rules']) < original_count:
                     with open(continue_config_path, 'w', encoding='utf-8') as f:
                         yaml.dump(config, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
-                    results.append("✅ Removed Context Engine rules from Continue config")
+                    results.append("[COMPLETE] Removed Context Engine rules from Continue config")
                 else:
                     results.append("ℹ️ Context Engine rules not found in Continue config")
             else:
@@ -541,13 +541,13 @@ def uninstall_continue():
                 # Write back the cleaned content
                 with open(continue_config_path, 'w', encoding='utf-8') as f:
                     f.writelines(new_lines)
-                results.append("✅ Removed Context Engine rules from Continue config (text-based)")
+                results.append("[COMPLETE] Removed Context Engine rules from Continue config (text-based)")
                 
             except Exception as text_error:
-                results.append(f"⚠️ Could not clean Continue config.yaml: {str(e)}")
+                results.append(f"[WARN]️ Could not clean Continue config.yaml: {str(e)}")
                 
         except Exception as e:
-            results.append(f"⚠️ Error processing Continue config: {str(e)}")
+            results.append(f"[WARN]️ Error processing Continue config: {str(e)}")
     else:
         results.append("ℹ️ Continue config not found")
     
@@ -557,7 +557,7 @@ def uninstall_continue():
         success, message = delete_with_retry(context_engine_yaml)
         results.append(message)
     except Exception as e:
-        results.append(f"⚠️ Error removing MCP server file: {str(e)}")
+        results.append(f"[WARN]️ Error removing MCP server file: {str(e)}")
     
     return results
 
@@ -583,7 +583,7 @@ def uninstall_gemini():
                     .replace("@CONTEXT-ENGINE.md", "")
                 )
                 gemini_md.write_text(new_content, encoding='utf-8')
-                results.append("✅ Removed @CONTEXT-ENGINE.md reference from GEMINI.md")
+                results.append("[COMPLETE] Removed @CONTEXT-ENGINE.md reference from GEMINI.md")
             else:
                 results.append("ℹ️ @CONTEXT-ENGINE.md reference not found in GEMINI.md")
 
@@ -625,13 +625,13 @@ def cleanup_common_files():
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                     backup_file = home / f"flags.yaml.backup_{timestamp}"
                     shutil.copy2(flags_file, backup_file)
-                    results.append(f"✅ Backed up flags.yaml to ~/{backup_file.name}")
+                    results.append(f"[COMPLETE] Backed up flags.yaml to ~/{backup_file.name}")
                 
                 # Remove the entire .context-engine directory
                 shutil.rmtree(context_dir)
-                results.append("✅ Removed ~/.context-engine directory (flags.yaml, etc.)")
+                results.append("[COMPLETE] Removed ~/.context-engine directory (flags.yaml, etc.)")
             except Exception as e:
-                results.append(f"⚠️ Could not remove .context-engine directory: {str(e)}")
+                results.append(f"[WARN]️ Could not remove .context-engine directory: {str(e)}")
         else:
             results.append("ℹ️ .context-engine directory not found")
         
