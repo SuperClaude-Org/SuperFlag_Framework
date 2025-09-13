@@ -354,6 +354,7 @@ def install(target="claude-code"):
     
     print("\n[COMPLETE] Context Engine MCP installation completed!")
     print("-" * 50)
+    return 0
 
 def kill_context_engine_processes():
     """Kill running context-engine-mcp server processes without killing shells or self
@@ -734,8 +735,8 @@ def main():
     args = parser.parse_args()
     
     if args.command == 'install':
-        install(args.target)
-        return 0
+        result = install(args.target)
+        return result if result is not None else 0
     elif args.command == 'uninstall':
         uninstall()
         return 0
