@@ -108,6 +108,7 @@ HANDOFF_REPORT_*.md
 CONTEXT-ENGINE.md
 *.bak.md
 docs/*.md
+CLAUDE.md
 !README.md
 !RELEASE_GUIDE_EN.md
 !CHANGELOG.md
