@@ -92,3 +92,7 @@ pip/
 # Pasted clipboard files
 Pasted-*
 attached_assets/Pasted-*
+
+# Analysis and optimization documents
+OPTIMIZATION_ANALYSIS.md
+FINAL_VERSION_NOTES.md

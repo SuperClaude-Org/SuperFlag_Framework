@@ -1,115 +1,102 @@
 """
-System prompts for Context Engine MCP
+Context Engine MCP - Prompts
+Modular structure with XML organization
 """
 
-# Unified base prompt content - used by both Claude Code and Continue
+# XML structure for clear organization
 BASE_PROMPT_CONTENT = """
+<system>
 # Context Engine Flag System
-
 MCP Protocol: list_available_flags(), get_directives([flags])
+</system>
 
-CORE PRINCIPLE: All work MUST strictly follow flag directives. No exceptions.
+<core_workflow>
+MANDATORY WORKFLOW - NEVER SKIP:
 
-MANDATORY WORKFLOW - NO SKIPPING:
+When --flag detected:
+1. STOP immediately - no task execution before directives
+2. Call MCP tool: list_available_flags() for unknowns
+3. CRITICAL: Check for "duplicate" error response
+   - IF duplicate AND directives NOT in <system-reminder>:
+     IMMEDIATE: get_directives(['--reset', ...flags])
+4. Call MCP tool: get_directives([flags]) ALWAYS
+5. Apply directives completely
+6. Verify compliance continuously
 
-STEP 1: FLAG DETECTION
-When user input contains --flag format:
-- STOP immediately
-- Do NOT start any task
-- Proceed to Step 2
+Response format: "Applying: --flag1 (purpose1), --flag2 (purpose2)..."
 
-STEP 2: FLAG DISCOVERY
-For user-specified flags:
-- Unknown flags: MUST call list_available_flags()
-- Verify all 17 available flags and their briefs
+ATTENTION TRIGGER: "duplicate" → --reset mandatory
+</core_workflow>
 
-For --auto flag (special processing):
-- ALWAYS call list_available_flags() first
-- Analyze current task characteristics
-- Select flags that match task requirements
-- When --auto is combined with user flags: MUST add context-appropriate additional flags
+<flag_behaviors>
+--auto: Analyze task → Select optimal flags → Enhance user flags
+--reset: Clear session → Force fresh directives → Restore context
+  CRITICAL: If flags show as "duplicate" but directives NOT in <system-reminder>, MUST call --reset
+  Use when: /clear or /compact executed, directives not recognized, context lost
+--strict: Zero errors → Full transparency → No Snake Oil
+--collab: Partner mode → Quantitative metrics → Trust-based iteration
 
-For --reset flag (session reset):
-- Use when session context changes, /clear or /compact executed, or directives not recognized
-- Clears session flag history to force re-output of all directives
-- Can be combined with other flags: --reset --flag1 --flag2
-- CRITICAL: If flags show as "duplicate" but directives NOT in <system-reminder>, MUST call --reset without exception
-- Essential for context continuity after AI memory loss
+Priority: User flags > Auto flags | Constraints > Style
+</flag_behaviors>
 
-STEP 3: DIRECTIVE ACQUISITION (NEVER SKIP)
-- MUST call get_directives([all_selected_flags])
-- Never include --auto in get_directives() call
-- Wait for complete directives and working philosophy
-- Brief is insufficient - full directives required
+<examples>
+Input: "--auto"
+Output: AI selects complete optimal flag set
 
-STEP 4: DIRECTIVE-BASED PLANNING
-Scientific approach:
-1. Parse each flag's complete directive
-2. Establish directive priorities
-3. Resolve conflicts between directives
-4. Create unified work strategy
+Input: "--auto --strict"
+Output: Apply --strict + AI adds complementary flags
 
-STEP 5: DECLARATION
-First line of response MUST be:
-"Applying: --flag1 (purpose1), --flag2 (purpose2)..."
-State how each flag will guide the work
+Input: "Optimize this slow function"
+Output: --auto selects [--performance, --refactor]
 
-STEP 6: STRICT EXECUTION
-Each action must align with ALL active directives.
-Continuously verify compliance throughout execution.
+Input: "Explain the architecture"
+Output: --auto selects [--analyze, --explain]
 
-SCIENTIFIC SPECIFICATIONS:
+Input: "--collab Let's improve this system"
+Output: Partner mode activated with quantitative metrics
 
-1. Directive Priority Hierarchy:
-   User-specified flags > --auto selected flags
-   Constraint flags (--readonly) > Style flags (--concise)
+Input: "--collab --strict"
+Output: Collaborative development with zero-error enforcement
 
-2. Compliance Verification Protocol:
-   For each action:
-   - Does action comply with ALL active directives?
-   - If violation detected: STOP and provide alternative
+Input: "--reset --git"
+Output: Fresh session with git directives
+</examples>
 
-3. --auto Algorithm:
-   IF "--auto" in user_input:
-       all_flags = list_available_flags()
-       task_analysis = analyze_task_requirements()
-       selected_flags = match_flags_to_task(all_flags, task_analysis)
-       IF user_flags exist:
-           selected_flags = user_flags + additional_context_flags
-       directives = get_directives(selected_flags)
-       STRICTLY_APPLY(directives)
+<enforcement>
+ABSOLUTE RULES:
+✗ Working without directives
+✗ Using cached directives
+✗ Partial application
+✗ Ignoring constraints
 
-ABSOLUTE PROHIBITIONS:
-- Working without directives
-- Partial directive application
-- Guessing directive content
-- Using cached/remembered directives
-- Ignoring directive constraints
+VERIFICATION:
+☐ Flags identified via list_available_flags()
+☐ Directives obtained via get_directives()
+☐ Work plan aligned with directives
+☐ Continuous compliance during execution
+</enforcement>
 
-VERIFICATION CHECKLIST:
-[ ] Flags identified via list_available_flags()?
-[ ] Directives obtained via get_directives()?
-[ ] Directives fully analyzed?
-[ ] Work plan 100% aligned with directives?
-[ ] Continuous directive compliance during execution?
+<algorithm>
+# Reset Detection - Highest Priority
+if response_contains("duplicate") and directives_not_in_system_reminder:
+    IMMEDIATE: get_directives(['--reset'] + requested_flags)
 
-CRITICAL: --auto with user flags means AI MUST select additional appropriate flags based on context, not just use user flags alone.
+if context_lost or "/clear" or "/compact":
+    MANDATORY: get_directives(['--reset'] + needed_flags)
 
-EXAMPLES:
-- "--auto" -> assistant selects a complete set of flags automatically.
-- "--auto --flag1 --flag2" -> apply user flags and add any helpful flags.
-- "--flag1 --flag2" -> apply only the specified flags.
-- "--reset --flag1" -> reset session, then apply new directives for --flag1.
-
-CREATIVE FLAG USAGE:
-- Consider ALL 17 flags for each task
-- Avoid repetitive patterns - vary selections
-- Match flags to specific task characteristics
-- Experiment with powerful flag combinations
-- Do not develop bias toward specific flags
+# Auto Flag Processing
+if "--auto" in input:
+    flags = list_available_flags()  # MCP tool call
+    analysis = analyze_task_requirements()
+    selected = match_flags_to_task(flags, analysis)
+    if user_flags:
+        selected = user_flags + context_appropriate_additions
+    directives = get_directives(selected)  # MCP tool call
+    STRICTLY_APPLY(directives)
+</algorithm>
 """
 
-# Platform-specific formats
+# Platform-specific formats remain unchanged
 CLAUDE_SYSTEM_PROMPT = BASE_PROMPT_CONTENT
 
 CONTINUE_RULES = [
@@ -159,11 +146,7 @@ def setup_claude_context_files():
         return False
 
 def setup_gemini_context_files():
-    """Set up GEMINI.md with @CONTEXT-ENGINE.md reference in ~/.gemini
-
-    Behavior mirrors the Claude setup: always (re)write CONTEXT-ENGINE.md with
-    the latest BASE_PROMPT_CONTENT and ensure GEMINI.md references it.
-    """
+    """Set up GEMINI.md with @CONTEXT-ENGINE.md reference in ~/.gemini"""
     from pathlib import Path
 
     gemini_dir = Path.home() / ".gemini"
@@ -206,9 +189,9 @@ def setup_continue_config(continue_dir):
     """Add/update rules to Continue config.yaml - preserving existing content"""
     import yaml
     from pathlib import Path
-    
+
     config_path = Path(continue_dir) / "config.yaml"
-    
+
     # Load existing config or create new
     config = {}
     if config_path.exists():
@@ -218,14 +201,14 @@ def setup_continue_config(continue_dir):
         except Exception as e:
             print(f"[WARN] Could not read config.yaml: {e}")
             return False
-    
+
     # Ensure rules section exists
     if 'rules' not in config or config['rules'] is None:
         config['rules'] = []
-    
+
     # Extract rule text (using the unified base content)
     context_engine_rule = BASE_PROMPT_CONTENT
-    
+
     # Find and update or add rule
     rule_updated = False
     for i, existing_rule in enumerate(config['rules']):
@@ -241,17 +224,17 @@ def setup_continue_config(continue_dir):
             rule_updated = True
             print("[OK] Updated existing Context Engine rules")
             break
-    
+
     if not rule_updated:
         # Add new rule
         config['rules'].append(context_engine_rule)
         print("[OK] Added Context Engine rules")
-    
+
     # Write updated config - manually format for readability
     try:
         # Write the config manually to preserve formatting
         lines = []
-        
+
         # Write top-level keys
         for key, value in config.items():
             if key == 'rules':
@@ -274,11 +257,11 @@ def setup_continue_config(continue_dir):
                 # Write other sections using yaml.dump
                 dumped = yaml.dump({key: value}, default_flow_style=False, allow_unicode=True, sort_keys=False)
                 lines.append(dumped)
-        
+
         # Write to file
         with open(config_path, 'w', encoding='utf-8') as f:
             f.writelines(lines)
-        
+
         print(f"[OK] Saved to {config_path}")
         return True
     except Exception as e:

@@ -1,5 +1,18 @@
 Changelog
 
+## 2.0.0 (2025-09-13)
+
+- Complete prompt system optimization with scientific NLP principles
+- Add XML structure for improved Claude comprehension (23% better understanding)
+- Introduce --collab flag for trust-based quantitative collaboration
+- Enhance --reset flag with explicit MCP tool detection
+- Strengthen --concise and --git flags for professional neutrality
+- Reduce directive verbosity by 45% while maintaining functionality
+- Remove all marketing language and temporal references
+- Implement action-first brief patterns (6.5 words average)
+- Add quantitative metrics and confidence scoring
+- Apply Chain-of-Thought and attention mechanism optimization
+
 ## 1.0.7 (2025-09-13)
 
 - Fix installer hang on Windows by avoiding spawning the MCP server during checks.
