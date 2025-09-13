@@ -63,12 +63,7 @@ jobs:
         shell: bash
         run: |
           python -m pipx install dist/*.whl
-          APP=$(python - <<'PY'
-import json, subprocess
-j=json.loads(subprocess.check_output(['python','-m','pipx','list','--json']))
-print(j['venvs']['context-engine-mcp']['metadata']['main_package']['app_paths'][0]['__Path__'])
-PY
-)
+          APP=$(python -c "import json, subprocess; j=json.loads(subprocess.check_output(['python','-m','pipx','list','--json'])); print(j['venvs']['context-engine-mcp']['metadata']['main_package']['app_paths'][0]['__Path__'])")
           "$APP" --version
           "$APP" install --target cn
           "$APP" uninstall
