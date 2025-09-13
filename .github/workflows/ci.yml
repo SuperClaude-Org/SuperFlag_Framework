@@ -31,11 +31,21 @@ jobs:
           python -m build
           python -m twine check dist/*
 
+      - name: Create isolated venv for install test
+        shell: bash
+        run: |
+          python -m venv .venv
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            echo "VENV_PY=.venv/\\Scripts\\/python" >> $GITHUB_ENV
+          else
+            echo "VENV_PY=.venv/bin/python" >> $GITHUB_ENV
+          fi
+
       - name: Install wheel and smoke test (pip)
         shell: bash
         run: |
           # Check wheel exists and install safely
-          python -c "
+          "$VENV_PY" -c "
           import glob, subprocess, sys
           wheels = glob.glob('dist/*.whl')
           if not wheels:
@@ -44,11 +54,11 @@ jobs:
           print(f'Found wheel: {wheels[0]}')
           subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-U', wheels[0]])
           "
-          python -m pip check
+          "$VENV_PY" -m pip check
           # CLI via module to avoid PATH differences across OS
-          python -m context_engine_mcp.install --version
-          python -m context_engine_mcp.install install --target cn
-          python -m context_engine_mcp.install uninstall
+          "$VENV_PY" -m context_engine_mcp.install --version
+          "$VENV_PY" -m context_engine_mcp.install install --target cn
+          "$VENV_PY" -m context_engine_mcp.install uninstall
 
   pipx-smoke:
     name: Pipx smoke (ubuntu)
