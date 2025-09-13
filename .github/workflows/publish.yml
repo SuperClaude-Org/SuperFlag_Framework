@@ -74,13 +74,7 @@ jobs:
       - name: Verify tag matches package version
         run: |
           TAG="${GITHUB_REF_NAME}"
-          PKG_VER=$(python - <<'PY'
-from pathlib import Path
-ns = {}
-exec(Path('src/context_engine_mcp/__version__.py').read_text(), ns)
-print(ns.get('__version__',''))
-PY
-)
+          PKG_VER=$(python -c "import pathlib; ns={}; exec(pathlib.Path('src/context_engine_mcp/__version__.py').read_text(), ns); print(ns.get('__version__',''))")
           echo "Tag: $TAG, __version__: $PKG_VER"
           # Require exact match between tag (without leading v) and package version
           # Supports PEP 440 pre-releases like 1.2.3rc1, 1.2.3a1, 1.2.3b1, 1.2.3.dev1
