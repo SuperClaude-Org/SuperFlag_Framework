@@ -6,7 +6,7 @@ import threading
 from typing import List, Dict, Any, Optional
 from pathlib import Path
 from collections import OrderedDict
-from mcp.server.fastmcp import FastMCP
+from fastmcp import FastMCP
 import logging
 
 # Configure logging
@@ -39,7 +39,7 @@ class SessionManager:
         process_id = os.getpid()
         return f"mcp_{process_id}_{thread_id}"
     
-    def get_session(self, session_id: str = None) -> Dict:
+    def get_session(self, session_id: Optional[str] = None) -> Dict:
         """Get or create session with auto-detection"""
         if session_id is None:
             session_id = self.get_current_session_id()
@@ -256,7 +256,7 @@ def get_directives(flags: List[str]) -> Dict[str, str]:
             reminder_parts.append(f"⚠️ {len(duplicate_flags)} FLAGS ALREADY ACTIVE")
         
         # Duplicate flags (compact format)
-        if duplicate_flags:
+        if duplicate_flags and duplicate_info is not None:
             dup_list = []
             for flag in duplicate_flags:
                 count = duplicate_info["counts"][flag]
