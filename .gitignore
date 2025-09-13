@@ -79,3 +79,8 @@ pypi-env/
 *-env/
 *_env/
 RELEASE_GUIDE_KO.md
+
+# Replit environment files
+.replit
+replit.md
+uv.lock
