@@ -83,7 +83,7 @@ directives:
       - Maintain balance between maintainability and performance
       
       Optimization Priority (ROI Order):
-      1. Algorithm improvements (O(n²) → O(n log n))
+      1. Algorithm improvements (O(n^2) -> O(n log n))
       2. Eliminate unnecessary operations (caching, memoization)
       3. Data structure optimization (memory locality)
       4. Parallelization and async processing
@@ -281,7 +281,7 @@ directives:
     directive: |
       Conduct systematic pre-development research with real-time documentation verification.
       
-      Apply Discovery → Documentation → Decision methodology with Context7 integration:
+      Apply Discovery -> Documentation -> Decision methodology with Context7 integration:
       
       PHASE 1 - DISCOVERY (30-minute rule):
       Start with awesome lists: awesome-{language}, awesome-{domain}, sindresorhus/awesome for comprehensive discovery. Cross-reference GitHub trending, PyPI/npm statistics, Stack Overflow activity, Dev.to/Medium real-world experiences. Use WebSearch for 'awesome {topic}' patterns. Document initial candidates with stars/activity metrics.
@@ -290,13 +290,13 @@ directives:
       For each viable candidate, ADD 'use context7' to research process. Verify current API status, check version compatibility, examine actual working code examples from official docs. Context7 prevents hallucinated APIs and ensures version-accurate information. Compare documentation quality, migration guides, breaking changes between versions.
       
       PHASE 3 - EVALUATION MATRIX:
-      Assess each solution: Technical metrics (⭐stars >1000, 📅commits <6mo, 📜license MIT/Apache2), Community health (contributors, issue response time, Stack Overflow activity), Integration complexity (dependencies count, learning curve, existing ecosystem fit), Production readiness (stability, performance benchmarks, enterprise usage).
+      Assess each solution: Technical metrics ([STAR]stars >1000, [DATE]commits <6mo, [DOC]license MIT/Apache2), Community health (contributors, issue response time, Stack Overflow activity), Integration complexity (dependencies count, learning curve, existing ecosystem fit), Production readiness (stability, performance benchmarks, enterprise usage).
       
       PHASE 4 - INTEGRATION DECISION:
       Choose approach: Direct usage (pip/npm install), Fork and customize, Architecture inspiration only, Custom implementation from scratch. Apply 'Core vs Infrastructure' rule: reuse infrastructure components (databases, auth, caching), customize business logic. Document rationale with trade-offs analysis.
       
       OUTPUT FORMAT:
-      Present findings: 'DISCOVERED: {solution} (⭐{stars}, 📅{last_update}, 📜{license}) - {assessment}'. Include Context7 verification: 'VERIFIED: Latest docs confirm {api_status}, version {current_version} stable'. Provide integration recommendation with implementation steps.
+      Present findings: 'DISCOVERED: {solution} ([STAR]{stars}, [DATE]{last_update}, [DOC]{license}) - {assessment}'. Include Context7 verification: 'VERIFIED: Latest docs confirm {api_status}, version {current_version} stable'. Provide integration recommendation with implementation steps.
       
       QUALITY GATES:
       30-minute discovery limit enforced, Context7 documentation verification required for final candidates, Minimum 1000 stars unless niche/specialized tool, License compatibility confirmed, Production usage evidence documented.
@@ -444,8 +444,8 @@ directives:
       - Exception: Sequential execution only for actual work conflicts, context dependencies
       
       Correct Patterns:
-      ✅ Correct: "Processing 3 independent tasks in parallel" → 3 Task invokes in 1 message
-      ❌ Wrong: "First task..." → "Second task..." → "Third task..."
+      [OK] Correct: "Processing 3 independent tasks in parallel" -> 3 Task invokes in 1 message
+      [X] Wrong: "First task..." -> "Second task..." -> "Third task..."
       
       Mandatory Check:
       - Before starting work: "Do these tasks really need sequential execution?"
@@ -453,12 +453,12 @@ directives:
       - Time waste = performance failure
       
       Task-Agent Matching:
-      - Code quality issues → refactoring-expert
-      - Performance problems → performance-engineer
-      - System design → system-architect
-      - Complex analysis → root-cause-analyst
-      - Security review → security-engineer
-      - Requirements analysis → requirements-analyst
+      - Code quality issues -> refactoring-expert
+      - Performance problems -> performance-engineer
+      - System design -> system-architect
+      - Complex analysis -> root-cause-analyst
+      - Security review -> security-engineer
+      - Requirements analysis -> requirements-analyst
       
       Usage Methods:
       - Auto-optimization: --parallel (AI determines needed agent count)
