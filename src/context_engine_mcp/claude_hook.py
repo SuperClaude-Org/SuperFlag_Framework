@@ -93,8 +93,8 @@ def generate_messages(flags, hook_messages):
     else:
         other_flags = flags
 
-    # Process remaining flags if any
-    if other_flags:
+    # Process remaining flags if any (but not when --auto is present)
+    if other_flags and AUTO_FLAG not in detected_set:
         other_message = get_other_flags_message(other_flags, hook_messages)
         if other_message:
             messages.append(other_message)
