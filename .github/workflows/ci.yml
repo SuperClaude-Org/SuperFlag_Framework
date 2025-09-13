@@ -36,7 +36,7 @@ jobs:
         run: |
           python -m venv .venv
           if [ "$RUNNER_OS" = "Windows" ]; then
-            echo "VENV_PY=.venv/\\Scripts\\/python" >> $GITHUB_ENV
+            echo "VENV_PY=.venv/Scripts/python.exe" >> $GITHUB_ENV
           else
             echo "VENV_PY=.venv/bin/python" >> $GITHUB_ENV
           fi
