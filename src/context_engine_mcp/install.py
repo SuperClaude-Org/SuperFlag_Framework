@@ -235,7 +235,7 @@ mcpServers:
             success = False
     
     if success:
-        print("\n[CONFIG] Configuration files created successfully!")
+        print("\n[CONFIG] Configuration files created successfully")
         print("\nNext steps:")
         print("1. Edit ~/.continue/mcpServers/context-engine.yaml")
         print("   - Choose and uncomment ONE configuration option")
@@ -316,7 +316,7 @@ def install(target="claude-code"):
         print("Supported targets: claude-code, cn (Continue), gemini-cli")
         return
     
-    print("\n[COMPLETE] Installation complete!")
+    print("\n[COMPLETE] Installation complete")
     
     if target == "claude-code":
         print("\n[NEXT] Next steps for Claude Code:")
@@ -352,7 +352,7 @@ def install(target="claude-code"):
         print("   - Available server: context-engine")
         print("\n[DOCS] Configuration file: ~/.continue/mcpServers/context-engine.yaml")
     
-    print("\n[COMPLETE] Context Engine MCP installation completed!")
+    print("\n[COMPLETE] Context Engine MCP installation completed")
     print("-" * 50)
 
 def kill_context_engine_processes():
@@ -679,11 +679,11 @@ def uninstall():
         print(f"\nWARNING: {len(failures)} items could not be removed (files may be in use)")
         print("These will be cleaned up after restarting Claude Code/Continue")
     
-    print("\nContext Engine MCP uninstall complete!")
+    print("\nContext Engine MCP uninstall complete")
     
     print("Run 'pip uninstall context-engine-mcp -y' to remove Python package")
     print("Manually remove MCP server: claude mcp remove context-engine")
-    print("No restart needed - files unlocked immediately!")
+    print("No restart needed - files unlocked immediately")
     
     # Return True for successful uninstall
     return True

@@ -88,3 +88,7 @@ uv.lock
 # Local test artifacts
 _home_test_*/
 pip/
+
+# Pasted clipboard files
+Pasted-*
+attached_assets/Pasted-*

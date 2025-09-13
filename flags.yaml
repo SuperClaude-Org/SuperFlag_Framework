@@ -253,15 +253,15 @@ directives:
       - Design: focus on current requirements
       
       Critical Warning - Don't confuse simplification with destruction:
-      - Simplification != removing core features
-      - Lean != compromising quality
-      - Minimization != incompleteness
-      - YAGNI != non-extensible
+      - Simplification does not mean removing core features
+      - Lean does not mean compromising quality
+      - Minimization does not mean incompleteness
+      - YAGNI does not mean non-extensible
       
       Correct Approach:
       - Use existing frameworks efficiently, don't remove them
       - Acknowledge chosen tools have reasons
-      - Waste elimination != feature removal
+      - Waste elimination does not mean feature removal
       - Simplify HOW, maintain WHAT
       
       Meta Checkpoints:
