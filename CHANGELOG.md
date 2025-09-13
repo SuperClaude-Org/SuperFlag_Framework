@@ -1,5 +1,10 @@
 Changelog
 
+## 2.1.2 (2025-09-14)
+
+### Fixed
+- Include hook output fix in stable release
+
 ## 2.1.1 (2025-09-14)
 
 ### Fixed
