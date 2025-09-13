@@ -251,9 +251,9 @@ def get_directives(flags: List[str]) -> Dict[str, str]:
         
         # Compact header
         if duplicate_flags and new_flags:
-            reminder_parts.append(f"⚠️ FLAGS: {len(duplicate_flags)} ACTIVE, {len(new_flags)} NEW")
+            reminder_parts.append(f"[WARN] FLAGS: {len(duplicate_flags)} ACTIVE, {len(new_flags)} NEW")
         elif duplicate_flags:
-            reminder_parts.append(f"⚠️ {len(duplicate_flags)} FLAGS ALREADY ACTIVE")
+            reminder_parts.append(f"[WARN] {len(duplicate_flags)} FLAGS ALREADY ACTIVE")
         
         # Duplicate flags (compact format)
         if duplicate_flags and duplicate_info is not None:
@@ -286,7 +286,7 @@ def get_directives(flags: List[str]) -> Dict[str, str]:
     
     # If reset was used, add reset confirmation
     elif reset_requested and (duplicate_flags or new_flags):
-        reset_msg = f"🔄 SESSION RESET: Refreshed {len(duplicate_flags)}, New {len(new_flags)}"
+        reset_msg = f"[RESET] SESSION RESET: Refreshed {len(duplicate_flags)}, New {len(new_flags)}"
         if duplicate_flags:
             reset_msg += f". Refreshed: {', '.join(duplicate_flags)}"
         if new_flags:

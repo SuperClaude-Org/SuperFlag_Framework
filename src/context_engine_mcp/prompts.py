@@ -96,10 +96,10 @@ VERIFICATION CHECKLIST:
 CRITICAL: --auto with user flags means AI MUST select additional appropriate flags based on context, not just use user flags alone.
 
 EXAMPLES:
-- "--auto" → assistant selects a complete set of flags automatically.
-- "--auto --flag1 --flag2" → apply user flags and add any helpful flags.
-- "--flag1 --flag2" → apply only the specified flags.
-- "--reset --flag1" → reset session, then apply new directives for --flag1.
+- "--auto" -> assistant selects a complete set of flags automatically.
+- "--auto --flag1 --flag2" -> apply user flags and add any helpful flags.
+- "--flag1 --flag2" -> apply only the specified flags.
+- "--reset --flag1" -> reset session, then apply new directives for --flag1.
 
 CREATIVE FLAG USAGE:
 - Consider ALL 17 flags for each task
