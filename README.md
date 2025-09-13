@@ -1,10 +1,10 @@
 # Context Engine MCP
 
-17 contextual flags for AI assistants. Control how AI thinks and works.
+![Claude Code](https://img.shields.io/badge/Claude%20Code-supported-F37435)
+![Gemini CLI](https://img.shields.io/badge/Gemini%20CLI-supported-1ABC9C)
+![Continue](https://img.shields.io/badge/Continue-supported-FFFFFF)
 
-## What it does
-
-Gives AI specialized working modes through flags. Like `--strict` for zero errors or `--auto` for automatic flag selection.
+Context Engine provides 17 contextual flags that guide assistant behavior (e.g., `--strict`, `--auto`). It exposes an MCP stdio server and small setup helpers for common clients.
 
 ## Quick Start
 
@@ -19,12 +19,10 @@ context-engine install
 context-engine install --target cn
 ```
 
-Then use in AI:
-- `"Fix this bug --auto"` → AI selects best flags
-- `"--save"` → Creates handoff documentation
-- `"Analyze --strict"` → Multi-angle analysis with zero errors
-
-**Note**: Manual MCP server setup required after installation (see details below).
+Then in your client/assistant, use prompts with flags:
+- "Fix this bug --auto" (auto-select flags)
+- "--save" (handoff documentation)
+- "Analyze --strict" (precise, zero-tolerance mode)
 
 ## 17 Flags
 
@@ -48,7 +46,7 @@ Then use in AI:
 | `--strict` | Zero-error enforcement |
 | `--todo` | Task management |
 
-## Installation Details
+## Installation
 
 ### Claude Code
 ```bash
@@ -59,7 +57,7 @@ pipx install context-engine-mcp
 context-engine install
 ```
 
-**⚠️ Important**: After installation, you must manually add the MCP server:
+Register the MCP server with Claude CLI:
 
 ```bash
 # Choose ONE of these commands:
@@ -74,7 +72,7 @@ claude mcp add -s user -- context-engine uv run context-engine-mcp
 claude mcp add -s user -- context-engine <your-command>
 ```
 
-This creates MCP server configuration and installs to `~/.claude/`.
+This also writes `~/.claude/CONTEXT-ENGINE.md` and appends a reference to `~/.claude/CLAUDE.md`.
 
 ### Continue Extension  
 ```bash
@@ -85,7 +83,7 @@ pipx install context-engine-mcp
 context-engine install --target cn
 ```
 
-**⚠️ Configuration Required**: Edit `~/.continue/mcpServers/context-engine.yaml` and uncomment ONE option:
+Edit `~/.continue/mcpServers/context-engine.yaml` and uncomment ONE option:
 
 ```yaml
 # Option 1: Standard Python (most common)
@@ -102,11 +100,126 @@ command: context-engine-mcp
 # command: <your-custom-command>
 ```
 
-Then restart VS Code and type `@` in Continue chat to access MCP tools.
+Restart VS Code, then type `@` in Continue chat to access MCP tools.
 
-## How to Use
+### Gemini CLI
+```bash
+# Install package
+pipx install context-engine-mcp
 
-### In AI Chat
+# Install configuration files for Gemini CLI
+context-engine install --target gemini-cli
+```
+
+This command:
+- Appends `@CONTEXT-ENGINE.md` to `~/.gemini/GEMINI.md` (adds once; no duplicate)
+- Writes latest instructions to `~/.gemini/CONTEXT-ENGINE.md`
+
+It does not modify `~/.gemini/settings.json`.
+If required, register the MCP stdio command in Gemini CLI settings:
+  - Command: `context-engine-mcp`
+  - Args: `[]`
+  - Transport: stdio
+
+MCP registration (example)
+- File: `~/.gemini/settings.json`
+- Add or merge this into the `mcpServers` section:
+
+```json
+{
+  "mcpServers": {
+    "context-engine": {
+      "type": "stdio",
+      "command": "context-engine-mcp",
+      "args": [],
+      "env": {}
+    }
+  }
+}
+```
+
+Gemini CLI settings
+- Location: `~/.gemini/settings.json`
+- Structure:
+
+```json
+{
+  "mcpServers": {
+    "<server-name>": {
+      "type": "stdio",
+      "command": "<executable or interpreter>",
+      "args": ["<arg1>", "<arg2>", "..."],
+      "env": { "ENV_KEY": "value" }
+    }
+  }
+}
+```
+
+Common setups
+- pipx (PATH):
+```json
+{
+  "mcpServers": {
+    "context-engine": {
+      "type": "stdio",
+      "command": "context-engine-mcp",
+      "args": [],
+      "env": {}
+    }
+  }
+}
+```
+
+- uv (run):
+```json
+{
+  "mcpServers": {
+    "context-engine": {
+      "type": "stdio",
+      "command": "uv",
+      "args": ["run", "context-engine-mcp"],
+      "env": {}
+    }
+  }
+}
+```
+
+- venv absolute path (Windows):
+```json
+{
+  "mcpServers": {
+    "context-engine": {
+      "type": "stdio",
+      "command": "C:\\path\\to\\venv\\Scripts\\context-engine.exe",
+      "args": [],
+      "env": {}
+    }
+  }
+}
+```
+
+- venv with interpreter (module run):
+```json
+{
+  "mcpServers": {
+    "context-engine": {
+      "type": "stdio",
+      "command": "/path/to/venv/bin/python",
+      "args": ["-m", "context_engine_mcp"],
+      "env": {}
+    }
+  }
+}
+```
+
+Notes
+- `type` is `stdio`.
+- If the command is not on PATH, use an absolute path (escape backslashes on Windows).
+- After editing, restart Gemini CLI and verify tools (e.g., list_available_flags).
+
+## Usage
+
+### In Chat
 ```python
 # Auto mode - AI selects flags
 "Refactor this code --auto"
@@ -120,17 +233,16 @@ Then restart VS Code and type `@` in Continue chat to access MCP tools.
 "Review this --analyze --strict --seq"
 ```
 
-### MCP Tools (Called by AI)
+### MCP Tools
 - `list_available_flags()` - Shows all 17 flags
 - `get_directives(['--flag1', '--flag2'])` - Activates flags
 
-**Development**: For local development, use `pip install -e .` instead of pipx.
+Development: use `pip install -e .` for editable installs.
 
-**Configuration Updates**: Edit `~/.context-engine/flags.yaml` and restart MCP server to apply changes.
+Configuration updates: edit `~/.context-engine/flags.yaml` and restart the MCP server.
 
 ### Optional MCP Servers
-
-For enhanced functionality with specific flags, consider installing these additional MCP servers:
+Additional MCP servers can complement certain flags:
 
 #### For `--research` flag:
 ```bash
@@ -144,21 +256,15 @@ claude mcp add -s user -- context7 npx -y @upstash/context7-mcp
 claude mcp add -s user -- sequential-thinking npx -y @modelcontextprotocol/server-sequential-thinking
 ```
 
-These servers provide specialized tools that complement the respective flags but are not required for basic functionality.
+These are optional; Context Engine works without them.
 
-### Session Management
-- Duplicate flags show REMINDER only (saves tokens)
-- Use `--reset` when changing context
-- AI tracks which flags are active
+### Session
+- Duplicate flags produce a brief reminder instead of repeating full directives.
+- Use `--reset` when the task/context changes.
+- The server tracks active flags per session.
 
-## Special: --auto Workflow
-
-`--auto` is NOT a flag. It's an instruction for AI to:
-1. Analyze your task
-2. Select appropriate flags
-3. Apply them automatically
-
-Example: `"Fix this bug --auto"` → AI might choose `--analyze`, `--strict`, `--seq`
+## `--auto`
+`--auto` instructs the assistant to analyze the task and pick appropriate flags (do not include `--auto` in get_directives calls).
 
 ## Files Created
 
@@ -176,6 +282,10 @@ Example: `"Fix this bug --auto"` → AI might choose `--analyze`, `--strict`, `-
 
 ~/.context-engine/
 └── flags.yaml          # Flag definitions
+
+~/.gemini/
+├── GEMINI.md           # References @CONTEXT-ENGINE.md
+└── CONTEXT-ENGINE.md   # Flag instructions (auto-updated)
 ```
 
 ## Uninstallation
@@ -188,8 +298,13 @@ context-engine uninstall
 pipx uninstall context-engine-mcp
 ```
 
-**Note**: During uninstallation, `~/.context-engine/flags.yaml` is backed up to `~/flags.yaml.backup_YYYYMMDD_HHMMSS` before removal. During installation, existing flags.yaml is automatically backed up and updated to the latest version.
+Note: During uninstallation, `~/.context-engine/flags.yaml` is backed up to `~/flags.yaml.backup_YYYYMMDD_HHMMSS` before removal. During installation, existing flags.yaml is backed up and updated to the latest version.
+
+Claude Code note: Uninstall removes the reference in `~/.claude/CLAUDE.md` and deletes `~/.claude/CONTEXT-ENGINE.md` if present.
+
+Gemini CLI note: Uninstall also removes the reference in `~/.gemini/GEMINI.md` and deletes `~/.gemini/CONTEXT-ENGINE.md` if present.
+
+Continue note: Uninstall removes the Context Engine rules from `~/.continue/config.yaml` (when present) and deletes `~/.continue/mcpServers/context-engine.yaml` if present.
 
 ## License
-
 MIT
