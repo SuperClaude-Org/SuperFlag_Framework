@@ -21,7 +21,7 @@ When user input contains --flag format:
 STEP 2: FLAG DISCOVERY
 For user-specified flags:
 - Unknown flags: MUST call list_available_flags()
-- Verify all 18 available flags and their briefs
+- Verify all 17 available flags and their briefs
 
 For --auto flag (special processing):
 - ALWAYS call list_available_flags() first
@@ -95,8 +95,14 @@ VERIFICATION CHECKLIST:
 
 CRITICAL: --auto with user flags means AI MUST select additional appropriate flags based on context, not just use user flags alone.
 
+EXAMPLES:
+- "--auto" → assistant selects a complete set of flags automatically.
+- "--auto --flag1 --flag2" → apply user flags and add any helpful flags.
+- "--flag1 --flag2" → apply only the specified flags.
+- "--reset --flag1" → reset session, then apply new directives for --flag1.
+
 CREATIVE FLAG USAGE:
-- Consider ALL 18 flags for each task
+- Consider ALL 17 flags for each task
 - Avoid repetitive patterns - vary selections
 - Match flags to specific task characteristics
 - Experiment with powerful flag combinations
@@ -112,14 +118,6 @@ CONTINUE_RULES = [
         "rule": BASE_PROMPT_CONTENT
     }
 ]
-
-def get_claude_prompt():
-    """Get the system prompt for Claude Code"""
-    return CLAUDE_SYSTEM_PROMPT
-
-def get_continue_rules():
-    """Get the rules configuration for Continue"""
-    return CONTINUE_RULES
 
 def setup_claude_context_files():
     """Set up CLAUDE.md with @CONTEXT-ENGINE.md reference"""
@@ -140,25 +138,49 @@ def setup_claude_context_files():
     except Exception as e:
         print(f"⚠ Could not write CONTEXT-ENGINE.md: {e}")
         return False
-    
-    # Check and update CLAUDE.md reference
-    reference = "@CONTEXT-ENGINE.md"
-    if claude_md.exists():
-        content = claude_md.read_text(encoding='utf-8')
-        if reference in content:
-            print("✓ CLAUDE.md already references CONTEXT-ENGINE.md")
-            return True
-    
-    # Append reference to CLAUDE.md
+
+def setup_gemini_context_files():
+    """Set up GEMINI.md with @CONTEXT-ENGINE.md reference in ~/.gemini
+
+    Behavior mirrors the Claude setup: always (re)write CONTEXT-ENGINE.md with
+    the latest BASE_PROMPT_CONTENT and ensure GEMINI.md references it.
+    """
+    from pathlib import Path
+
+    gemini_dir = Path.home() / ".gemini"
+    gemini_md = gemini_dir / "GEMINI.md"
+    context_engine_md = gemini_dir / "CONTEXT-ENGINE.md"
+
+    # Ensure directory exists
+    gemini_dir.mkdir(parents=True, exist_ok=True)
+
+    # Always update CONTEXT-ENGINE.md (allows updates)
     try:
-        with open(claude_md, 'a', encoding='utf-8') as f:
-            if claude_md.exists() and claude_md.stat().st_size > 0:
+        with open(context_engine_md, 'w', encoding='utf-8') as f:
+            f.write(BASE_PROMPT_CONTENT)
+        print(f"✓ Updated {context_engine_md}")
+    except Exception as e:
+        print(f"⚠ Could not write CONTEXT-ENGINE.md: {e}")
+        return False
+
+    # Check and update GEMINI.md reference
+    reference = "@CONTEXT-ENGINE.md"
+    if gemini_md.exists():
+        content = gemini_md.read_text(encoding='utf-8')
+        if reference in content:
+            print("✓ GEMINI.md already references CONTEXT-ENGINE.md")
+            return True
+
+    # Append reference to GEMINI.md
+    try:
+        with open(gemini_md, 'a', encoding='utf-8') as f:
+            if gemini_md.exists() and gemini_md.stat().st_size > 0:
                 f.write("\n\n")
             f.write(reference)
-        print(f"✓ Added @CONTEXT-ENGINE.md reference to CLAUDE.md")
+        print(f"✓ Added @CONTEXT-ENGINE.md reference to GEMINI.md")
         return True
     except Exception as e:
-        print(f"⚠ Could not update CLAUDE.md: {e}")
+        print(f"⚠ Could not update GEMINI.md: {e}")
         return False
 
 def setup_continue_config(continue_dir):
