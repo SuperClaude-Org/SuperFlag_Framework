@@ -1,13 +1,11 @@
 # Context Engine MCP - Optimized Version
 # Scientific Prompt Engineering + Philosophical Wisdom
-# Version: 2.0.0
 
 # ========================================
 # MCP Server Configuration
 # ========================================
 server:
   name: "context-engine-mcp"
-  version: "2.0.0"
   description: "MCP-based contextual flag system with scientific optimization"
 
 mcp:

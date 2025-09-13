@@ -161,20 +161,26 @@ def install_gemini_cli_instructions():
 
 def setup_continue_mcp_servers():
     """Set up Continue extension MCP server configurations"""
+    # Get current version dynamically
+    try:
+        from .__version__ import __version__
+    except ImportError:
+        __version__ = "unknown"
+
     home = get_home_dir()
     continue_dir = home / ".continue" / "mcpServers"
-    
+
     # Create directory if it doesn't exist
     continue_dir.mkdir(parents=True, exist_ok=True)
-    
+
     print("[CREATE] Creating Continue MCP configuration files...")
     print("  Location: ~/.continue/mcpServers/")
-    
+
     # Define server configurations with clear examples
     servers = [
         {
             "filename": "context-engine.yaml",
-            "content": """# Context Engine MCP - Contextual flag system for AI assistants
+            "content": f"""# Context Engine MCP - Contextual flag system for AI assistants
 # Context Engine MCP installation utilities
 #
 # ===== IMPORTANT: Choose ONE configuration below =====
@@ -182,34 +188,34 @@ def setup_continue_mcp_servers():
 
 # --- Option 1: Standard Python installation ---
 name: Context Engine MCP
-version: 1.0.8rc1
+version: {__version__}
 schema: v1
 mcpServers:
 - name: context-engine
   command: context-engine-mcp
   args: []
-  env: {}
+  env: {{}}
 
 # --- Option 2: UV (Python package manager) ---
 # Requires: uv in PATH or use full path like ~/.cargo/bin/uv
 # name: Context Engine MCP
-# version: 1.0.8rc1
+# version: {__version__}
 # schema: v1
 # mcpServers:
 # - name: context-engine
 #   command: uv
 #   args: ["run", "context-engine-mcp"]
-#   env: {}
+#   env: {{}}
 
 # --- Option 3: Development mode (pip install -e) ---
 # name: Context Engine MCP
-# version: 1.0.8rc1
+# version: {__version__}
 # schema: v1
 # mcpServers:
 # - name: context-engine
 #   command: python
 #   args: ["-m", "context_engine_mcp"]
-#   env: {}
+#   env: {{}}
 
 """
         }

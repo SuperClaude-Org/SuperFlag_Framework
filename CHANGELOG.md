@@ -1,5 +1,11 @@
 Changelog
 
+## 2.0.2 (2025-09-13)
+
+- Remove version metadata from flags.yaml to prevent version conflicts
+- Add dynamic version loading to Continue configuration templates
+- Centralize all version management to __version__.py only
+
 ## 2.0.1 (2025-09-13)
 
 - Fix uninstall command terminating early without showing all cleanup messages
