@@ -40,7 +40,7 @@ Then in your client/assistant, use prompts with flags:
 | `--readonly` | Analysis only mode |
 | `--refactor` | Code quality improvement |
 | `--research` | Technology investigation |
-| `--reset` | Reset session flag state |
+| `--reset` | Reset all flag states to new (clears session cache) |
 | `--save` | Handoff documentation |
 | `--seq` | Sequential thinking |
 | `--strict` | Zero-error enforcement |
@@ -260,8 +260,9 @@ These are optional; Context Engine works without them.
 
 ### Session
 - Duplicate flags produce a brief reminder instead of repeating full directives.
-- Use `--reset` when the task/context changes.
+- Use `--reset` when the task/context changes (resets all flag states to new).
 - The server tracks active flags per session.
+- Note: In Claude, flag states persist through `/clear` or `/compact` commands. Use `--reset` to reinitialize.
 
 ## `--auto`
 `--auto` instructs the assistant to analyze the task and pick appropriate flags (do not include `--auto` in get_directives calls).
