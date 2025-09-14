@@ -4,7 +4,7 @@
 ![Gemini CLI](https://img.shields.io/badge/Gemini%20CLI-supported-1ABC9C)
 ![Continue](https://img.shields.io/badge/Continue-supported-FFFFFF)
 
-Context Engine provides 17 contextual flags that guide assistant behavior (e.g., `--strict`, `--auto`). It exposes an MCP stdio server and small setup helpers for common clients.
+Context Engine provides 18 contextual flags that guide assistant behavior (e.g., `--strict`, `--auto`). It exposes an MCP stdio server and small setup helpers for common clients.
 
 ## Quick Start
 
@@ -24,13 +24,15 @@ Then in your client/assistant, use prompts with flags:
 - "--save" (handoff documentation)
 - "Analyze --strict" (precise, zero-tolerance mode)
 
-## 17 Flags
+## 18 Flags
 
 | Flag | Purpose |
 |------|---------|
 | `--analyze` | Multi-angle systematic analysis |
 | `--auto` | AI selects optimal flag combination |
+| `--collab` | Co-develop solutions through trust-based iteration |
 | `--concise` | Minimal communication |
+| `--discover` | Discover existing solutions before building new |
 | `--explain` | Progressive disclosure |
 | `--git` | Version control best practices |
 | `--lean` | Essential focus only |
@@ -39,7 +41,6 @@ Then in your client/assistant, use prompts with flags:
 | `--performance` | Speed and efficiency optimization |
 | `--readonly` | Analysis only mode |
 | `--refactor` | Code quality improvement |
-| `--research` | Technology investigation |
 | `--reset` | Reset all flag states to new (clears session cache) |
 | `--save` | Handoff documentation |
 | `--seq` | Sequential thinking |
@@ -234,7 +235,7 @@ Notes
 ```
 
 ### MCP Tools
-- `list_available_flags()` - Shows all 17 flags
+- `list_available_flags()` - Shows all 18 flags
 - `get_directives(['--flag1', '--flag2'])` - Activates flags
 
 Development: use `pip install -e .` for editable installs.
@@ -243,12 +244,6 @@ Configuration updates: edit `~/.context-engine/flags.yaml` and restart the MCP s
 
 ### Optional MCP Servers
 Additional MCP servers can complement certain flags:
-
-#### For `--research` flag:
-```bash
-# Documentation and examples server
-claude mcp add -s user -- context7 npx -y @upstash/context7-mcp
-```
 
 #### For `--seq` flag:
 ```bash
@@ -276,8 +271,11 @@ Behavior
 
 ```
 ~/.claude/
-├── CLAUDE.md           # References @CONTEXT-ENGINE.md
-└── CONTEXT-ENGINE.md   # Flag instructions (auto-updated)
+├── CLAUDE.md                     # References @CONTEXT-ENGINE.md
+├── CONTEXT-ENGINE.md             # Flag instructions (auto-updated)
+├── hooks/
+│   └── context-engine-hook.py    # Hook for flag detection (Claude Code only)
+└── settings.json                 # Updated with hook registration (Claude Code only)
 
 ~/.continue/
 ├── config.yaml         # Contains Context Engine rules
@@ -306,9 +304,9 @@ pipx uninstall context-engine-mcp
 
 Note: During uninstallation, `~/.context-engine/flags.yaml` is backed up to `~/flags.yaml.backup_YYYYMMDD_HHMMSS` before removal. During installation, existing flags.yaml is backed up and updated to the latest version.
 
-Claude Code note: Uninstall removes the reference in `~/.claude/CLAUDE.md` and deletes `~/.claude/CONTEXT-ENGINE.md` if present.
+Claude Code note: Uninstall removes the `@CONTEXT-ENGINE.md` reference from `~/.claude/CLAUDE.md`, deletes `~/.claude/CONTEXT-ENGINE.md` if present, removes the hook file from `~/.claude/hooks/context-engine-hook.py`, and removes the hook registration from `~/.claude/settings.json`.
 
-Gemini CLI note: Uninstall also removes the reference in `~/.gemini/GEMINI.md` and deletes `~/.gemini/CONTEXT-ENGINE.md` if present.
+Gemini CLI note: Uninstall removes the `@CONTEXT-ENGINE.md` reference from `~/.gemini/GEMINI.md` and deletes `~/.gemini/CONTEXT-ENGINE.md` if present.
 
 Continue note: Uninstall removes the Context Engine rules from `~/.continue/config.yaml` (when present) and deletes `~/.continue/mcpServers/context-engine.yaml` if present.
 
