@@ -4,6 +4,8 @@
 ![Gemini CLI](https://img.shields.io/badge/Gemini%20CLI-supported-1ABC9C)
 ![Continue](https://img.shields.io/badge/Continue-supported-FFFFFF)
 
+> **Note**: This project was inspired by the pioneering work in [SuperClaude Framework](https://github.com/SuperClaude-Org/SuperClaude_Framework) and [SuperGemini Framework](https://github.com/SuperClaude-Org/SuperGemini_Framework). Special thanks to [SuperClaude-Org](https://github.com/SuperClaude-Org) team members [@NomenAK](https://github.com/NomenAK) and [@mithun50](https://github.com/mithun50) whose work made this possible.
+
 Context Engine provides 18 contextual flags that guide assistant behavior (e.g., `--strict`, `--auto`). It exposes an MCP stdio server and small setup helpers for common clients.
 
 ## Quick Start
