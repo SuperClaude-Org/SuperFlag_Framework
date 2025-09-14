@@ -105,6 +105,10 @@ The MCP server maintains session state to prevent directive duplication:
 - Subsequent invocations: Brief reminder with reference to system-reminder
 - Reset capability: `--reset` flag clears session cache
 
+**Important Note**: Flag states are maintained per session. In Claude, when using `/clear`, `/compact`, or during automatic compaction, flag states persist. Use the `--reset` flag explicitly to reinitialize flag states when needed.
+
+**Tip for --git users**: To ensure complete anonymity and prevent signatures like "by Claude" from appearing in commits, always use `--reset` with `--git` flag (e.g., `--reset --git`).
+
 ## Performance Characteristics
 
 ### Token Efficiency
