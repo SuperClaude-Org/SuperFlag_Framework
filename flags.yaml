@@ -374,6 +374,7 @@ directives:
       • Focus on WHAT changed, never WHO made changes
       • ASCII text only - no Unicode decorations
       • Pure technical content - no marketing or emotions
+      • NEVER push unless user explicitly requests
 
       Format: <type>(<scope>): <subject>
       Types: feat, fix, docs, style, refactor, test, chore
@@ -395,6 +396,7 @@ directives:
       ☐ ASCII text only (no emojis)
       ☐ Zero attribution or signatures
       ☐ Professional technical language
+      ☐ No push without explicit request
       </verify>
 
   "--readonly":
