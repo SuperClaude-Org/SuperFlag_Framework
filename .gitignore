@@ -103,12 +103,15 @@ test_input.txt
 *.test.py
 *_test.py
 
-# Documentation (except README, RELEASE_GUIDE_EN, CHANGELOG)
+# Documentation (except README, RELEASE_GUIDE_EN, CHANGELOG, ARCHITECTURE.md)
 HANDOFF_REPORT_*.md
 CONTEXT-ENGINE.md
 *.bak.md
 docs/*.md
 CLAUDE.md
+ARCHITECTURE_KO.md
+example_custom_flag.yaml
 !README.md
 !RELEASE_GUIDE_EN.md
 !CHANGELOG.md
+!ARCHITECTURE.md
