@@ -1,5 +1,36 @@
 Changelog
 
+## 2.1.8
+
+### Changed
+- Refactor MCP response format from dictionary to formatted string for improved readability
+  - **Before**: `{"REMINDER": "New: '--analyze'", "combined_directive": "## --analyze\n...", "applied_flags": "--analyze"}`
+  - **After**: Clean formatted text with sections separated by lines, no JSON syntax
+- Remove JSON structure from get_directives output to enhance user experience
+- Leverage FastMCP automatic content block conversion for cleaner presentation
+
+### Improved
+- Response readability increased significantly with natural text formatting
+  ```
+  Before (JSON):
+  {
+    "combined_directive": "## --analyze\n<task>...",
+    "meta_instruction": "...",
+    "applied_flags": "--analyze"
+  }
+
+  After (Formatted):
+  ## --analyze
+  <task>
+  ...
+  </task>
+
+  ==================================================
+  Applied flags: --analyze
+  ```
+- Eliminated verbose JSON syntax in favor of structured plain text output
+- Maintained 100% content integrity while improving visual presentation
+
 ## 2.1.3 (2025-09-14)
 
 ### Changed
