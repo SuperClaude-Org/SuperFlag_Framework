@@ -282,7 +282,7 @@ Behavior
 ├── CLAUDE.md                     # References @CONTEXT-ENGINE.md
 ├── CONTEXT-ENGINE.md             # Flag instructions (auto-updated)
 ├── hooks/
-│   └── context-engine-hook.py    # Hook for flag detection (Claude Code only)
+│   └── superflag.py              # Hook for flag detection (Claude Code only)
 └── settings.json                 # Updated with hook registration (Claude Code only)
 
 ~/.continue/
@@ -312,7 +312,7 @@ pipx uninstall superflag
 
 Note: During uninstallation, `~/.superflag/flags.yaml` is backed up to `~/flags.yaml.backup_YYYYMMDD_HHMMSS` before removal. During installation, existing flags.yaml is backed up and updated to the latest version.
 
-Claude Code note: Uninstall removes the `@CONTEXT-ENGINE.md` reference from `~/.claude/CLAUDE.md`, deletes `~/.claude/CONTEXT-ENGINE.md` if present, removes the hook file from `~/.claude/hooks/context-engine-hook.py`, and removes the hook registration from `~/.claude/settings.json`.
+Claude Code note: Uninstall removes the `@CONTEXT-ENGINE.md` reference from `~/.claude/CLAUDE.md`, deletes `~/.claude/CONTEXT-ENGINE.md` if present, removes the hook file from `~/.claude/hooks/superflag.py`, and removes the hook registration from `~/.claude/settings.json`.
 
 Gemini CLI note: Uninstall removes the `@CONTEXT-ENGINE.md` reference from `~/.gemini/GEMINI.md` and deletes `~/.gemini/CONTEXT-ENGINE.md` if present.
 

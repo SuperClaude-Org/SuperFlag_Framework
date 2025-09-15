@@ -160,7 +160,7 @@ def setup_claude_code_hooks():
         hooks_dir.mkdir(parents=True, exist_ok=True)
 
         # 2. Copy hook file
-        hook_file = hooks_dir / "context-engine-hook.py"
+        hook_file = hooks_dir / "superflag.py"
 
         # Read the hook content from our package
         try:
@@ -204,7 +204,7 @@ def setup_claude_code_hooks():
             if not (isinstance(hook, dict) and
                    'hooks' in hook and
                    len(hook['hooks']) > 0 and
-                   'context-engine-hook.py' in str(hook['hooks'][0].get('command', '')))
+                   'superflag.py' in str(hook['hooks'][0].get('command', '')))
         ]
 
         # Add our hook
@@ -631,7 +631,7 @@ def uninstall_claude_code():
                         if not (isinstance(hook, dict) and
                                'hooks' in hook and
                                len(hook['hooks']) > 0 and
-                               'context-engine-hook.py' in str(hook['hooks'][0].get('command', '')))
+                               'superflag.py' in str(hook['hooks'][0].get('command', '')))
                     ]
 
                     if len(settings['hooks']['UserPromptSubmit']) < original_count:
@@ -647,7 +647,7 @@ def uninstall_claude_code():
                 results.append(f"[WARNING] Error removing hook from settings: {str(e)}")
 
         # 3. Remove hook file
-        hook_file = home / ".claude" / "hooks" / "context-engine-hook.py"
+        hook_file = home / ".claude" / "hooks" / "superflag.py"
         if hook_file.exists():
             success, message = delete_with_retry(hook_file)
             results.append(message)
