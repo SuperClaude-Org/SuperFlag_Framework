@@ -1,5 +1,16 @@
 Changelog
 
+## 2.2.4 (2025-09-15)
+
+### Fixed
+- Removed all remaining `superflag-server` references
+- Corrected all MCP server commands to use `superflag` entry point
+- Fixed Gemini installation instructions
+
+### Improved
+- Complete consistency across all documentation
+- All commands now use single unified `superflag` command
+
 ## 2.2.3 (2025-09-15)
 
 ### Changed - Complete Rebranding to SuperFlag
