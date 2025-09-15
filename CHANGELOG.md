@@ -1,5 +1,16 @@
 Changelog
 
+## 2.2.0
+
+### Added
+- New `superflag` CLI command alias for simplified usage
+  - Users can now use `superflag install` alongside `context-engine install`
+- PyPI package alias `superflag` for easier installation
+  - `pip install superflag` automatically installs context-engine-mcp
+
+### Changed
+- Enhanced CLI accessibility with multiple entry points
+
 ## 2.1.8
 
 ### Changed
