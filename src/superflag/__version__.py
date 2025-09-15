@@ -1,3 +1,3 @@
-"""Version information for context-engine-mcp."""
+"""Version information for superflag."""
 
-__version__ = "2.2.1"
+__version__ = "2.2.2"

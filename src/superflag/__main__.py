@@ -17,7 +17,7 @@ logger = logging.getLogger("context-engine-mcp")
 def main():
     """Main entry point for the MCP server"""
     try:
-        logger.info("Starting Context Engine MCP Server...")
+        logger.info("Starting SuperFlag MCP Server...")
         
         # Run the FastMCP server
         # FastMCP handles stdio transport automatically

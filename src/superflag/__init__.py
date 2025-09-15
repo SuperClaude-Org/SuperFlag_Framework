@@ -1,5 +1,5 @@
 """
-Context Engine MCP Server
+SuperFlag MCP Server
 
 A Model Context Protocol server for managing contextual flags
 that enhance AI assistant capabilities.

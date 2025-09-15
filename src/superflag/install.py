@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Installation helper script to set up Context Engine MCP
+Installation helper script to set up SuperFlag
 """
 
 import os
@@ -321,14 +321,14 @@ def setup_continue_mcp_servers():
     servers = [
         {
             "filename": "context-engine.yaml",
-            "content": f"""# Context Engine MCP - Contextual flag system for AI assistants
-# Context Engine MCP installation utilities
+            "content": f"""# SuperFlag - Contextual flag system for AI assistants
+# SuperFlag installation utilities
 #
 # ===== IMPORTANT: Choose ONE configuration below =====
 # Uncomment the configuration that matches your setup:
 
 # --- Option 1: Standard Python installation ---
-name: Context Engine MCP
+name: SuperFlag MCP
 version: {__version__}
 schema: v1
 mcpServers:
@@ -339,7 +339,7 @@ mcpServers:
 
 # --- Option 2: UV (Python package manager) ---
 # Requires: uv in PATH or use full path like ~/.cargo/bin/uv
-# name: Context Engine MCP
+# name: SuperFlag MCP
 # version: {__version__}
 # schema: v1
 # mcpServers:
@@ -349,7 +349,7 @@ mcpServers:
 #   env: {{}}
 
 # --- Option 3: Development mode (pip install -e) ---
-# name: Context Engine MCP
+# name: SuperFlag MCP
 # version: {__version__}
 # schema: v1
 # mcpServers:
@@ -399,7 +399,7 @@ def install(target="claude-code"):
     Args:
         target: Installation target ('claude-code' or 'continue')
     """
-    print(f"\n[SETUP] Setting up Context Engine MCP for {target}...")
+    print(f"\n[SETUP] Setting up SuperFlag for {target}...")
     print("=" * 50)
     
     # Get home directory for later use
@@ -497,7 +497,7 @@ def install(target="claude-code"):
         print("2. If Gemini CLI supports config files, add it there; otherwise use the CLI's add command if available.")
         print("3. Run Gemini CLI and verify the MCP tool is available (get_directives).")
     
-    print("\n[COMPLETE] Context Engine MCP installation completed")
+    print("\n[COMPLETE] SuperFlag installation completed")
     print("-" * 50)
 
 def kill_context_engine_processes():
@@ -702,7 +702,7 @@ def uninstall_continue():
                 with open(continue_config_path, 'r', encoding='utf-8') as f:
                     lines = f.readlines()
                 
-                # Find and remove Context Engine MCP Protocol section
+                # Find and remove SuperFlag MCP Protocol section
                 new_lines = []
                 skip_current_rule = False
                 
@@ -836,7 +836,7 @@ def cleanup_common_files():
 
 def uninstall():
     """Main uninstall function - removes Context Engine from all environments"""
-    print("Uninstalling Context Engine MCP...")
+    print("Uninstalling SuperFlag...")
     print("Force-killing processes and immediately removing files...")
 
     try:
@@ -887,7 +887,7 @@ def uninstall():
         print(f"\nWARNING: {len(failures)} items could not be removed (files may be in use)")
         print("These will be cleaned up after restarting Claude Code/Continue")
     
-    print("\nContext Engine MCP uninstall complete")
+    print("\nSuperFlag uninstall complete")
     
     print("Run 'pip uninstall context-engine-mcp -y' to remove Python package")
     print("Manually remove MCP server: claude mcp remove context-engine")
@@ -907,7 +907,7 @@ def main():
     
     parser = argparse.ArgumentParser(
         prog="context-engine",
-        description="Context Engine MCP - Contextual flag system for AI assistants"
+        description="SuperFlag - Contextual flag system for AI assistants"
     )
     parser.add_argument(
         "--version", "-v",
@@ -924,7 +924,7 @@ def main():
     # Install subcommand
     install_parser = subparsers.add_parser(
         'install',
-        help='Install Context Engine MCP'
+        help='Install SuperFlag'
     )
     install_parser.add_argument(
         "--target",
@@ -936,7 +936,7 @@ def main():
     # Uninstall subcommand
     uninstall_parser = subparsers.add_parser(
         'uninstall',
-        help='Uninstall Context Engine MCP from all environments'
+        help='Uninstall SuperFlag from all environments'
     )
     
     args = parser.parse_args()

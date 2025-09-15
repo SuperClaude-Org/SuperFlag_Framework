@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Context Engine MCP - Claude Code Hook
+SuperFlag - Claude Code Hook
 Simple flag detection and message output for Claude Code
 """
 

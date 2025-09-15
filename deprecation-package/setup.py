@@ -3,7 +3,7 @@ from setuptools import setup
 # Best practice: Minimal redirect package following sklearn pattern
 setup(
     name="context-engine-mcp",
-    version="3.0.0",  # Major version bump to indicate breaking change
+    version="2.2.3",  # Minimal increment for deprecation notice
     description="Deprecated: This package has been renamed to 'superflag'",
     long_description="""# IMPORTANT: Package Renamed to superflag
 
@@ -44,7 +44,7 @@ For issues or questions, visit: https://github.com/SuperClaude-Org/context-engin
 """,
     long_description_content_type="text/markdown",
     install_requires=[
-        "superflag>=2.2.1",  # Automatically installs the new package
+        "superflag>=2.2.2",  # Automatically installs the new package
     ],
     python_requires=">=3.10",
     author="SuperClaude-Org",

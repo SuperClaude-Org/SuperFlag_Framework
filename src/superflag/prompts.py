@@ -1,5 +1,5 @@
 """
-Context Engine MCP - Prompts
+SuperFlag - Prompts
 """
 import yaml
 from pathlib import Path
@@ -269,7 +269,7 @@ def setup_continue_config(continue_dir):
     # Find and update or add rule
     rule_updated = False
     for i, existing_rule in enumerate(config['rules']):
-        if isinstance(existing_rule, str) and "Context Engine MCP" in existing_rule:
+        if isinstance(existing_rule, str) and "SuperFlag" in existing_rule:
             # Update existing rule
             config['rules'][i] = context_engine_rule
             rule_updated = True

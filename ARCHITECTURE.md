@@ -1,8 +1,8 @@
-# Context Engine MCP - Architecture
+# SuperFlag - Architecture
 
 ## Overview
 
-Context Engine addresses a fundamental challenge in prompt engineering: providing contextually appropriate directives at runtime without the overhead of persistent system prompts. This architectural document explains the design philosophy, technical decisions, and implementation approach.
+SuperFlag addresses a fundamental challenge in prompt engineering: providing contextually appropriate directives at runtime without the overhead of persistent system prompts. This architectural document explains the design philosophy, technical decisions, and implementation approach.
 
 ## Problem Statement
 
@@ -15,7 +15,7 @@ Developers face three critical challenges with AI assistants:
 
 ### Core Principle: Just-In-Time Context Injection
 
-Rather than loading all possible directives upfront, Context Engine injects precisely the needed context at runtime. This approach parallels just-in-time compilation in programming languages - optimize when needed, not before.
+Rather than loading all possible directives upfront, SuperFlag injects precisely the needed context at runtime. This approach parallels just-in-time compilation in programming languages - optimize when needed, not before.
 
 ### Scientific Foundation
 
@@ -59,7 +59,7 @@ The `--auto` flag enables AI to analyze task context and automatically select op
 - Allows context-aware message injection based on detected flags
 
 #### 3. Distributed Configuration Architecture
-**Decision**: Place `flags.yaml` in `~/.context-engine/` for user customization
+**Decision**: Place `flags.yaml` in `~/.superflag/` for user customization
 **Rationale**:
 - Domain-specific flags can be added without modifying core package
 - Separation of mechanism (server) from policy (flags)
@@ -78,8 +78,8 @@ The `--auto` flag enables AI to analyze task context and automatically select op
 ### Component Map
 
 ```
-context-engine-mcp/
-├── src/context_engine_mcp/
+superflag/
+├── src/superflag/
 │   ├── server.py           # MCP stdio server implementation
 │   ├── claude_hook.py       # Hook system for Claude Code
 │   ├── install.py          # Multi-target installation logic
@@ -113,7 +113,7 @@ The MCP server maintains session state to prevent directive duplication:
 
 ### Token Efficiency
 - **Persistent Context Approach**: Full system prompt included in every interaction
-- **Context Engine**: Only necessary directives injected on-demand
+- **SuperFlag**: Only necessary directives injected on-demand
 - **Benefit**: Reduced token usage leads to lower API costs
 
 ### Response Quality
@@ -144,7 +144,7 @@ When needing new flags for specific domains or situations:
 1. Ask AI to reference existing flags.yaml tone and structure
 2. Request: "Based on flags.yaml patterns, create a flag and prompt for [specific situation]"
 3. AI generates new flag with prompt engineering techniques applied
-4. Add generated flag to ~/.context-engine/flags.yaml
+4. Add generated flag to ~/.superflag/flags.yaml
 
 Example: `--edit-docs` (documentation refinement)
 ```yaml
