@@ -10,7 +10,7 @@ import yaml
 from pathlib import Path
 
 # Constants
-FLAGS_YAML_PATH = Path.home() / ".context-engine" / "flags.yaml"
+FLAGS_YAML_PATH = Path.home() / ".superflag" / "flags.yaml"
 AUTO_FLAG = '--auto'
 RESET_FLAG = '--reset'
 

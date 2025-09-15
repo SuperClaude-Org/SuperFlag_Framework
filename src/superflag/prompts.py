@@ -6,7 +6,7 @@ from pathlib import Path
 
 def generate_available_flags_section():
     """Generate available flags section from flags.yaml"""
-    flags_path = Path.home() / ".context-engine" / "flags.yaml"
+    flags_path = Path.home() / ".superflag" / "flags.yaml"
 
     if not flags_path.exists():
         return ""

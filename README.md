@@ -248,7 +248,7 @@ Notes
 
 Development: use `pip install -e .` for editable installs.
 
-Configuration updates: edit `~/.context-engine/flags.yaml` and restart the MCP server.
+Configuration updates: edit `~/.superflag/flags.yaml` and restart the MCP server.
 
 ### Optional MCP Servers
 Additional MCP servers can complement certain flags:
@@ -292,7 +292,7 @@ Behavior
     ├── sequential-thinking.yaml
     └── context7.yaml
 
-~/.context-engine/
+~/.superflag/
 └── flags.yaml          # Flag definitions
 
 ~/.gemini/
@@ -310,7 +310,7 @@ superflag uninstall
 pipx uninstall superflag
 ```
 
-Note: During uninstallation, `~/.context-engine/flags.yaml` is backed up to `~/flags.yaml.backup_YYYYMMDD_HHMMSS` before removal. During installation, existing flags.yaml is backed up and updated to the latest version.
+Note: During uninstallation, `~/.superflag/flags.yaml` is backed up to `~/flags.yaml.backup_YYYYMMDD_HHMMSS` before removal. During installation, existing flags.yaml is backed up and updated to the latest version.
 
 Claude Code note: Uninstall removes the `@CONTEXT-ENGINE.md` reference from `~/.claude/CLAUDE.md`, deletes `~/.claude/CONTEXT-ENGINE.md` if present, removes the hook file from `~/.claude/hooks/context-engine-hook.py`, and removes the hook registration from `~/.claude/settings.json`.
 

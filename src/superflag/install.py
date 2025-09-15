@@ -28,7 +28,7 @@ def get_home_dir():
 def setup_flags_yaml():
     """Copy flags.yaml to user's home directory for editing"""
     home = get_home_dir()
-    target_dir = home / ".context-engine"
+    target_dir = home / ".superflag"
     target_dir.mkdir(parents=True, exist_ok=True)
 
     target_file = target_dir / "flags.yaml"
@@ -257,7 +257,7 @@ def verify_claude_hook(hook_file: Path) -> bool:
             return False
 
         # Check if flags.yaml exists
-        flags_path = Path.home() / ".context-engine" / "flags.yaml"
+        flags_path = Path.home() / ".superflag" / "flags.yaml"
         if not flags_path.exists():
             print("[INFO] flags.yaml will be created during setup")
 
@@ -805,9 +805,9 @@ def cleanup_common_files():
             success, message = delete_with_retry(exe_path)
             results.append(message)
         
-        # Remove .context-engine directory with backup
+        # Remove .superflag directory with backup
         home = get_home_dir()
-        context_dir = home / ".context-engine"
+        context_dir = home / ".superflag"
         if context_dir.exists():
             try:
                 # Backup flags.yaml if it exists
@@ -819,13 +819,13 @@ def cleanup_common_files():
                     shutil.copy2(flags_file, backup_file)
                     results.append(f"[COMPLETE] Backed up flags.yaml to ~/{backup_file.name}")
                 
-                # Remove the entire .context-engine directory
+                # Remove the entire .superflag directory
                 shutil.rmtree(context_dir)
-                results.append("[COMPLETE] Removed ~/.context-engine directory (flags.yaml, etc.)")
+                results.append("[COMPLETE] Removed ~/.superflag directory (flags.yaml, etc.)")
             except Exception as e:
-                results.append(f"[WARN] Could not remove .context-engine directory: {str(e)}")
+                results.append(f"[WARN] Could not remove .superflag directory: {str(e)}")
         else:
-            results.append("[INFO] .context-engine directory not found")
+            results.append("[INFO] .superflag directory not found")
         
         results.append("[INFO] Run 'pip uninstall context-engine-mcp -y' to remove Python package")
         
