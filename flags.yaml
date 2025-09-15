@@ -510,9 +510,9 @@ directives:
       Use when context lost or directives not recognized.
 
   "--auto":
-    brief: "META FLAG: Grants autonomous flag selection authority (reference <available_flags> and <flag_selection_strategy> in CONTEXT-ENGINE.md)"
+    brief: "META FLAG: Grants autonomous flag selection authority (reference <available_flags> and <flag_selection_strategy> in SUPERFLAG.md)"
     directive: |
-      META FLAG: Skip get_directives(['--auto']). Instead, use <available_flags> and <flag_selection_strategy> from CONTEXT-ENGINE.md.
+      META FLAG: Skip get_directives(['--auto']). Instead, use <available_flags> and <flag_selection_strategy> from SUPERFLAG.md.
       Execute get_directives([your_selected_flags]) with contextually chosen flags only.
 
 # ========================================
@@ -543,7 +543,7 @@ hook_messages:
     flags: ["--auto"]
     message: |
       Activating FULL CONTEXTUAL AUTHORITY for autonomous flag selection.
-      Reference <available_flags> and <flag_selection_strategy> in CONTEXT-ENGINE.md.
+      Reference <available_flags> and <flag_selection_strategy> in SUPERFLAG.md.
 
       Execute: get_directives([...selected_flags])
 
@@ -551,7 +551,7 @@ hook_messages:
     # When auto is used with other flags
     message: |
       Enhancing {other_flags} with contextual flags.
-      Reference <available_flags> and <flag_selection_strategy> in CONTEXT-ENGINE.md.
+      Reference <available_flags> and <flag_selection_strategy> in SUPERFLAG.md.
 
       Execute: get_directives({other_flags}, ...additional_flags)
 
