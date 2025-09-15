@@ -1,4 +1,4 @@
-# SuperFlag (formerly Context Engine MCP)
+# SuperFlag
 
 > **⚠️ MIGRATION NOTICE**: If you previously installed `context-engine-mcp`, please uninstall it and install `superflag` instead:
 > ```bash
@@ -12,7 +12,7 @@
 
 > **Note**: This project was inspired by the pioneering work in [SuperClaude Framework](https://github.com/SuperClaude-Org/SuperClaude_Framework) and [SuperGemini Framework](https://github.com/SuperClaude-Org/SuperGemini_Framework). Special thanks to [SuperClaude-Org](https://github.com/SuperClaude-Org) team members [@NomenAK](https://github.com/NomenAK) and [@mithun50](https://github.com/mithun50) whose work made this possible.
 
-Context Engine provides 18 contextual flags that guide assistant behavior (e.g., `--strict`, `--auto`). It exposes an MCP stdio server and small setup helpers for common clients.
+SuperFlag provides 18 contextual flags that guide assistant behavior (e.g., `--strict`, `--auto`). It exposes an MCP stdio server and small setup helpers for common clients.
 
 ## Quick Start
 
@@ -92,7 +92,7 @@ pipx install superflag
 superflag install --target cn
 ```
 
-Edit `~/.continue/mcpServers/context-engine.yaml` and uncomment ONE option:
+Edit `~/.continue/mcpServers/superflag.yaml` and uncomment ONE option:
 
 ```yaml
 # Option 1: Standard Python (most common)
@@ -137,7 +137,7 @@ MCP registration (example)
 ```json
 {
   "mcpServers": {
-    "context-engine": {
+    "superflag": {
       "type": "stdio",
       "command": "superflag",
       "args": [],
@@ -169,7 +169,7 @@ Common setups
 ```json
 {
   "mcpServers": {
-    "context-engine": {
+    "superflag": {
       "type": "stdio",
       "command": "superflag",
       "args": [],
@@ -183,7 +183,7 @@ Common setups
 ```json
 {
   "mcpServers": {
-    "context-engine": {
+    "superflag": {
       "type": "stdio",
       "command": "uv",
       "args": ["run", "superflag"],
@@ -197,7 +197,7 @@ Common setups
 ```json
 {
   "mcpServers": {
-    "context-engine": {
+    "superflag": {
       "type": "stdio",
       "command": "C:\\path\\to\\venv\\Scripts\\superflag.exe",
       "args": [],
@@ -211,7 +211,7 @@ Common setups
 ```json
 {
   "mcpServers": {
-    "context-engine": {
+    "superflag": {
       "type": "stdio",
       "command": "/path/to/venv/bin/python",
       "args": ["-m", "superflag"],
@@ -259,7 +259,7 @@ Additional MCP servers can complement certain flags:
 claude mcp add -s user -- sequential-thinking npx -y @modelcontextprotocol/server-sequential-thinking
 ```
 
-These are optional; Context Engine works without them.
+These are optional; SuperFlag works without them.
 
 ### Session
 - Duplicate flags produce a brief reminder instead of repeating full directives.
@@ -286,9 +286,9 @@ Behavior
 └── settings.json                 # Updated with hook registration (Claude Code only)
 
 ~/.continue/
-├── config.yaml         # Contains Context Engine rules
+├── config.yaml         # Contains SuperFlag rules
 └── mcpServers/
-    ├── context-engine.yaml
+    ├── superflag.yaml
     ├── sequential-thinking.yaml
     └── context7.yaml
 
@@ -316,7 +316,7 @@ Claude Code note: Uninstall removes the `@SUPERFLAG.md` reference from `~/.claud
 
 Gemini CLI note: Uninstall removes the `@SUPERFLAG.md` reference from `~/.gemini/GEMINI.md` and deletes `~/.gemini/SUPERFLAG.md` if present.
 
-Continue note: Uninstall removes the Context Engine rules from `~/.continue/config.yaml` (when present) and deletes `~/.continue/mcpServers/context-engine.yaml` if present.
+Continue note: Uninstall removes the SuperFlag rules from `~/.continue/config.yaml` (when present) and deletes `~/.continue/mcpServers/superflag.yaml` if present.
 
 ## License
 MIT

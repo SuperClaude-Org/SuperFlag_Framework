@@ -11,11 +11,11 @@ import logging
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("context-engine-mcp")
+logger = logging.getLogger("superflag")
 
 # Initialize FastMCP server
 mcp = FastMCP(
-    "context-engine-mcp",
+    "superflag",
     "MCP-based contextual flag system for AI assistants"
 )
 

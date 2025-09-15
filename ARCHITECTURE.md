@@ -211,4 +211,4 @@ Anonymous usage metrics to optimize:
 
 ## Conclusion
 
-Context Engine transforms prompt engineering from static system prompts to dynamic runtime injection. By providing only the necessary context in real-time, the system achieves both token efficiency and directive compliance. The user-customizable structure enables application across various domains and situations.
+SuperFlag transforms prompt engineering from static system prompts to dynamic runtime injection. By providing only the necessary context in real-time, the system achieves both token efficiency and directive compliance. The user-customizable structure enables application across various domains and situations.

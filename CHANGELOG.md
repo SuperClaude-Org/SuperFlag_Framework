@@ -1,5 +1,35 @@
 Changelog
 
+## 2.2.3 (2025-09-15)
+
+### Changed - Complete Rebranding to SuperFlag
+- **Package Naming**: Full migration from `context-engine-mcp` to `superflag`
+  - All internal references updated
+  - Unified CLI command: `superflag` (install, uninstall, version)
+  - Deprecation package created for backward compatibility
+
+- **File Structure Changes**:
+  - Configuration directory: `~/.context-engine/` → `~/.superflag/`
+  - Hook file: `context-engine-hook.py` → `superflag.py`
+  - Context files: `CONTEXT-ENGINE.md` → `SUPERFLAG.md`
+  - References: `@CONTEXT-ENGINE.md` → `@SUPERFLAG.md`
+
+- **Command Unification**:
+  - Single entry point: `superflag` with subcommands
+  - Supports: `superflag install`, `superflag uninstall`, `superflag version`
+  - Shortcuts: `--install`, `--uninstall`, `--version`
+  - MCP server mode when run without arguments
+
+- **Documentation Updates**:
+  - All references to `context-engine` replaced with `superflag`
+  - README commands updated to use new `superflag` command
+  - Installation paths and file names updated throughout
+
+### Improved
+- Consistent branding across all components
+- Simplified command structure for better user experience
+- Cleaner file organization with superflag naming
+
 ## 2.2.1
 
 ### Changed

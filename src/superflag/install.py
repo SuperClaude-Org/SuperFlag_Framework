@@ -111,7 +111,7 @@ def ensure_safe_installation():
 
         # Module not importable - likely not installed in current interpreter
         print("[WARN] superflag is not installed in this Python environment.")
-        print("  Install or upgrade via: python -m pip install -U context-engine-mcp")
+        print("  Install or upgrade via: python -m pip install -U superflag")
         return False
 
     except Exception as e:
@@ -140,9 +140,9 @@ def install_mcp_servers_via_cli():
     # Inform user about context-engine setup
     print("[INFO] For context-engine MCP server:")
     print("   Choose your installation method:")
-    print("   - Python: claude mcp add -s user -- context-engine context-engine-mcp")
-    print("   - UV: claude mcp add -s user -- context-engine uv run context-engine-mcp")
-    print("   - Custom: claude mcp add -s user -- context-engine <your-command>")
+    print("   - Python: claude mcp add -s user -- superflag")
+    print("   - UV: claude mcp add -s user -- uv run superflag")
+    print("   - Custom: claude mcp add -s user -- <your-command>")
 
 def setup_claude_code_hooks():
     """Setup Claude Code Hooks for automatic flag detection"""
@@ -293,11 +293,11 @@ def install_gemini_cli_instructions():
     """
     print("\n[INFO] For Gemini CLI (generic MCP stdio):")
     print("   Register the server command in your Gemini CLI MCP configuration:")
-    print("   - Command: context-engine-mcp")
+    print("   - Command: superflag")
     print("   - Args: []")
     print("   - Transport: stdio (default for FastMCP)")
     print("\nIf Gemini CLI supports a config file for MCP servers, add an entry ")
-    print("pointing to 'context-engine-mcp'. If it supports environment variables,")
+    print("pointing to 'superflag'. If it supports environment variables,")
     print("you can set any needed env for advanced scenarios.")
 
 def setup_continue_mcp_servers():
@@ -320,7 +320,7 @@ def setup_continue_mcp_servers():
     # Define server configurations with clear examples
     servers = [
         {
-            "filename": "context-engine.yaml",
+            "filename": "superflag.yaml",
             "content": f"""# SuperFlag - Contextual flag system for AI assistants
 # SuperFlag installation utilities
 #
@@ -333,7 +333,7 @@ version: {__version__}
 schema: v1
 mcpServers:
 - name: context-engine
-  command: context-engine-mcp
+  command: superflag
   args: []
   env: {{}}
 
@@ -345,7 +345,7 @@ mcpServers:
 # mcpServers:
 # - name: context-engine
 #   command: uv
-#   args: ["run", "context-engine-mcp"]
+#   args: ["run", "superflag"]
 #   env: {{}}
 
 # --- Option 3: Development mode (pip install -e) ---
@@ -384,7 +384,7 @@ mcpServers:
     if success:
         print("\n[CONFIG] Configuration files created successfully")
         print("\nNext steps:")
-        print("1. Edit ~/.continue/mcpServers/context-engine.yaml")
+        print("1. Edit ~/.continue/mcpServers/superflag.yaml")
         print("   - Choose and uncomment ONE configuration option")
         print("2. Restart VS Code")
         print("3. Type @ in Continue chat and select 'MCP'")
@@ -483,17 +483,17 @@ def install(target="claude-code"):
     elif target == "cn":
         print("\n[NEXT] Next steps for Continue:")
         print("1. [EDIT] Edit context-engine configuration:")
-        print("   ~/.continue/mcpServers/context-engine.yaml")
+        print("   ~/.continue/mcpServers/superflag.yaml")
         print("   (Choose and uncomment ONE option)")
         print("\n2. [RESTART] Restart VS Code")
         print("\n3. [CHAT] In Continue chat:")
         print("   - Type @ and select 'MCP'")
         print("   - Available server: context-engine")
-        print("\n[DOCS] Configuration file: ~/.continue/mcpServers/context-engine.yaml")
+        print("\n[DOCS] Configuration file: ~/.continue/mcpServers/superflag.yaml")
 
     elif target == "gemini-cli":
         print("\n[NEXT] Next steps for Gemini CLI:")
-        print("1. Register 'context-engine-mcp' as an MCP stdio server in your Gemini CLI.")
+        print("1. Register 'superflag' as an MCP stdio server in your Gemini CLI.")
         print("2. If Gemini CLI supports config files, add it there; otherwise use the CLI's add command if available.")
         print("3. Run Gemini CLI and verify the MCP tool is available (get_directives).")
     
@@ -501,13 +501,13 @@ def install(target="claude-code"):
     print("-" * 50)
 
 def kill_context_engine_processes():
-    """Kill running context-engine-mcp server processes without killing shells or self
+    """Kill running superflag server processes without killing shells or self
 
     Safety rules:
     - Skip current PID
     - Skip common shells (bash, zsh, sh, fish, powershell, cmd)
     - Only kill if the executable is python* with a cmdline referencing superflag
-      or if the executable itself is context-engine-mcp
+      or if the executable itself is superflag
     """
     killed = []
 
@@ -550,7 +550,7 @@ def kill_context_engine_processes():
                     continue
 
                 is_server_wrapper = (
-                    'context-engine-mcp' in exe or 'context-engine-mcp' in name
+                    'superflag' in exe or 'superflag' in name
                 )
                 is_python_running_server = (
                     exe.startswith('python') and (
@@ -570,7 +570,7 @@ def kill_context_engine_processes():
         if killed:
             time.sleep(1)
 
-        return killed if killed else ["[INFO] No context-engine-mcp processes found running"]
+        return killed if killed else ["[INFO] No superflag processes found running"]
 
     except Exception as e:
         return [f"[WARN] Error killing processes: {str(e)}"]
@@ -745,7 +745,7 @@ def uninstall_continue():
     
     # 2. Remove MCP server configuration with retry (always attempt this)
     try:
-        context_engine_yaml = home / ".continue" / "mcpServers" / "context-engine.yaml"
+        context_engine_yaml = home / ".continue" / "mcpServers" / "superflag.yaml"
         success, message = delete_with_retry(context_engine_yaml)
         results.append(message)
     except Exception as e:
@@ -800,7 +800,7 @@ def cleanup_common_files():
         import sys
         scripts_dir = Path(sys.executable).parent / "Scripts"
         
-        for exe_name in ["context-engine-mcp.exe", "context-engine-mcp.bat"]:
+        for exe_name in ["superflag.exe", "superflag.bat"]:
             exe_path = scripts_dir / exe_name
             success, message = delete_with_retry(exe_path)
             results.append(message)
@@ -827,7 +827,7 @@ def cleanup_common_files():
         else:
             results.append("[INFO] .superflag directory not found")
         
-        results.append("[INFO] Run 'pip uninstall context-engine-mcp -y' to remove Python package")
+        results.append("[INFO] Run 'pip uninstall superflag -y' to remove Python package")
         
     except Exception as e:
         results.append(f"[ERROR] Error cleaning up files: {str(e)}")
@@ -889,7 +889,7 @@ def uninstall():
     
     print("\nSuperFlag uninstall complete")
     
-    print("Run 'pip uninstall context-engine-mcp -y' to remove Python package")
+    print("Run 'pip uninstall superflag -y' to remove Python package")
     print("Manually remove MCP server: claude mcp remove context-engine")
     print("No restart needed - files unlocked immediately")
     
@@ -912,7 +912,7 @@ def main():
     parser.add_argument(
         "--version", "-v",
         action="version",
-        version=f"context-engine-mcp {__version__}"
+        version=f"superflag {__version__}"
     )
     
     subparsers = parser.add_subparsers(

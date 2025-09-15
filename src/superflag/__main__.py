@@ -12,7 +12,7 @@ logging.basicConfig(
     handlers=[logging.StreamHandler(sys.stderr)]
 )
 
-logger = logging.getLogger("context-engine-mcp")
+logger = logging.getLogger("superflag")
 
 def main():
     """Main entry point for the MCP server"""
