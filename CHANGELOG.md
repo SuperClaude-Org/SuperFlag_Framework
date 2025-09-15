@@ -1,5 +1,14 @@
 Changelog
 
+## 2.2.1
+
+### Changed
+- Replace "Error:" prefix with more user-friendly "Hint:" in MCP server responses
+- Use "Cache:" prefix specifically for duplicate flag detection messages
+- Restore detailed guidance messages for duplicate flag scenarios
+  - Include reference to system-reminder location
+  - Provide reset instructions when duplicates detected
+
 ## 2.2.0
 
 ### Added

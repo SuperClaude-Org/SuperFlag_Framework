@@ -154,7 +154,7 @@ def get_directives(flags: List[str]) -> str:
         # Simplified error response format - removed available_flags field
         with config_lock:
             available_flags = ', '.join(DIRECTIVES.keys())
-        return f"Error: No flags provided.\n\nAvailable flags: {available_flags}\n\nPlease specify at least one flag."
+        return f"Hint: No flags provided.\n\nAvailable flags: {available_flags}\n\nPlease specify at least one flag."
     
     # Handle --reset flag
     reset_requested = False
@@ -204,7 +204,7 @@ def get_directives(flags: List[str]) -> str:
     
     if not_found_flags:
         # Simplified error response format - removed available_flags field
-        return f"Error: Unknown flags: {not_found_flags}\n\nAvailable flags: {', '.join(DIRECTIVES.keys())}\n\nReference <available_flags> section in <system-reminder>'s CONTEXT-ENGINE.md"
+        return f"Hint: Unknown flags: {not_found_flags}\n\nAvailable flags: {', '.join(DIRECTIVES.keys())}\n\nReference <available_flags> section in <system-reminder>'s CONTEXT-ENGINE.md"
     
     # Update session with used flags
     if valid_flags:
@@ -215,8 +215,10 @@ def get_directives(flags: List[str]) -> str:
 
     # Build status report
     if duplicate_flags and not reset_requested:
-        # Return simple duplicate error
-        result_parts.append(f"Error: duplicate. Flags already requested: {duplicate_flags}")
+        # Return duplicate hint with guidance
+        result_parts.append(f"Cache: duplicate. Flags already requested: {duplicate_flags}")
+        result_parts.append("\nDirectives already in <system-reminder>.")
+        result_parts.append("IF duplicate AND directives NOT in <system-reminder>: IMMEDIATE get_directives(['--reset', ...flags])")
         result_parts.append("")  # Empty line for separation
     elif reset_requested and (duplicate_flags or new_flags):
         # Reset confirmation message
