@@ -154,7 +154,7 @@ def get_directives(flags: List[str]) -> str:
         # Simplified error response format - removed available_flags field
         with config_lock:
             available_flags = ', '.join(DIRECTIVES.keys())
-        return f"Hint: No flags provided.\n\nAvailable flags: {available_flags}\n\nPlease specify at least one flag."
+        return f"No flags specified.\n\nAvailable flags: {available_flags}\n\nPlease specify at least one flag."
     
     # Handle --reset flag
     reset_requested = False
@@ -204,7 +204,8 @@ def get_directives(flags: List[str]) -> str:
     
     if not_found_flags:
         # Simplified error response format - removed available_flags field
-        return f"Hint: Unknown flags: {not_found_flags}\n\nAvailable flags: {', '.join(DIRECTIVES.keys())}\n\nReference <available_flags> section in <system-reminder>'s SUPERFLAG.md"
+        flag_text = "flag" if len(not_found_flags) == 1 else "flags"
+        return f"Unknown {flag_text}: {not_found_flags}\n\nAvailable flags: {', '.join(DIRECTIVES.keys())}\n\nReference <available_flags> section in <system-reminder>'s SUPERFLAG.md"
     
     # Update session with used flags
     if valid_flags:
@@ -216,7 +217,8 @@ def get_directives(flags: List[str]) -> str:
     # Build status report
     if duplicate_flags and not reset_requested:
         # Return duplicate hint with guidance
-        result_parts.append(f"Cache: duplicate. Flags already requested: {duplicate_flags}")
+        flag_text = "Flag" if len(duplicate_flags) == 1 else "Flags"
+        result_parts.append(f"{flag_text} {duplicate_flags} already active in current session.")
         result_parts.append("\nDirectives already in <system-reminder>.")
         result_parts.append("IF duplicate AND directives NOT in <system-reminder>: IMMEDIATE get_directives(['--reset', ...flags])")
         result_parts.append("")  # Empty line for separation
@@ -224,7 +226,8 @@ def get_directives(flags: List[str]) -> str:
         # Reset confirmation message
         result_parts.append("Session cache cleared.")
         result_parts.append("")  # Empty line for separation
-    elif new_flags:
+
+    if new_flags:
         # New flags announcement
         new_list = []
         for flag in new_flags:
@@ -245,12 +248,12 @@ def get_directives(flags: List[str]) -> str:
             result_parts.append(META_INSTRUCTIONS.get('get_directives', ''))
             result_parts.append("=" * 50)
     else:
-        # All flags were duplicates
-        result_parts.append("All specified flags are already active. See <system-reminder> for active directives.")
-        result_parts.append("\nUse --reset with flags to force re-output of directives.")
+        # All flags were duplicates - no additional message needed
+        pass
 
     # Add applied flags at the end
-    result_parts.append(f"\nApplied flags: {', '.join(valid_flags)}")
+    applied_flag_text = "Applied flag" if len(valid_flags) == 1 else "Applied flags"
+    result_parts.append(f"\n{applied_flag_text}: {', '.join(valid_flags)}")
 
     return "\n".join(result_parts)
 

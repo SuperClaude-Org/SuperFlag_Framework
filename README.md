@@ -243,7 +243,6 @@ Notes
 ```
 
 ### MCP Tools
-- `list_available_flags()` - Shows all 18 flags
 - `get_directives(['--flag1', '--flag2'])` - Activates flags
 
 Development: use `pip install -e .` for editable installs.
