@@ -1,5 +1,5 @@
 [project]
-name = "context-engine-mcp"
+name = "superflag"
 dynamic = ["version"]
 description = "MCP-based contextual flag system for AI assistants"
 readme = "README.md"
@@ -17,28 +17,28 @@ name = "Your Name"
 email = "your.email@example.com"
 
 [project.scripts]
-context-engine-mcp = "context_engine_mcp.__main__:main"
-context-engine = "context_engine_mcp.install:main"
-superflag = "context_engine_mcp.install:main"
+superflag = "superflag.install:main"
+context-engine = "superflag.install:main"
+context-engine-mcp = "superflag.__main__:main"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.version]
-path = "src/context_engine_mcp/__version__.py"
+path = "src/superflag/__version__.py"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/context_engine_mcp"]
+packages = ["src/superflag"]
 include = []
 # Ensure flags.yaml is bundled inside the installed package
 # so importlib.resources can access it at runtime (pipx/pyproject builds)
-force-include = { "flags.yaml" = "context_engine_mcp/flags.yaml" }
+force-include = { "flags.yaml" = "superflag/flags.yaml" }
 
 [tool.hatch.build.targets.sdist]
 # Limit sdist contents to just the project files
 only-include = [
-    "src/context_engine_mcp",
+    "src/superflag",
     "README.md",
     "LICENSE",
     "pyproject.toml",

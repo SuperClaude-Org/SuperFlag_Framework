@@ -47,7 +47,7 @@ def setup_flags_yaml():
     try:
         from importlib.resources import files as pkg_files, as_file
         try:
-            with as_file(pkg_files('context_engine_mcp') / 'flags.yaml') as res_path:
+            with as_file(pkg_files('superflag') / 'flags.yaml') as res_path:
                 if res_path.exists():
                     source_file = res_path
         except Exception:
@@ -60,7 +60,7 @@ def setup_flags_yaml():
         possible_paths = [
             Path(__file__).parent / 'flags.yaml',  # flags.yaml placed inside package
             Path(__file__).parent.parent.parent / "flags.yaml",  # Development root
-            Path(sys.prefix) / "share" / "context-engine-mcp" / "flags.yaml",  # Legacy installed path
+            Path(sys.prefix) / "share" / "superflag" / "flags.yaml",  # Legacy installed path
         ]
         for path in possible_paths:
             if path.exists():
@@ -96,21 +96,21 @@ def ensure_safe_installation():
         from importlib.util import find_spec
         from shutil import which
 
-        module_ok = find_spec('context_engine_mcp') is not None
-        exe_path = which('context-engine-mcp')
+        module_ok = find_spec('superflag') is not None
+        exe_path = which('superflag')
 
         if module_ok and exe_path:
-            print(f"[OK] context-engine-mcp is importable and on PATH: {exe_path}")
+            print(f"[OK] superflag is importable and on PATH: {exe_path}")
             return True
 
         if module_ok and not exe_path:
-            print("[WARN] context-engine-mcp module is importable, but entrypoint not found on PATH.")
+            print("[WARN] superflag module is importable, but entrypoint not found on PATH.")
             print("  Ensure your Python Scripts directory is on PATH, then try again.")
             print("  Example (PowerShell): $env:Path += ';' + (Split-Path $(python -c 'import sys;print(sys.executable)')) + '\\Scripts'")
             return False
 
         # Module not importable - likely not installed in current interpreter
-        print("[WARN] context-engine-mcp is not installed in this Python environment.")
+        print("[WARN] superflag is not installed in this Python environment.")
         print("  Install or upgrade via: python -m pip install -U context-engine-mcp")
         return False
 
@@ -355,7 +355,7 @@ mcpServers:
 # mcpServers:
 # - name: context-engine
 #   command: python
-#   args: ["-m", "context_engine_mcp"]
+#   args: ["-m", "superflag"]
 #   env: {{}}
 
 """
@@ -506,7 +506,7 @@ def kill_context_engine_processes():
     Safety rules:
     - Skip current PID
     - Skip common shells (bash, zsh, sh, fish, powershell, cmd)
-    - Only kill if the executable is python* with a cmdline referencing context_engine_mcp
+    - Only kill if the executable is python* with a cmdline referencing superflag
       or if the executable itself is context-engine-mcp
     """
     killed = []
@@ -554,7 +554,7 @@ def kill_context_engine_processes():
                 )
                 is_python_running_server = (
                     exe.startswith('python') and (
-                        'context-engine-mcp' in joined or 'context_engine_mcp' in joined
+                        'superflag' in joined
                     )
                 )
 

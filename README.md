@@ -1,4 +1,10 @@
-# Context Engine MCP
+# SuperFlag (formerly Context Engine MCP)
+
+> **⚠️ MIGRATION NOTICE**: If you previously installed `context-engine-mcp`, please uninstall it and install `superflag` instead:
+> ```bash
+> pip uninstall context-engine-mcp
+> pip install superflag
+> ```
 
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-supported-F37435)
 ![Gemini CLI](https://img.shields.io/badge/Gemini%20CLI-supported-1ABC9C)
@@ -12,13 +18,13 @@ Context Engine provides 18 contextual flags that guide assistant behavior (e.g.,
 
 ```bash
 # Install (recommended)
-pipx install context-engine-mcp
+pipx install superflag
 
 # For Claude Code
-context-engine install
+superflag install
 
-# For Continue 
-context-engine install --target cn
+# For Continue
+superflag install --target cn
 ```
 
 Then in your client/assistant, use prompts with flags:
