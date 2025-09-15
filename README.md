@@ -3,7 +3,7 @@
 > **⚠️ MIGRATION NOTICE**: If you previously installed `context-engine-mcp`, please uninstall it and install `superflag` instead:
 > ```bash
 > pip uninstall context-engine-mcp
-> pip install superflag
+> pipx install superflag
 > ```
 
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-supported-F37435)
