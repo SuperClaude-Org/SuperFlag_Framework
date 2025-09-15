@@ -72,10 +72,10 @@ Register the MCP server with Claude CLI:
 # Choose ONE of these commands:
 
 # Standard Python installation
-claude mcp add -s user -- superflag superflag-server
+claude mcp add -s user -- superflag
 
-# UV installation  
-claude mcp add -s user -- superflag uv run superflag-server
+# UV installation
+claude mcp add -s user -- uv run superflag
 
 # Custom command
 claude mcp add -s user -- superflag <your-command>
@@ -97,12 +97,12 @@ Edit `~/.continue/mcpServers/superflag.yaml` and uncomment ONE option:
 ```yaml
 # Option 1: Standard Python (most common)
 name: SuperFlag
-command: superflag-server
+command: superflag
 
 # Option 2: UV installation  
 # name: SuperFlag
 # command: uv
-# args: ["run", "superflag-server"]
+# args: ["run", "superflag"]
 
 # Option 3: Custom installation
 # name: SuperFlag
@@ -114,7 +114,7 @@ Restart VS Code, then type `@` in Continue chat to access MCP tools.
 ### Gemini CLI
 ```bash
 # Install package
-pipx install context-engine-mcp
+pipx install superflag
 
 # Install configuration files for Gemini CLI
 superflag install --target gemini-cli
@@ -126,7 +126,7 @@ This command:
 
 It does not modify `~/.gemini/settings.json`.
 If required, register the MCP stdio command in Gemini CLI settings:
-  - Command: `superflag-server`
+  - Command: `superflag`
   - Args: `[]`
   - Transport: stdio
 
