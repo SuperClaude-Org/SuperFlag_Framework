@@ -13,8 +13,8 @@ dependencies = [
 ]
 
 [[project.authors]]
-name = "Your Name"
-email = "your.email@example.com"
+name = "Hyunjae Lim"
+email = "thecurrent.lim@gmail.com"
 
 [project.scripts]
 superflag = "superflag.cli:main"
