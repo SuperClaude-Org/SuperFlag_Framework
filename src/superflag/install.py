@@ -479,7 +479,7 @@ def install(target="claude-code"):
         print("   - Available flags are listed in system prompt")
         print("   - get_directives(['--analyze', '--performance']) - Activate modes")
         print("   - Use '--auto' to let AI select optimal flags")
-        print("\n[DOCS] Documentation: ~/.claude/CONTEXT-ENGINE.md")
+        print("\n[DOCS] Documentation: ~/.claude/SUPERFLAG.md")
     elif target == "cn":
         print("\n[NEXT] Next steps for Continue:")
         print("1. [EDIT] Edit context-engine configuration:")
@@ -603,16 +603,16 @@ def uninstall_claude_code():
     results.extend(kill_context_engine_processes())
     
     try:
-        # 1. Remove @CONTEXT-ENGINE.md reference from CLAUDE.md
+        # 1. Remove @SUPERFLAG.md reference from CLAUDE.md
         claude_md = home / ".claude" / "CLAUDE.md"
         if claude_md.exists():
             content = claude_md.read_text(encoding='utf-8')
-            if "@CONTEXT-ENGINE.md" in content:
-                new_content = content.replace("\n\n@CONTEXT-ENGINE.md", "").replace("\n@CONTEXT-ENGINE.md", "").replace("@CONTEXT-ENGINE.md", "")
+            if "@SUPERFLAG.md" in content:
+                new_content = content.replace("\n\n@SUPERFLAG.md", "").replace("\n@SUPERFLAG.md", "").replace("@SUPERFLAG.md", "")
                 claude_md.write_text(new_content, encoding='utf-8')
-                results.append("[COMPLETE] Removed @CONTEXT-ENGINE.md reference from CLAUDE.md")
+                results.append("[COMPLETE] Removed @SUPERFLAG.md reference from CLAUDE.md")
             else:
-                results.append("[INFO] @CONTEXT-ENGINE.md reference not found in CLAUDE.md")
+                results.append("[INFO] @SUPERFLAG.md reference not found in CLAUDE.md")
 
         # 2. Remove hook from Claude Code settings.json
         settings_path = home / ".claude" / "settings.json"
@@ -654,8 +654,8 @@ def uninstall_claude_code():
         else:
             results.append("[INFO] Hook file not found")
 
-        # 4. Remove CONTEXT-ENGINE.md file with retry
-        context_engine_md = home / ".claude" / "CONTEXT-ENGINE.md"
+        # 4. Remove SUPERFLAG.md file with retry
+        context_engine_md = home / ".claude" / "SUPERFLAG.md"
         success, message = delete_with_retry(context_engine_md)
         results.append(message)
             
@@ -756,8 +756,8 @@ def uninstall_continue():
 def uninstall_gemini():
     """Remove Context Engine references from Gemini configuration (~/.gemini)
 
-    - Remove @CONTEXT-ENGINE.md reference from GEMINI.md (if present)
-    - Remove CONTEXT-ENGINE.md file
+    - Remove @SUPERFLAG.md reference from GEMINI.md (if present)
+    - Remove SUPERFLAG.md file
     - Be forgiving if files/dirs don't exist
     """
     results = []
@@ -767,19 +767,19 @@ def uninstall_gemini():
         gemini_md = home / ".gemini" / "GEMINI.md"
         if gemini_md.exists():
             content = gemini_md.read_text(encoding='utf-8')
-            if "@CONTEXT-ENGINE.md" in content:
+            if "@SUPERFLAG.md" in content:
                 new_content = (
                     content
-                    .replace("\n\n@CONTEXT-ENGINE.md", "")
-                    .replace("\n@CONTEXT-ENGINE.md", "")
-                    .replace("@CONTEXT-ENGINE.md", "")
+                    .replace("\n\n@SUPERFLAG.md", "")
+                    .replace("\n@SUPERFLAG.md", "")
+                    .replace("@SUPERFLAG.md", "")
                 )
                 gemini_md.write_text(new_content, encoding='utf-8')
-                results.append("[COMPLETE] Removed @CONTEXT-ENGINE.md reference from GEMINI.md")
+                results.append("[COMPLETE] Removed @SUPERFLAG.md reference from GEMINI.md")
             else:
-                results.append("[INFO] @CONTEXT-ENGINE.md reference not found in GEMINI.md")
+                results.append("[INFO] @SUPERFLAG.md reference not found in GEMINI.md")
 
-        context_engine_md = home / ".gemini" / "CONTEXT-ENGINE.md"
+        context_engine_md = home / ".gemini" / "SUPERFLAG.md"
         success, message = delete_with_retry(context_engine_md)
         results.append(message)
 

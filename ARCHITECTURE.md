@@ -66,9 +66,9 @@ The `--auto` flag enables AI to analyze task context and automatically select op
 - Version-controlled defaults with user override capability
 
 #### 4. Priming Strategy
-**Decision**: Place CONTEXT-ENGINE.md references in configuration files and session priming
+**Decision**: Place SUPERFLAG.md references in configuration files and session priming
 **Rationale**:
-- Claude Code/Gemini: @CONTEXT-ENGINE.md reference in CLAUDE.md/GEMINI.md
+- Claude Code/Gemini: @SUPERFLAG.md reference in CLAUDE.md/GEMINI.md
 - Continue: rules section in config.yaml
 - Initial session priming with --auto or tool mention enhances compliance
 - Reference pattern establishes mental model

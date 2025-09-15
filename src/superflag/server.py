@@ -204,7 +204,7 @@ def get_directives(flags: List[str]) -> str:
     
     if not_found_flags:
         # Simplified error response format - removed available_flags field
-        return f"Hint: Unknown flags: {not_found_flags}\n\nAvailable flags: {', '.join(DIRECTIVES.keys())}\n\nReference <available_flags> section in <system-reminder>'s CONTEXT-ENGINE.md"
+        return f"Hint: Unknown flags: {not_found_flags}\n\nAvailable flags: {', '.join(DIRECTIVES.keys())}\n\nReference <available_flags> section in <system-reminder>'s SUPERFLAG.md"
     
     # Update session with used flags
     if valid_flags:

@@ -138,7 +138,7 @@ META-RULES:
 ✓ Learn from every interaction
 
 VERIFICATION:
-☐ Flags retrieved from <available_flags> section in CONTEXT-ENGINE.md
+☐ Flags retrieved from <available_flags> section in SUPERFLAG.md
 ☐ Directives obtained via get_directives()
 ☐ Work plan aligned with directives
 ☐ Continuous compliance during execution
@@ -160,17 +160,17 @@ CLAUDE_SYSTEM_PROMPT = None  # Will be set when needed
 CONTINUE_RULES = None  # Will be set when needed
 
 def setup_claude_context_files():
-    """Set up CLAUDE.md with @CONTEXT-ENGINE.md reference"""
+    """Set up CLAUDE.md with @SUPERFLAG.md reference"""
     from pathlib import Path
 
     claude_dir = Path.home() / ".claude"
     claude_md = claude_dir / "CLAUDE.md"
-    context_engine_md = claude_dir / "CONTEXT-ENGINE.md"
+    context_engine_md = claude_dir / "SUPERFLAG.md"
 
     # Ensure directory exists
     claude_dir.mkdir(parents=True, exist_ok=True)
 
-    # Always update CONTEXT-ENGINE.md (allows updates)
+    # Always update SUPERFLAG.md (allows updates)
     try:
         # Generate content at setup time
         content = get_prompt_content()
@@ -178,15 +178,15 @@ def setup_claude_context_files():
             f.write(content)
         print(f"[OK] Updated {context_engine_md}")
     except Exception as e:
-        print(f"[WARN] Could not write CONTEXT-ENGINE.md: {e}")
+        print(f"[WARN] Could not write SUPERFLAG.md: {e}")
         return False
 
-    # Ensure CLAUDE.md references CONTEXT-ENGINE.md
-    reference = "@CONTEXT-ENGINE.md"
+    # Ensure CLAUDE.md references SUPERFLAG.md
+    reference = "@SUPERFLAG.md"
     if claude_md.exists():
         content = claude_md.read_text(encoding='utf-8')
         if reference in content:
-            print("[OK] CLAUDE.md already references CONTEXT-ENGINE.md")
+            print("[OK] CLAUDE.md already references SUPERFLAG.md")
             return True
 
     try:
@@ -194,24 +194,24 @@ def setup_claude_context_files():
             if claude_md.exists() and claude_md.stat().st_size > 0:
                 f.write("\n\n")
             f.write(reference)
-        print(f"[OK] Added @CONTEXT-ENGINE.md reference to CLAUDE.md")
+        print(f"[OK] Added @SUPERFLAG.md reference to CLAUDE.md")
         return True
     except Exception as e:
         print(f"[WARN] Could not update CLAUDE.md: {e}")
         return False
 
 def setup_gemini_context_files():
-    """Set up GEMINI.md with @CONTEXT-ENGINE.md reference in ~/.gemini"""
+    """Set up GEMINI.md with @SUPERFLAG.md reference in ~/.gemini"""
     from pathlib import Path
 
     gemini_dir = Path.home() / ".gemini"
     gemini_md = gemini_dir / "GEMINI.md"
-    context_engine_md = gemini_dir / "CONTEXT-ENGINE.md"
+    context_engine_md = gemini_dir / "SUPERFLAG.md"
 
     # Ensure directory exists
     gemini_dir.mkdir(parents=True, exist_ok=True)
 
-    # Always update CONTEXT-ENGINE.md (allows updates)
+    # Always update SUPERFLAG.md (allows updates)
     try:
         # Generate content at setup time
         content = get_prompt_content()
@@ -219,15 +219,15 @@ def setup_gemini_context_files():
             f.write(content)
         print(f"[OK] Updated {context_engine_md}")
     except Exception as e:
-        print(f"[WARN] Could not write CONTEXT-ENGINE.md: {e}")
+        print(f"[WARN] Could not write SUPERFLAG.md: {e}")
         return False
 
     # Check and update GEMINI.md reference
-    reference = "@CONTEXT-ENGINE.md"
+    reference = "@SUPERFLAG.md"
     if gemini_md.exists():
         content = gemini_md.read_text(encoding='utf-8')
         if reference in content:
-            print("[OK] GEMINI.md already references CONTEXT-ENGINE.md")
+            print("[OK] GEMINI.md already references SUPERFLAG.md")
             return True
 
     # Append reference to GEMINI.md
@@ -236,7 +236,7 @@ def setup_gemini_context_files():
             if gemini_md.exists() and gemini_md.stat().st_size > 0:
                 f.write("\n\n")
             f.write(reference)
-        print(f"[OK] Added @CONTEXT-ENGINE.md reference to GEMINI.md")
+        print(f"[OK] Added @SUPERFLAG.md reference to GEMINI.md")
         return True
     except Exception as e:
         print(f"[WARN] Could not update GEMINI.md: {e}")

@@ -81,7 +81,7 @@ claude mcp add -s user -- superflag uv run superflag-server
 claude mcp add -s user -- superflag <your-command>
 ```
 
-This also writes `~/.claude/CONTEXT-ENGINE.md` and appends a reference to `~/.claude/CLAUDE.md`.
+This also writes `~/.claude/SUPERFLAG.md` and appends a reference to `~/.claude/CLAUDE.md`.
 
 ### Continue Extension  
 ```bash
@@ -121,8 +121,8 @@ superflag install --target gemini-cli
 ```
 
 This command:
-- Appends `@CONTEXT-ENGINE.md` to `~/.gemini/GEMINI.md` (adds once; no duplicate)
-- Writes latest instructions to `~/.gemini/CONTEXT-ENGINE.md`
+- Appends `@SUPERFLAG.md` to `~/.gemini/GEMINI.md` (adds once; no duplicate)
+- Writes latest instructions to `~/.gemini/SUPERFLAG.md`
 
 It does not modify `~/.gemini/settings.json`.
 If required, register the MCP stdio command in Gemini CLI settings:
@@ -279,8 +279,8 @@ Behavior
 
 ```
 ~/.claude/
-├── CLAUDE.md                     # References @CONTEXT-ENGINE.md
-├── CONTEXT-ENGINE.md             # Flag instructions (auto-updated)
+├── CLAUDE.md                     # References @SUPERFLAG.md
+├── SUPERFLAG.md             # Flag instructions (auto-updated)
 ├── hooks/
 │   └── superflag.py              # Hook for flag detection (Claude Code only)
 └── settings.json                 # Updated with hook registration (Claude Code only)
@@ -296,8 +296,8 @@ Behavior
 └── flags.yaml          # Flag definitions
 
 ~/.gemini/
-├── GEMINI.md           # References @CONTEXT-ENGINE.md
-└── CONTEXT-ENGINE.md   # Flag instructions (auto-updated)
+├── GEMINI.md           # References @SUPERFLAG.md
+└── SUPERFLAG.md   # Flag instructions (auto-updated)
 ```
 
 ## Uninstallation
@@ -312,9 +312,9 @@ pipx uninstall superflag
 
 Note: During uninstallation, `~/.superflag/flags.yaml` is backed up to `~/flags.yaml.backup_YYYYMMDD_HHMMSS` before removal. During installation, existing flags.yaml is backed up and updated to the latest version.
 
-Claude Code note: Uninstall removes the `@CONTEXT-ENGINE.md` reference from `~/.claude/CLAUDE.md`, deletes `~/.claude/CONTEXT-ENGINE.md` if present, removes the hook file from `~/.claude/hooks/superflag.py`, and removes the hook registration from `~/.claude/settings.json`.
+Claude Code note: Uninstall removes the `@SUPERFLAG.md` reference from `~/.claude/CLAUDE.md`, deletes `~/.claude/SUPERFLAG.md` if present, removes the hook file from `~/.claude/hooks/superflag.py`, and removes the hook registration from `~/.claude/settings.json`.
 
-Gemini CLI note: Uninstall removes the `@CONTEXT-ENGINE.md` reference from `~/.gemini/GEMINI.md` and deletes `~/.gemini/CONTEXT-ENGINE.md` if present.
+Gemini CLI note: Uninstall removes the `@SUPERFLAG.md` reference from `~/.gemini/GEMINI.md` and deletes `~/.gemini/SUPERFLAG.md` if present.
 
 Continue note: Uninstall removes the Context Engine rules from `~/.continue/config.yaml` (when present) and deletes `~/.continue/mcpServers/context-engine.yaml` if present.
 
