@@ -10,6 +10,7 @@ import json
 import sys
 import time
 import subprocess
+
 try:
     import psutil
 except ImportError:
@@ -430,21 +431,21 @@ def install(target="claude-code"):
     # Show what will be created/modified
     if target == "claude-code":
         print(f"  {CYAN}Files to create/modify:{RESET}")
-        print(f"    • Create: ~/.superflag/flags.yaml")
-        print(f"    • Create: ~/.claude/SUPERFLAG.md")
-        print(f"    • Create: ~/.claude/hooks/superflag.py")
-        print(f"    • Modify: ~/.claude/CLAUDE.md (add @SUPERFLAG.md)")
-        print(f"    • Modify: ~/.claude/settings.json (add hook)")
+        print(f"    * Create: ~/.superflag/flags.yaml")
+        print(f"    * Create: ~/.claude/SUPERFLAG.md")
+        print(f"    * Create: ~/.claude/hooks/superflag.py")
+        print(f"    * Modify: ~/.claude/CLAUDE.md (add @SUPERFLAG.md)")
+        print(f"    * Modify: ~/.claude/settings.json (add hook)")
     elif target in ["cn", "continue"]:
         print(f"  {CYAN}Files to create/modify:{RESET}")
-        print(f"    • Create: ~/.superflag/flags.yaml")
-        print(f"    • Create: ~/.continue/mcpServers/superflag.yaml")
-        print(f"    • Modify: ~/.continue/config.yaml (add rules)")
+        print(f"    * Create: ~/.superflag/flags.yaml")
+        print(f"    * Create: ~/.continue/mcpServers/superflag.yaml")
+        print(f"    * Modify: ~/.continue/config.yaml (add rules)")
     elif target in ["gemini-cli", "gemini"]:
         print(f"  {CYAN}Files to create/modify:{RESET}")
-        print(f"    • Create: ~/.superflag/flags.yaml")
-        print(f"    • Create: ~/.gemini/SUPERFLAG.md")
-        print(f"    • Modify: ~/.gemini/GEMINI.md (add @SUPERFLAG.md)")
+        print(f"    * Create: ~/.superflag/flags.yaml")
+        print(f"    * Create: ~/.gemini/SUPERFLAG.md")
+        print(f"    * Modify: ~/.gemini/GEMINI.md (add @SUPERFLAG.md)")
     print()
     
     # Get home directory for later use
@@ -457,10 +458,10 @@ def install(target="claude-code"):
 
     # 1. Set up flags.yaml
     if setup_flags_yaml():
-        print(f"  {GREEN}✓{RESET} flags.yaml configured (~/.superflag/flags.yaml)")
+        print(f"  {GREEN}[OK]{RESET} flags.yaml configured (~/.superflag/flags.yaml)")
         success_count += 1
     else:
-        print(f"  {RED}✗{RESET} flags.yaml setup failed")
+        print(f"  {RED}[X]{RESET} flags.yaml setup failed")
         error_count += 1
     
     # 2. Install based on target
@@ -472,22 +473,22 @@ def install(target="claude-code"):
 
             # Setup CLAUDE.md
             if setup_claude_context_files():
-                print(f"  {GREEN}✓{RESET} Context files updated (~/.claude/)")
+                print(f"  {GREEN}[OK]{RESET} Context files updated (~/.claude/)")
                 success_count += 1
             else:
-                print(f"  {YELLOW}⚠{RESET} Context files skipped")
+                print(f"  {YELLOW}[!]{RESET} Context files skipped")
 
             # Setup Claude Code Hooks
             if setup_claude_code_hooks():
-                print(f"  {GREEN}✓{RESET} Hook registered (~/.claude/hooks/)")
+                print(f"  {GREEN}[OK]{RESET} Hook registered (~/.claude/hooks/)")
                 success_count += 1
             else:
-                print(f"  {YELLOW}⚠{RESET} Hook setup skipped (MCP will still work)")
+                print(f"  {YELLOW}[!]{RESET} Hook setup skipped (MCP will still work)")
 
-            print(f"  {GREEN}✓{RESET} MCP server ready")
+            print(f"  {GREEN}[OK]{RESET} MCP server ready")
             success_count += 1
         else:
-            print(f"  {RED}✗{RESET} Claude CLI not found")
+            print(f"  {RED}[X]{RESET} Claude CLI not found")
             print(f"\n{YELLOW}Install Claude Code first: npm install -g @anthropic/claude-code{RESET}")
             error_count += 1
     
@@ -920,23 +921,23 @@ def uninstall():
 
     if "claude-code" in installed_targets:
         print(f"  {CYAN}Claude Code:{RESET}")
-        print(f"    • Modify: CLAUDE.md (remove @SUPERFLAG.md)")
-        print(f"    • Modify: settings.json (remove hook)")
-        print(f"    • Delete: SUPERFLAG.md, hooks/superflag.py")
+        print(f"    * Modify: CLAUDE.md (remove @SUPERFLAG.md)")
+        print(f"    * Modify: settings.json (remove hook)")
+        print(f"    * Delete: SUPERFLAG.md, hooks/superflag.py")
 
     if "continue" in installed_targets:
         print(f"  {CYAN}Continue:{RESET}")
-        print(f"    • Modify: config.yaml (remove rules)")
-        print(f"    • Delete: mcpServers/superflag.yaml")
+        print(f"    * Modify: config.yaml (remove rules)")
+        print(f"    * Delete: mcpServers/superflag.yaml")
 
     if "gemini" in installed_targets:
         print(f"  {CYAN}Gemini CLI:{RESET}")
-        print(f"    • Modify: GEMINI.md (remove @SUPERFLAG.md)")
-        print(f"    • Delete: SUPERFLAG.md")
+        print(f"    * Modify: GEMINI.md (remove @SUPERFLAG.md)")
+        print(f"    * Delete: SUPERFLAG.md")
 
     if (home / ".superflag" / "flags.yaml").exists():
         print(f"  {CYAN}Common:{RESET}")
-        print(f"    • Backup & Delete: ~/.superflag/flags.yaml")
+        print(f"    * Backup & Delete: ~/.superflag/flags.yaml")
     print()
 
     success_items = []
@@ -958,9 +959,9 @@ def uninstall():
                     if "backup_" in result:
                         backup_path = result.split("backup_")[1].split()[0]
             if any("[COMPLETE]" in r for r in claude_results):
-                print(f"  {GREEN}✓{RESET} Claude Code cleaned")
+                print(f"  {GREEN}[OK]{RESET} Claude Code cleaned")
         except Exception as e:
-            print(f"  {RED}✗{RESET} Failed to clean Claude Code")
+            print(f"  {RED}[X]{RESET} Failed to clean Claude Code")
             error_items.append(str(e))
             claude_results = []
     else:
@@ -976,9 +977,9 @@ def uninstall():
                 elif "[ERROR]" in result or "[WARN]" in result:
                     error_items.append(result)
             if any("[COMPLETE]" in r for r in continue_results) or any("[INFO]" in r for r in continue_results):
-                print(f"  {GREEN}✓{RESET} Continue cleaned")
+                print(f"  {GREEN}[OK]{RESET} Continue cleaned")
         except Exception as e:
-            print(f"  {RED}✗{RESET} Failed to clean Continue")
+            print(f"  {RED}[X]{RESET} Failed to clean Continue")
             error_items.append(str(e))
             continue_results = []
     else:
@@ -994,9 +995,9 @@ def uninstall():
                 elif "[ERROR]" in result or "[WARN]" in result:
                     error_items.append(result)
             if any("[COMPLETE]" in r for r in gemini_results) or any("[INFO]" in r for r in gemini_results):
-                print(f"  {GREEN}✓{RESET} Gemini cleaned")
+                print(f"  {GREEN}[OK]{RESET} Gemini cleaned")
         except Exception as e:
-            print(f"  {RED}✗{RESET} Failed to clean Gemini")
+            print(f"  {RED}[X]{RESET} Failed to clean Gemini")
             error_items.append(str(e))
             gemini_results = []
     else:
@@ -1015,11 +1016,11 @@ def uninstall():
                 error_items.append(result)
         if any("[COMPLETE]" in r for r in cleanup_results):
             if backup_path:
-                print(f"  {GREEN}✓{RESET} Backup created: flags.yaml.backup_{backup_path}")
+                print(f"  {GREEN}[OK]{RESET} Backup created: flags.yaml.backup_{backup_path}")
             else:
-                print(f"  {GREEN}✓{RESET} Files cleaned")
+                print(f"  {GREEN}[OK]{RESET} Files cleaned")
     except Exception as e:
-        print(f"  {RED}✗{RESET} Failed to clean common files")
+        print(f"  {RED}[X]{RESET} Failed to clean common files")
         error_items.append(str(e))
         cleanup_results = []
     
