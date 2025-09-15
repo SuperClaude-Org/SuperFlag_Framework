@@ -60,10 +60,10 @@ Then in your client/assistant, use prompts with flags:
 ### Claude Code
 ```bash
 # Install package
-pipx install context-engine-mcp
+pipx install superflag
 
 # Install configuration files
-context-engine install
+superflag install
 ```
 
 Register the MCP server with Claude CLI:
@@ -72,13 +72,13 @@ Register the MCP server with Claude CLI:
 # Choose ONE of these commands:
 
 # Standard Python installation
-claude mcp add -s user -- context-engine context-engine-mcp
+claude mcp add -s user -- superflag superflag-server
 
 # UV installation  
-claude mcp add -s user -- context-engine uv run context-engine-mcp
+claude mcp add -s user -- superflag uv run superflag-server
 
 # Custom command
-claude mcp add -s user -- context-engine <your-command>
+claude mcp add -s user -- superflag <your-command>
 ```
 
 This also writes `~/.claude/CONTEXT-ENGINE.md` and appends a reference to `~/.claude/CLAUDE.md`.
@@ -86,26 +86,26 @@ This also writes `~/.claude/CONTEXT-ENGINE.md` and appends a reference to `~/.cl
 ### Continue Extension  
 ```bash
 # Install package
-pipx install context-engine-mcp
+pipx install superflag
 
 # Install configuration files
-context-engine install --target cn
+superflag install --target cn
 ```
 
 Edit `~/.continue/mcpServers/context-engine.yaml` and uncomment ONE option:
 
 ```yaml
 # Option 1: Standard Python (most common)
-name: Context Engine MCP
-command: context-engine-mcp
+name: SuperFlag
+command: superflag-server
 
 # Option 2: UV installation  
-# name: Context Engine MCP
+# name: SuperFlag
 # command: uv
-# args: ["run", "context-engine-mcp"]
+# args: ["run", "superflag-server"]
 
 # Option 3: Custom installation
-# name: Context Engine MCP  
+# name: SuperFlag
 # command: <your-custom-command>
 ```
 
@@ -117,7 +117,7 @@ Restart VS Code, then type `@` in Continue chat to access MCP tools.
 pipx install context-engine-mcp
 
 # Install configuration files for Gemini CLI
-context-engine install --target gemini-cli
+superflag install --target gemini-cli
 ```
 
 This command:
@@ -126,7 +126,7 @@ This command:
 
 It does not modify `~/.gemini/settings.json`.
 If required, register the MCP stdio command in Gemini CLI settings:
-  - Command: `context-engine-mcp`
+  - Command: `superflag-server`
   - Args: `[]`
   - Transport: stdio
 
@@ -139,7 +139,7 @@ MCP registration (example)
   "mcpServers": {
     "context-engine": {
       "type": "stdio",
-      "command": "context-engine-mcp",
+      "command": "superflag",
       "args": [],
       "env": {}
     }
@@ -171,7 +171,7 @@ Common setups
   "mcpServers": {
     "context-engine": {
       "type": "stdio",
-      "command": "context-engine-mcp",
+      "command": "superflag",
       "args": [],
       "env": {}
     }
@@ -186,7 +186,7 @@ Common setups
     "context-engine": {
       "type": "stdio",
       "command": "uv",
-      "args": ["run", "context-engine-mcp"],
+      "args": ["run", "superflag"],
       "env": {}
     }
   }
@@ -199,7 +199,7 @@ Common setups
   "mcpServers": {
     "context-engine": {
       "type": "stdio",
-      "command": "C:\\path\\to\\venv\\Scripts\\context-engine.exe",
+      "command": "C:\\path\\to\\venv\\Scripts\\superflag.exe",
       "args": [],
       "env": {}
     }
@@ -214,7 +214,7 @@ Common setups
     "context-engine": {
       "type": "stdio",
       "command": "/path/to/venv/bin/python",
-      "args": ["-m", "context_engine_mcp"],
+      "args": ["-m", "superflag"],
       "env": {}
     }
   }
@@ -304,10 +304,10 @@ Behavior
 
 ```bash
 # Complete uninstall from all environments (Claude Code + Continue)
-context-engine uninstall
+superflag uninstall
 
 # Remove Python package
-pipx uninstall context-engine-mcp
+pipx uninstall superflag
 ```
 
 Note: During uninstallation, `~/.context-engine/flags.yaml` is backed up to `~/flags.yaml.backup_YYYYMMDD_HHMMSS` before removal. During installation, existing flags.yaml is backed up and updated to the latest version.
