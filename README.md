@@ -32,28 +32,33 @@ Then in your client/assistant, use prompts with flags:
 - "--save" (handoff documentation)
 - "Analyze --strict" (precise, zero-tolerance mode)
 
-## 18 Flags
+## 23 Flags
 
 | Flag | Purpose |
 |------|---------|
 | `--analyze` | Multi-angle systematic analysis |
 | `--auto` | AI selects optimal flag combination |
+| `--brainstorm` | Collaborative discovery for vague requests |
 | `--collab` | Co-develop solutions through trust-based iteration |
+| `--commit` | Anonymous commits without attribution |
 | `--concise` | Minimal communication |
+| `--delegate` | Delegate tasks to specialized agents |
 | `--discover` | Discover existing solutions before building new |
 | `--explain` | Progressive disclosure |
-| `--commit` | Anonymous commits without attribution |
+| `--introspect` | Transparent thinking with process markers |
 | `--lean` | Essential focus only |
 | `--load` | Load handoff documentation |
-| `--delegate` | Delegate tasks to specialized agents |
+| `--loop` | Iterative improvement cycles |
 | `--performance` | Speed and efficiency optimization |
 | `--readonly` | Analysis only mode |
 | `--refactor` | Code quality improvement |
 | `--reset` | Reset all flag states to new (clears session cache) |
+| `--safe-mode` | Maximum safety for production environments |
 | `--save` | Handoff documentation |
 | `--seq` | Sequential thinking |
 | `--strict` | Zero-error enforcement |
 | `--todo` | Task management |
+| `--validate` | Pre-execution risk assessment |
 
 ## Installation
 

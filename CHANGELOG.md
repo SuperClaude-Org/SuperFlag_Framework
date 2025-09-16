@@ -2,6 +2,13 @@ Changelog
 
 ## Unreleased
 
+### Added
+- Added `--validate` flag for pre-execution risk assessment and validation
+- Added `--safe-mode` flag for maximum safety in production environments
+- Added `--loop` flag for iterative improvement cycles
+- Added `--brainstorm` flag for collaborative discovery with vague requests
+- Added `--introspect` flag for transparent thinking process with visual markers
+
 ### Changed
 - Renamed `--git` flag to `--commit` for better clarity
 - Renamed `--parallel` flag to `--delegate` for consistency with SuperClaude Framework

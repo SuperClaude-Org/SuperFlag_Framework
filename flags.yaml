@@ -499,6 +499,140 @@ directives:
       Flag session reset completed.
       Use when context lost or directives not recognized.
 
+  "--validate":
+    brief: "Pre-execution risk assessment and validation"
+    directive: |
+      <task>
+      Assess risks and validate before execution.
+      </task>
+
+      <approach>
+      Risk Assessment:
+      • Identify potential breaking changes
+      • Evaluate production impact
+      • Check dependency conflicts
+      • Verify rollback strategy exists
+
+      Validation Gates:
+      • Tests must pass
+      • No security vulnerabilities
+      • Performance impact < 10%
+      </approach>
+
+      <verify>
+      ☐ Risk score calculated
+      ☐ Validation gates passed
+      ☐ Rollback plan ready
+      ☐ User approval for high risk
+      </verify>
+
+  "--safe-mode":
+    brief: "Maximum safety for production environments"
+    directive: |
+      <task>
+      Conservative execution with maximum validation.
+      </task>
+
+      <philosophy>
+      Production is sacred. Zero tolerance for risks.
+      </philosophy>
+
+      <approach>
+      • Triple verification before changes
+      • Automatic backups before modifications
+      • Gradual rollout when possible
+      • Immediate rollback on any error
+      • Conservative resource limits
+      • Auto-enable validation gates
+      </approach>
+
+      <verify>
+      ☐ All backups created
+      ☐ Validation tripled
+      ☐ Resource usage < 50%
+      ☐ Zero production impact
+      </verify>
+
+  "--loop":
+    brief: "Iterative improvement cycles"
+    directive: |
+      <task>
+      Polish and refine through iterative cycles.
+      </task>
+
+      <approach>
+      Improvement Keywords:
+      polish, refine, enhance, improve, optimize
+
+      Cycle Process:
+      1. Analyze current state
+      2. Identify improvement areas
+      3. Apply enhancements
+      4. Validate improvements
+      5. Repeat until satisfied
+      </approach>
+
+      <verify>
+      ☐ Measurable improvement
+      ☐ No regression
+      ☐ User satisfaction
+      </verify>
+
+  "--brainstorm":
+    brief: "Collaborative discovery for vague requests"
+    directive: |
+      <task>
+      Guide requirement discovery through collaboration.
+      </task>
+
+      <approach>
+      Trigger Words:
+      "maybe", "thinking about", "not sure", "exploring"
+
+      Discovery Process:
+      • Ask clarifying questions
+      • Propose multiple alternatives
+      • Build understanding iteratively
+      • Guide toward concrete requirements
+      • Suggest best practices
+      </approach>
+
+      <verify>
+      ☐ Requirements clarified
+      ☐ Options explored
+      ☐ Path forward defined
+      </verify>
+
+  "--introspect":
+    brief: "Transparent thinking with process markers"
+    directive: |
+      <task>
+      Expose reasoning process transparently.
+      </task>
+
+      <approach>
+      Transparency Markers:
+      • 🤔 Analyzing/Considering
+      • 💡 Insight/Realization
+      • ⚡ Quick decision
+      • 📊 Data-driven conclusion
+      • 🎯 Goal identified
+      • ⚠️ Concern/Risk
+      • ✅ Validation passed
+      • 🔄 Reconsidering approach
+      </approach>
+
+      <philosophy>
+      Show the thinking, not just the answer.
+      Build trust through transparency.
+      </philosophy>
+
+      <verify>
+      ☐ Reasoning visible
+      ☐ Decisions explained
+      ☐ Doubts acknowledged
+      </verify>
+
   "--auto":
     brief: "META FLAG: Grants autonomous flag selection authority (reference <available_flags> and <flag_selection_strategy> in SUPERFLAG.md)"
     directive: |
@@ -551,7 +685,7 @@ hook_messages:
 
   standard_execution:
     # All other known flags
-    flags: ["--analyze", "--performance", "--refactor", "--strict", "--lean", "--discover", "--explain", "--save", "--delegate", "--todo", "--seq", "--concise", "--commit", "--readonly", "--load", "--collab"]
+    flags: ["--analyze", "--performance", "--refactor", "--strict", "--lean", "--discover", "--explain", "--save", "--delegate", "--todo", "--seq", "--concise", "--commit", "--readonly", "--load", "--collab", "--validate", "--safe-mode", "--loop", "--brainstorm", "--introspect"]
     message: "Execute get_directives({flag_list}) for systematic implementation."
 
   reset_with_others:
