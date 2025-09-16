@@ -15,14 +15,20 @@ logging.basicConfig(
 logger = logging.getLogger("superflag")
 
 def main():
-    """Main entry point for the MCP server"""
+    """Main entry point - handles both MCP server and CLI commands"""
+    # Check if this is an install/uninstall command
+    if len(sys.argv) > 1 and sys.argv[1] in ['install', 'uninstall']:
+        from .install import main as install_main
+        return install_main()
+
+    # Otherwise, run MCP server
     try:
         logger.info("Starting SuperFlag MCP Server...")
-        
+
         # Run the FastMCP server
         # FastMCP handles stdio transport automatically
         mcp.run()
-        
+
     except Exception as e:
         logger.error(f"Server failed to start: {e}")
         sys.exit(1)

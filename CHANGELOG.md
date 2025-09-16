@@ -1,5 +1,26 @@
 Changelog
 
+## 3.0.1 (2025-09-17)
+
+### Added - Interactive Installation System
+- **Interactive Mode**: `python -m superflag install` now shows platform selection menu
+- **Interactive Uninstall**: `python -m superflag uninstall` with selective removal options
+- **Multi-platform Support**: Choose from Claude Code, Gemini CLI, Continue, or All
+- **Environment Auto-detection**: Automatically detects pipx, uv, pip installation methods
+- **Selective Operations**: Install/uninstall specific platforms without affecting others
+
+### Improved
+- **CLI Integration**: `python -m superflag install/uninstall` now works properly
+- **MCP Auto-registration**: Automatic MCP server registration for all supported platforms
+- **User Experience**: Color-coded interactive menus with clear instructions
+- **Windows Compatibility**: Enhanced subprocess handling for Windows environments
+
+### Technical
+- New modules: `environment_detector.py`, `mcp_manager.py`
+- Updated `__main__.py` for proper CLI routing
+- Enhanced `install.py` with interactive platform selection
+- Streamlined uninstall options (removed unnecessary "shared files only")
+
 ## 2.2.4 (2025-09-15)
 
 ### Fixed

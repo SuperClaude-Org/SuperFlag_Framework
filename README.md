@@ -22,11 +22,13 @@ pipx install superflag
 pipx ensurepath  # Required once on Windows - adds pipx to PATH
 # Restart terminal after ensurepath
 
-# For Claude Code
+# Interactive installation (choose platforms)
 superflag install
 
-# For Continue
-superflag install --target cn
+# Direct installation
+superflag install --target claude-code  # Claude Code only
+superflag install --target gemini-cli   # Gemini CLI only
+superflag install --target cn           # Continue only
 ```
 
 Then in your client/assistant, use prompts with flags:
