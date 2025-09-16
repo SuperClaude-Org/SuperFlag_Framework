@@ -75,14 +75,14 @@ Register the MCP server with Claude CLI:
 ```bash
 # Choose ONE of these commands:
 
-# Standard Python installation
-claude mcp add -s user -- superflag
+# pipx or pip with PATH
+claude mcp add superflag -s user superflag
+
+# pip without PATH (recommended for pip users)
+claude mcp add superflag -s user python -m superflag
 
 # UV installation
-claude mcp add -s user -- uv run superflag
-
-# Custom command
-claude mcp add -s user -- superflag <your-command>
+claude mcp add superflag -s user uv run superflag
 ```
 
 This also writes `~/.claude/SUPERFLAG.md` and appends a reference to `~/.claude/CLAUDE.md`.
