@@ -17,9 +17,11 @@ except ImportError:
     psutil = None
 try:
     from .prompts import setup_claude_context_files, setup_continue_config, setup_gemini_context_files
+    from .environment_detector import EnvironmentDetector
 except ImportError:
     # For direct script execution
     from prompts import setup_claude_context_files, setup_continue_config, setup_gemini_context_files
+    from environment_detector import EnvironmentDetector
 
 def get_home_dir():
     """Get the user's home directory"""
@@ -271,7 +273,7 @@ def install_gemini_cli_instructions():
     pass
 
 def setup_continue_mcp_servers():
-    """Set up Continue extension MCP server configurations"""
+    """Set up Continue extension MCP server configurations with auto-detection"""
     # Get current version dynamically
     try:
         from .__version__ import __version__
@@ -284,69 +286,91 @@ def setup_continue_mcp_servers():
     # Create directory if it doesn't exist
     continue_dir.mkdir(parents=True, exist_ok=True)
 
-    # Define server configurations with clear examples
+    # Detect installation method
+    detector = EnvironmentDetector()
+    detection = detector.detect()
+
+    # Determine command and args based on detection
+    if detection['method'] == 'pipx' or (detection['method'] == 'pip' and detection['in_path']):
+        command = 'superflag'
+        args = []
+        detected_note = f"# Auto-detected: {detection['method']} installation"
+    elif detection['method'] == 'uv':
+        command = 'uv'
+        args = ['run', 'superflag']
+        detected_note = "# Auto-detected: uv installation"
+    elif detection['method'] == 'pip' and not detection['in_path']:
+        command = 'python'
+        args = ['-m', 'superflag']
+        detected_note = "# Auto-detected: pip installation (not in PATH)"
+    else:
+        # Default fallback
+        command = 'superflag'
+        args = []
+        detected_note = "# Default configuration (modify if needed)"
+
+    # Define server configuration with auto-detected values
     servers = [
         {
             "filename": "superflag.yaml",
             "content": f"""# SuperFlag - Contextual flag system for AI assistants
 # SuperFlag installation utilities
 #
-# ===== IMPORTANT: Choose ONE configuration below =====
-# Uncomment the configuration that matches your setup:
+{detected_note}
 
-# --- Option 1: Standard Python installation ---
 name: SuperFlag MCP
 version: {__version__}
 schema: v1
 mcpServers:
 - name: context-engine
-  command: superflag
-  args: []
+  command: {command}
+  args: {args}
   env: {{}}
 
+# ===== Alternative configurations (if auto-detection was incorrect) =====
+
+# --- Option 1: Standard Python installation (pipx or pip with PATH) ---
+# mcpServers:
+# - name: context-engine
+#   command: superflag
+#   args: []
+#   env: {{}}
+
 # --- Option 2: UV (Python package manager) ---
-# Requires: uv in PATH or use full path like ~/.cargo/bin/uv
-# name: SuperFlag MCP
-# version: {__version__}
-# schema: v1
 # mcpServers:
 # - name: context-engine
 #   command: uv
 #   args: ["run", "superflag"]
 #   env: {{}}
 
-# --- Option 3: Development mode (pip install -e) ---
-# name: SuperFlag MCP
-# version: {__version__}
-# schema: v1
+# --- Option 3: pip without PATH ---
 # mcpServers:
 # - name: context-engine
 #   command: python
 #   args: ["-m", "superflag"]
 #   env: {{}}
-
 """
         }
     ]
-    
+
     # Write each server configuration
     success = True
     for server in servers:
         config_path = continue_dir / server["filename"]
-        
+
         # Skip if file already exists
         if config_path.exists():
             continue
-            
+
         try:
             # Write the content directly (already in YAML format)
             with open(config_path, 'w', encoding='utf-8') as f:
                 f.write(server["content"])
         except Exception as e:
             success = False
-    
+
     # Return success status for caller to handle
-    
+
     return success
 
     
@@ -464,14 +488,32 @@ def install(target="claude-code"):
         print(f"\n{GREEN}Installation complete ({success_count} components configured){RESET}")
 
         if target == "claude-code":
+            # Detect environment and show appropriate MCP command
+            detector = EnvironmentDetector()
+            mcp_command = detector.get_mcp_install_command()
+
             print(f"\n{BOLD}Next Steps:{RESET}")
-            print("1. Restart Claude Code if running")
-            print("2. Use MCP tools: get_directives(['--analyze', '--performance'])")
-            print("3. Try '--auto' for automatic flag selection")
+            print("1. Register MCP server with Claude CLI:")
+            if mcp_command:
+                print(f"   {GREEN}{mcp_command}{RESET}")
+            else:
+                print(f"   {YELLOW}Could not detect installation method{RESET}")
+                print(f"   Try: claude mcp add superflag -s user superflag")
+            print("2. Restart Claude Code if running")
+            print("3. Use MCP tools: get_directives(['--analyze', '--performance'])")
+            print("4. Try '--auto' for automatic flag selection")
             print(f"\n{CYAN}Documentation: ~/.claude/SUPERFLAG.md{RESET}")
         elif target == "cn":
+            # Show detected configuration
+            detector = EnvironmentDetector()
+            detection = detector.detect()
+
             print(f"\n{BOLD}Next Steps:{RESET}")
-            print("1. Edit ~/.continue/mcpServers/superflag.yaml (choose ONE config)")
+            if detection['method'] != 'not_installed':
+                print(f"1. MCP config auto-detected ({detection['method']} installation)")
+                print("   Review ~/.continue/mcpServers/superflag.yaml if needed")
+            else:
+                print("1. Edit ~/.continue/mcpServers/superflag.yaml (choose ONE config)")
             print("2. Restart VS Code")
             print("3. In Continue chat: type @ and select 'MCP'")
         elif target == "gemini-cli":
