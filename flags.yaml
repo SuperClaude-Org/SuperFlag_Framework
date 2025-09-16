@@ -248,11 +248,11 @@ directives:
       ☐ Next steps specified?
       </verify>
 
-  "--parallel":
-    brief: "Execute independent tasks simultaneously with agents"
+  "--delegate":
+    brief: "Delegate tasks to specialized agents for parallel processing"
     directive: |
       <task>
-      Run multiple agents concurrently for speed.
+      Delegate work to multiple specialized agents concurrently.
       </task>
 
       <approach>
@@ -270,8 +270,8 @@ directives:
       </agents>
 
       <usage>
-      --parallel: Auto-select agent count
-      --parallel n: Use n agents
+      --delegate: Auto-select agent count
+      --delegate n: Use n agents
       </usage>
 
       <verify>
@@ -551,7 +551,7 @@ hook_messages:
 
   standard_execution:
     # All other known flags
-    flags: ["--analyze", "--performance", "--refactor", "--strict", "--lean", "--discover", "--explain", "--save", "--parallel", "--todo", "--seq", "--concise", "--commit", "--readonly", "--load", "--collab"]
+    flags: ["--analyze", "--performance", "--refactor", "--strict", "--lean", "--discover", "--explain", "--save", "--delegate", "--todo", "--seq", "--concise", "--commit", "--readonly", "--load", "--collab"]
     message: "Execute get_directives({flag_list}) for systematic implementation."
 
   reset_with_others:

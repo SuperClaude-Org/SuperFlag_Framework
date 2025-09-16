@@ -45,7 +45,7 @@ Then in your client/assistant, use prompts with flags:
 | `--commit` | Anonymous commits without attribution |
 | `--lean` | Essential focus only |
 | `--load` | Load handoff documentation |
-| `--parallel` | Multi-agent processing |
+| `--delegate` | Delegate tasks to specialized agents |
 | `--performance` | Speed and efficiency optimization |
 | `--readonly` | Analysis only mode |
 | `--refactor` | Code quality improvement |

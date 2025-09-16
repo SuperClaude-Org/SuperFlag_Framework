@@ -4,6 +4,7 @@ Changelog
 
 ### Changed
 - Renamed `--git` flag to `--commit` for better clarity
+- Renamed `--parallel` flag to `--delegate` for consistency with SuperClaude Framework
 - Streamlined `--commit` flag to focus on anonymity philosophy
 - Added quantitative focus requirement to `--concise` flag for scientific verifiability
 
