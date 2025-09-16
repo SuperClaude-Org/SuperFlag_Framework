@@ -6,9 +6,23 @@ Detects installation method and provides appropriate MCP commands.
 
 import subprocess
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from shutil import which
-from typing import Tuple, Optional, Dict, Any
+from typing import Any, Dict, List, Optional, Tuple
+
+
+@dataclass(frozen=True)
+class CommandSpec:
+    """Normalized command representation for MCP registrations."""
+
+    executable: str
+    args: List[str]
+    note: Optional[str] = None
+
+    def as_cli(self) -> str:
+        parts = [self.executable] + list(self.args)
+        return " ".join(part for part in parts if part)
 
 
 class EnvironmentDetector:
@@ -192,31 +206,38 @@ class EnvironmentDetector:
         """
         # Determine the appropriate MCP command
         if method == 'pipx':
-            # pipx always puts executables in PATH after ensurepath
             command = 'superflag'
+            command_list = ['superflag']
             command_note = None
         elif method == 'uv':
             command = '"uv run superflag"'
+            command_list = ['uv', 'run', 'superflag']
             command_note = 'UV requires quotes around the full command'
         elif method == 'pip':
             if in_path:
                 command = 'superflag'
+                command_list = ['superflag']
                 command_note = None
             else:
                 command = '"python -m superflag"'
+                command_list = ['python', '-m', 'superflag']
                 command_note = 'Using -m flag since superflag is not in PATH'
         else:
             # Unknown or fallback
             if in_path:
                 command = 'superflag'
+                command_list = ['superflag']
                 command_note = None
             else:
                 command = '"python -m superflag"'
+                command_list = ['python', '-m', 'superflag']
                 command_note = 'Using -m flag as safe fallback'
 
         response = {
             'method': method,
             'command': command,
+            'command_list': command_list,
+            'command_args': command_list[1:],
             'executable_path': executable_path,
             'in_path': in_path,
             'details': details
@@ -227,20 +248,36 @@ class EnvironmentDetector:
 
         return response
 
-    def get_mcp_install_command(self) -> str:
-        """
-        Get the complete MCP install command for Claude CLI.
-
-        Returns:
-            Full command string ready to execute
-        """
+    def get_mcp_install_command(self) -> Optional[str]:
+        """Get the complete MCP install command for Claude CLI."""
         detection = self.detect()
 
         if detection['method'] == 'not_installed':
             return None
 
-        command = detection['command']
-        return f'claude mcp add superflag -s user {command}'
+        spec = self.get_command_spec(detection)
+        if not spec:
+            return None
+
+        return f"claude mcp add superflag -s user {spec.as_cli()}"
+
+    def get_command_spec(self, detection: Optional[Dict[str, Any]] = None) -> Optional[CommandSpec]:
+        """Return the normalized command specification for the detected environment."""
+        if detection is None:
+            detection = self.detect()
+
+        if detection.get('method') == 'not_installed':
+            return None
+
+        command_list = detection.get('command_list') or []
+        if not command_list and detection.get('command'):
+            command_list = detection['command'].strip('"').split()
+
+        if not command_list:
+            return None
+
+        executable, *args = command_list
+        return CommandSpec(executable=executable, args=args, note=detection.get('command_note'))
 
     def print_detection_results(self):
         """Print formatted detection results for user display."""
