@@ -40,8 +40,7 @@ def setup_flags_yaml():
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         backup_file = target_dir / f"flags.yaml.backup_{timestamp}"
         shutil.copy2(target_file, backup_file)
-        print(f"[OK] Backed up existing flags.yaml to {backup_file.name}")
-        print(f"[OK] Updating flags.yaml with latest version")
+        # Silently backup and update
 
     # Prefer packaged resource (works from wheels)
     source_file = None
@@ -70,11 +69,8 @@ def setup_flags_yaml():
 
     if source_file:
         shutil.copy2(source_file, target_file)
-        print(f"[OK] Installed flags.yaml to {target_file}")
-        print("  You can edit this file to customize flag directives")
         return True
     else:
-        print(f"[WARN] flags.yaml source not found in any expected location")
         return False
 
 def check_claude_cli():
@@ -101,22 +97,12 @@ def ensure_safe_installation():
         exe_path = which('superflag')
 
         if module_ok and exe_path:
-            print(f"[OK] superflag is importable and on PATH: {exe_path}")
             return True
 
-        if module_ok and not exe_path:
-            print("[WARN] superflag module is importable, but entrypoint not found on PATH.")
-            print("  Ensure your Python Scripts directory is on PATH, then try again.")
-            print("  Example (PowerShell): $env:Path += ';' + (Split-Path $(python -c 'import sys;print(sys.executable)')) + '\\Scripts'")
-            return False
-
-        # Module not importable - likely not installed in current interpreter
-        print("[WARN] superflag is not installed in this Python environment.")
-        print("  Install or upgrade via: python -m pip install -U superflag")
+        # Return false for any issues (will be handled by caller)
         return False
 
     except Exception as e:
-        print(f"[WARN] Installation check error: {e}")
         return False
 
 def stop_mcp_server(server_name):
@@ -135,15 +121,8 @@ def stop_mcp_server(server_name):
 
 def install_mcp_servers_via_cli():
     """Install MCP servers using Claude CLI"""
-    # Ensure Python package is installed
+    # Ensure Python package is installed (silently)
     ensure_safe_installation()
-    
-    # Inform user about context-engine setup
-    print("[INFO] For context-engine MCP server:")
-    print("   Choose your installation method:")
-    print("   - Python: claude mcp add -s user -- superflag")
-    print("   - UV: claude mcp add -s user -- uv run superflag")
-    print("   - Custom: claude mcp add -s user -- <your-command>")
 
 def setup_claude_code_hooks():
     """Setup Claude Code Hooks for automatic flag detection"""
@@ -177,7 +156,7 @@ def setup_claude_code_hooks():
         with open(hook_file, 'w', encoding='utf-8') as f:
             f.write(hook_content)
 
-        print(f"[OK] Created hook file: {hook_file}")
+        # Hook file created successfully
 
         # 3. Update settings.json to register the hook
         settings_file = claude_dir / "settings.json"
@@ -223,15 +202,11 @@ def setup_claude_code_hooks():
         with open(settings_file, 'w', encoding='utf-8') as f:
             json.dump(settings, f, indent=2)
 
-        print(f"[OK] Registered hook in: {settings_file}")
+        # Hook registered in settings
 
         # 4. Verify hook installation
-        if verify_claude_hook(hook_file):
-            print("[OK] Hook installation verified")
-            return True
-        else:
-            print("[WARN] Hook verification failed, but installation completed")
-            return True
+        verify_claude_hook(hook_file)  # Verify silently
+        return True
 
     except Exception as e:
         print(f"[ERROR] Failed to setup Claude Code hooks: {e}")
@@ -292,14 +267,8 @@ def install_gemini_cli_instructions():
     We don't modify Gemini CLI config files here. This prints clear, minimal
     steps so users can register the stdio MCP server command.
     """
-    print("\n[INFO] For Gemini CLI (generic MCP stdio):")
-    print("   Register the server command in your Gemini CLI MCP configuration:")
-    print("   - Command: superflag")
-    print("   - Args: []")
-    print("   - Transport: stdio (default for FastMCP)")
-    print("\nIf Gemini CLI supports a config file for MCP servers, add an entry ")
-    print("pointing to 'superflag'. If it supports environment variables,")
-    print("you can set any needed env for advanced scenarios.")
+    # Instructions will be shown in the final output
+    pass
 
 def setup_continue_mcp_servers():
     """Set up Continue extension MCP server configurations"""
@@ -314,9 +283,6 @@ def setup_continue_mcp_servers():
 
     # Create directory if it doesn't exist
     continue_dir.mkdir(parents=True, exist_ok=True)
-
-    print("[CREATE] Creating Continue MCP configuration files...")
-    print("  Location: ~/.continue/mcpServers/")
 
     # Define server configurations with clear examples
     servers = [
@@ -370,25 +336,16 @@ mcpServers:
         
         # Skip if file already exists
         if config_path.exists():
-            print(f"  [OK] {server['filename']} already exists, skipping...")
             continue
             
         try:
             # Write the content directly (already in YAML format)
             with open(config_path, 'w', encoding='utf-8') as f:
                 f.write(server["content"])
-            print(f"  [OK] Created: {config_path}")
         except Exception as e:
-            print(f"  [WARN] Failed to create {server['filename']}: {e}")
             success = False
     
-    if success:
-        print("\n[CONFIG] Configuration files created successfully")
-        print("\nNext steps:")
-        print("1. Edit ~/.continue/mcpServers/superflag.yaml")
-        print("   - Choose and uncomment ONE configuration option")
-        print("2. Restart VS Code")
-        print("3. Type @ in Continue chat and select 'MCP'")
+    # Return success status for caller to handle
     
     return success
 
@@ -426,44 +383,21 @@ def install(target="claude-code"):
         "gemini": "Gemini CLI"
     }.get(target, target)
 
-    print(f"Installing for {BOLD}{target_display}{RESET}:")
-
-    # Show what will be created/modified
-    if target == "claude-code":
-        print(f"  {CYAN}Files to create/modify:{RESET}")
-        print(f"    * Create: ~/.superflag/flags.yaml")
-        print(f"    * Create: ~/.claude/SUPERFLAG.md")
-        print(f"    * Create: ~/.claude/hooks/superflag.py")
-        print(f"    * Modify: ~/.claude/CLAUDE.md (add @SUPERFLAG.md)")
-        print(f"    * Modify: ~/.claude/settings.json (add hook)")
-    elif target in ["cn", "continue"]:
-        print(f"  {CYAN}Files to create/modify:{RESET}")
-        print(f"    * Create: ~/.superflag/flags.yaml")
-        print(f"    * Create: ~/.continue/mcpServers/superflag.yaml")
-        print(f"    * Modify: ~/.continue/config.yaml (add rules)")
-    elif target in ["gemini-cli", "gemini"]:
-        print(f"  {CYAN}Files to create/modify:{RESET}")
-        print(f"    * Create: ~/.superflag/flags.yaml")
-        print(f"    * Create: ~/.gemini/SUPERFLAG.md")
-        print(f"    * Modify: ~/.gemini/GEMINI.md (add @SUPERFLAG.md)")
+    print(f"Installing for {BOLD}{target_display}{RESET}...")
     print()
-    
+
     # Get home directory for later use
     home = get_home_dir()
-    
-    # 1. Set up flags.yaml
-    # Simplified output
-    success_count = 0
-    error_count = 0
+
+    # Track installation progress
+    tasks = []
 
     # 1. Set up flags.yaml
     if setup_flags_yaml():
-        print(f"  {GREEN}[OK]{RESET} flags.yaml configured (~/.superflag/flags.yaml)")
-        success_count += 1
+        tasks.append(("flags.yaml", "OK", "~/.superflag/flags.yaml"))
     else:
-        print(f"  {RED}[X]{RESET} flags.yaml setup failed")
-        error_count += 1
-    
+        tasks.append(("flags.yaml", "FAIL", "Setup failed"))
+
     # 2. Install based on target
     if target == "claude-code":
         # Check for Claude CLI and install MCP servers
@@ -473,82 +407,79 @@ def install(target="claude-code"):
 
             # Setup CLAUDE.md
             if setup_claude_context_files():
-                print(f"  {GREEN}[OK]{RESET} Context files updated (~/.claude/)")
-                success_count += 1
+                tasks.append(("Context files", "OK", "~/.claude/"))
             else:
-                print(f"  {YELLOW}[!]{RESET} Context files skipped")
+                tasks.append(("Context files", "SKIP", "Already configured"))
 
             # Setup Claude Code Hooks
             if setup_claude_code_hooks():
-                print(f"  {GREEN}[OK]{RESET} Hook registered (~/.claude/hooks/)")
-                success_count += 1
+                tasks.append(("Hook system", "OK", "~/.claude/hooks/"))
             else:
-                print(f"  {YELLOW}[!]{RESET} Hook setup skipped (MCP will still work)")
+                tasks.append(("Hook system", "SKIP", "MCP will still work"))
 
-            print(f"  {GREEN}[OK]{RESET} MCP server ready")
-            success_count += 1
+            tasks.append(("MCP server", "OK", "Ready for use"))
         else:
-            print(f"  {RED}[X]{RESET} Claude CLI not found")
+            tasks.append(("Claude CLI", "FAIL", "Not installed"))
             print(f"\n{YELLOW}Install Claude Code first: npm install -g @anthropic/claude-code{RESET}")
-            error_count += 1
-    
+
     elif target == "cn":
         # Install for Continue extension
-        print("\n[SETUP] Setting up MCP servers for Continue extension...")
         if setup_continue_mcp_servers():
+            tasks.append(("MCP config", "OK", "~/.continue/mcpServers/"))
             # Setup config.yaml with rules
-            print("\n[CONFIG] Setting up global rules...")
             continue_dir = home / ".continue"
             if setup_continue_config(continue_dir):
-                print("[OK] Global rules configured")
+                tasks.append(("Global rules", "OK", "~/.continue/config.yaml"))
             else:
-                print("[WARN] Could not configure global rules")
+                tasks.append(("Global rules", "SKIP", "Manual config needed"))
         else:
-            print("[WARN] Failed to create Continue MCP server configurations")
-    
+            tasks.append(("MCP config", "FAIL", "Could not create files"))
+
     elif target == "gemini-cli":
         # Provide generic instructions and set up context files in ~/.gemini
         install_gemini_cli_instructions()
-        print("\n[CONFIG] Setting up Gemini context files...")
         if setup_gemini_context_files():
-            print("[OK] Gemini context files configured")
+            tasks.append(("Context files", "OK", "~/.gemini/"))
         else:
-            print("[WARN] Could not configure Gemini context files")
+            tasks.append(("Context files", "FAIL", "Setup failed"))
 
     else:
-        print(f"[WARN] Unknown target: {target}")
+        print(f"Unknown target: {target}")
         print("Supported targets: claude-code, cn (Continue), gemini-cli")
         return
-    
-    print("\n[COMPLETE] Installation complete")
-    
-    if target == "claude-code":
-        print("\n[NEXT] Next steps for Claude Code:")
-        print("1. Restart Claude Code if it's running")
-        print("2. Use the MCP tools in your conversations:")
-        print("   - Available flags are listed in system prompt")
-        print("   - get_directives(['--analyze', '--performance']) - Activate modes")
-        print("   - Use '--auto' to let AI select optimal flags")
-        print("\n[DOCS] Documentation: ~/.claude/SUPERFLAG.md")
-    elif target == "cn":
-        print("\n[NEXT] Next steps for Continue:")
-        print("1. [EDIT] Edit context-engine configuration:")
-        print("   ~/.continue/mcpServers/superflag.yaml")
-        print("   (Choose and uncomment ONE option)")
-        print("\n2. [RESTART] Restart VS Code")
-        print("\n3. [CHAT] In Continue chat:")
-        print("   - Type @ and select 'MCP'")
-        print("   - Available server: context-engine")
-        print("\n[DOCS] Configuration file: ~/.continue/mcpServers/superflag.yaml")
 
-    elif target == "gemini-cli":
-        print("\n[NEXT] Next steps for Gemini CLI:")
-        print("1. Register 'superflag' as an MCP stdio server in your Gemini CLI.")
-        print("2. If Gemini CLI supports config files, add it there; otherwise use the CLI's add command if available.")
-        print("3. Run Gemini CLI and verify the MCP tool is available (get_directives).")
-    
-    print("\n[COMPLETE] SuperFlag installation completed")
-    print("-" * 50)
+    # Display results in a structured format
+    print(f"{CYAN}Installation Results:{RESET}")
+    for task_name, status, details in tasks:
+        if status == "OK":
+            print(f"  {GREEN}✓{RESET} {task_name:<15} {details}")
+        elif status == "SKIP":
+            print(f"  {YELLOW}⚠{RESET} {task_name:<15} {details}")
+        else:
+            print(f"  {RED}✗{RESET} {task_name:<15} {details}")
+
+    # Show next steps based on target
+    success_count = len([t for t in tasks if t[1] == "OK"])
+    if success_count > 0:
+        print(f"\n{GREEN}Installation complete ({success_count} components configured){RESET}")
+
+        if target == "claude-code":
+            print(f"\n{BOLD}Next Steps:{RESET}")
+            print("1. Restart Claude Code if running")
+            print("2. Use MCP tools: get_directives(['--analyze', '--performance'])")
+            print("3. Try '--auto' for automatic flag selection")
+            print(f"\n{CYAN}Documentation: ~/.claude/SUPERFLAG.md{RESET}")
+        elif target == "cn":
+            print(f"\n{BOLD}Next Steps:{RESET}")
+            print("1. Edit ~/.continue/mcpServers/superflag.yaml (choose ONE config)")
+            print("2. Restart VS Code")
+            print("3. In Continue chat: type @ and select 'MCP'")
+        elif target == "gemini-cli":
+            print(f"\n{BOLD}Next Steps:{RESET}")
+            print("1. Register 'superflag' as MCP stdio server")
+            print("2. Verify get_directives tool is available")
+    else:
+        print(f"\n{YELLOW}Installation completed with issues. Check error messages above.{RESET}")
 
 def kill_context_engine_processes():
     """Kill running superflag server processes without killing shells or self
@@ -915,136 +846,121 @@ def uninstall():
     if (home / ".gemini" / "SUPERFLAG.md").exists():
         installed_targets.append("gemini")
 
-    print(f"Detected installations: {', '.join(installed_targets) if installed_targets else 'None'}")
-    print()
-    print(f"Removing components:")
-
-    if "claude-code" in installed_targets:
-        print(f"  {CYAN}Claude Code:{RESET}")
-        print(f"    * Modify: CLAUDE.md (remove @SUPERFLAG.md)")
-        print(f"    * Modify: settings.json (remove hook)")
-        print(f"    * Delete: SUPERFLAG.md, hooks/superflag.py")
-
-    if "continue" in installed_targets:
-        print(f"  {CYAN}Continue:{RESET}")
-        print(f"    * Modify: config.yaml (remove rules)")
-        print(f"    * Delete: mcpServers/superflag.yaml")
-
-    if "gemini" in installed_targets:
-        print(f"  {CYAN}Gemini CLI:{RESET}")
-        print(f"    * Modify: GEMINI.md (remove @SUPERFLAG.md)")
-        print(f"    * Delete: SUPERFLAG.md")
-
-    if (home / ".superflag" / "flags.yaml").exists():
-        print(f"  {CYAN}Common:{RESET}")
-        print(f"    * Backup & Delete: ~/.superflag/flags.yaml")
+    if not installed_targets:
+        print(f"No SuperFlag installations detected.")
+        print(f"\n{YELLOW}Note: Shared files (~/.superflag/) will still be cleaned{RESET}")
+    else:
+        print(f"Detected: {', '.join(installed_targets)}")
     print()
 
-    success_items = []
-    error_items = []
+    # Track cleanup progress
+    cleanup_tasks = []
     backup_path = None
 
-    # Only clean Claude Code if it's installed
+    # Process each target silently and collect results
     if "claude-code" in installed_targets:
         try:
             claude_results = uninstall_claude_code()
-            for result in claude_results:
-                if "[COMPLETE]" in result:
-                    if "Claude Code configuration" not in result:
-                        continue  # Skip individual file messages
-                elif "[ERROR]" in result or "[WARN]" in result:
-                    error_items.append(result)
-                elif "backup" in result.lower():
-                    # Extract backup filename
-                    if "backup_" in result:
-                        backup_path = result.split("backup_")[1].split()[0]
-            if any("[COMPLETE]" in r for r in claude_results):
-                print(f"  {GREEN}[OK]{RESET} Claude Code cleaned")
+            success = any("[COMPLETE]" in r for r in claude_results)
+            errors = [r for r in claude_results if "[ERROR]" in r or "[WARN]" in r]
+
+            if success:
+                cleanup_tasks.append(("Claude Code", "OK", "Hooks and context files removed"))
+            elif errors:
+                cleanup_tasks.append(("Claude Code", "WARN", f"{len(errors)} warnings"))
+            else:
+                cleanup_tasks.append(("Claude Code", "SKIP", "No changes needed"))
+
         except Exception as e:
-            print(f"  {RED}[X]{RESET} Failed to clean Claude Code")
-            error_items.append(str(e))
-            claude_results = []
-    else:
-        claude_results = []
-    
-    # 2. Continue cleanup
+            cleanup_tasks.append(("Claude Code", "FAIL", "Cleanup failed"))
+
     if "continue" in installed_targets:
         try:
             continue_results = uninstall_continue()
-            for result in continue_results:
-                if "[COMPLETE]" in result:
-                    continue
-                elif "[ERROR]" in result or "[WARN]" in result:
-                    error_items.append(result)
-            if any("[COMPLETE]" in r for r in continue_results) or any("[INFO]" in r for r in continue_results):
-                print(f"  {GREEN}[OK]{RESET} Continue cleaned")
-        except Exception as e:
-            print(f"  {RED}[X]{RESET} Failed to clean Continue")
-            error_items.append(str(e))
-            continue_results = []
-    else:
-        continue_results = []
+            success = any("[COMPLETE]" in r for r in continue_results)
+            errors = [r for r in continue_results if "[ERROR]" in r or "[WARN]" in r]
 
-    # 3. Gemini cleanup
+            if success:
+                cleanup_tasks.append(("Continue", "OK", "MCP config and rules removed"))
+            elif errors:
+                cleanup_tasks.append(("Continue", "WARN", f"{len(errors)} warnings"))
+            else:
+                cleanup_tasks.append(("Continue", "SKIP", "No changes needed"))
+
+        except Exception as e:
+            cleanup_tasks.append(("Continue", "FAIL", "Cleanup failed"))
+
     if "gemini" in installed_targets:
         try:
             gemini_results = uninstall_gemini()
-            for result in gemini_results:
-                if "[COMPLETE]" in result:
-                    continue
-                elif "[ERROR]" in result or "[WARN]" in result:
-                    error_items.append(result)
-            if any("[COMPLETE]" in r for r in gemini_results) or any("[INFO]" in r for r in gemini_results):
-                print(f"  {GREEN}[OK]{RESET} Gemini cleaned")
-        except Exception as e:
-            print(f"  {RED}[X]{RESET} Failed to clean Gemini")
-            error_items.append(str(e))
-            gemini_results = []
-    else:
-        gemini_results = []
+            success = any("[COMPLETE]" in r for r in gemini_results)
+            errors = [r for r in gemini_results if "[ERROR]" in r or "[WARN]" in r]
 
-    # 4. Common files cleanup
+            if success:
+                cleanup_tasks.append(("Gemini CLI", "OK", "Context files removed"))
+            elif errors:
+                cleanup_tasks.append(("Gemini CLI", "WARN", f"{len(errors)} warnings"))
+            else:
+                cleanup_tasks.append(("Gemini CLI", "SKIP", "No changes needed"))
+
+        except Exception as e:
+            cleanup_tasks.append(("Gemini CLI", "FAIL", "Cleanup failed"))
+
+    # Common files cleanup (always run)
     try:
         cleanup_results = cleanup_common_files()
+        success = any("[COMPLETE]" in r for r in cleanup_results)
+        errors = [r for r in cleanup_results if "[ERROR]" in r or "[WARN]" in r]
+
+        # Extract backup info
         for result in cleanup_results:
-            if "[COMPLETE]" in result:
-                if "backup" in result.lower():
-                    if "backup_" in result:
-                        backup_path = result.split("backup_")[1].split()[0]
-                continue
-            elif "[ERROR]" in result or "[WARN]" in result:
-                error_items.append(result)
-        if any("[COMPLETE]" in r for r in cleanup_results):
+            if "backup_" in result:
+                backup_path = result.split("backup_")[1].split()[0]
+                break
+
+        if success:
             if backup_path:
-                print(f"  {GREEN}[OK]{RESET} Backup created: flags.yaml.backup_{backup_path}")
+                cleanup_tasks.append(("Shared files", "OK", f"Backed up as flags.yaml.backup_{backup_path}"))
             else:
-                print(f"  {GREEN}[OK]{RESET} Files cleaned")
-    except Exception as e:
-        print(f"  {RED}[X]{RESET} Failed to clean common files")
-        error_items.append(str(e))
-        cleanup_results = []
-    
-    # Final status
-    print()
-    if not error_items:
-        print(f"{GREEN}Uninstall complete.{RESET}")
-    else:
-        # Count only real errors (not INFO messages)
-        real_errors = [e for e in error_items if "[ERROR]" in e or "[WARN]" in e]
-        if real_errors:
-            print(f"{YELLOW}Uninstall complete with {len(real_errors)} warning(s).{RESET}")
-            if any("in use" in e for e in real_errors):
-                print(f"Files in use will be cleaned after restart.")
+                cleanup_tasks.append(("Shared files", "OK", "~/.superflag/ removed"))
+        elif errors:
+            cleanup_tasks.append(("Shared files", "WARN", "Some files may remain"))
         else:
-            print(f"{GREEN}Uninstall complete.{RESET}")
+            cleanup_tasks.append(("Shared files", "SKIP", "No files found"))
+
+    except Exception as e:
+        cleanup_tasks.append(("Shared files", "FAIL", "Cleanup failed"))
+
+    # Display results in structured format
+    print(f"{CYAN}Cleanup Results:{RESET}")
+    for task_name, status, details in cleanup_tasks:
+        if status == "OK":
+            print(f"  {GREEN}✓{RESET} {task_name:<15} {details}")
+        elif status == "WARN":
+            print(f"  {YELLOW}⚠{RESET} {task_name:<15} {details}")
+        elif status == "SKIP":
+            print(f"  {YELLOW}○{RESET} {task_name:<15} {details}")
+        else:
+            print(f"  {RED}✗{RESET} {task_name:<15} {details}")
+
+    # Final status
+    success_count = len([t for t in cleanup_tasks if t[1] == "OK"])
+    warn_count = len([t for t in cleanup_tasks if t[1] == "WARN"])
+
+    print()
+    if warn_count == 0:
+        print(f"{GREEN}Uninstall complete ({success_count} components cleaned){RESET}")
+    else:
+        print(f"{YELLOW}Uninstall complete with {warn_count} warning(s){RESET}")
+        print(f"Some files may require manual removal or system restart")
 
     # Package removal instructions
-    print(f"\nTo remove package:")
+    print(f"\n{BOLD}To remove package:{RESET}")
     print(f"  pip uninstall superflag -y")
     print(f"  pipx uninstall superflag")
 
-    print(f"{CYAN}{'=' * width}{RESET}")
-    
+    print(f"\n{CYAN}{'=' * width}{RESET}")
+
     # Return 0 for successful uninstall
     return 0
 
