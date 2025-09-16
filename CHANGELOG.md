@@ -14,7 +14,7 @@ Changelog
 - Added `--all-mcp` flag to enable all MCP servers
 - Added `--no-mcp` flag to disable all MCP servers
 - Added `--iterations` flag to control improvement cycle count
-- Added `--uc` flag for ultra-concise mode with 30-50% token reduction
+- Added `--uc` flag for ultra-compressed mode with 30-50% token reduction
 
 ### Changed
 - Renamed `--git` flag to `--commit` for better clarity

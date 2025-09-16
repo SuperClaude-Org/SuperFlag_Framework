@@ -64,7 +64,7 @@ Then in your client/assistant, use prompts with flags:
 | `--seq-think` | Sequential thinking MCP tool |
 | `--strict` | Zero-error enforcement |
 | `--todo` | Task management |
-| `--uc` | Ultra-concise mode (30-50% token reduction) |
+| `--uc` | Ultra-compressed mode (30-50% token reduction) |
 | `--validate` | Pre-execution risk assessment |
 
 ## Installation

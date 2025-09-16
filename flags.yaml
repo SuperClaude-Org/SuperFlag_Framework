@@ -710,10 +710,10 @@ directives:
       </verify>
 
   "--uc":
-    brief: "Ultra-concise mode with maximum compression"
+    brief: "Ultra-compressed mode for token efficiency"
     directive: |
       <task>
-      Extreme token efficiency mode.
+      Ultra-compressed token-efficient communication.
       </task>
 
       <approach>
