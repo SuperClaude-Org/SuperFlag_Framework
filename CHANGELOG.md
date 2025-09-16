@@ -8,6 +8,13 @@ Changelog
 - Added `--loop` flag for iterative improvement cycles
 - Added `--brainstorm` flag for collaborative discovery with vague requests
 - Added `--introspect` flag for transparent thinking process with visual markers
+- Added `--c7` flag for Context7 MCP documentation lookup
+- Added `--seq-think` flag for sequential thinking MCP tool
+- Added `--magic` flag for UI component generation from 21st.dev
+- Added `--all-mcp` flag to enable all MCP servers
+- Added `--no-mcp` flag to disable all MCP servers
+- Added `--iterations` flag to control improvement cycle count
+- Added `--uc` flag for ultra-concise mode with 30-50% token reduction
 
 ### Changed
 - Renamed `--git` flag to `--commit` for better clarity

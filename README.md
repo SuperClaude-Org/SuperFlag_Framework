@@ -32,13 +32,15 @@ Then in your client/assistant, use prompts with flags:
 - "--save" (handoff documentation)
 - "Analyze --strict" (precise, zero-tolerance mode)
 
-## 23 Flags
+## 30 Flags
 
 | Flag | Purpose |
 |------|---------|
+| `--all-mcp` | Enable all MCP servers |
 | `--analyze` | Multi-angle systematic analysis |
 | `--auto` | AI selects optimal flag combination |
 | `--brainstorm` | Collaborative discovery for vague requests |
+| `--c7` | Context7 MCP for documentation |
 | `--collab` | Co-develop solutions through trust-based iteration |
 | `--commit` | Anonymous commits without attribution |
 | `--concise` | Minimal communication |
@@ -46,9 +48,12 @@ Then in your client/assistant, use prompts with flags:
 | `--discover` | Discover existing solutions before building new |
 | `--explain` | Progressive disclosure |
 | `--introspect` | Transparent thinking with process markers |
+| `--iterations` | Set improvement cycle count |
 | `--lean` | Essential focus only |
 | `--load` | Load handoff documentation |
 | `--loop` | Iterative improvement cycles |
+| `--magic` | UI components from 21st.dev |
+| `--no-mcp` | Disable all MCP servers |
 | `--performance` | Speed and efficiency optimization |
 | `--readonly` | Analysis only mode |
 | `--refactor` | Code quality improvement |
@@ -56,8 +61,10 @@ Then in your client/assistant, use prompts with flags:
 | `--safe-mode` | Maximum safety for production environments |
 | `--save` | Handoff documentation |
 | `--seq` | Sequential thinking |
+| `--seq-think` | Sequential thinking MCP tool |
 | `--strict` | Zero-error enforcement |
 | `--todo` | Task management |
+| `--uc` | Ultra-concise mode (30-50% token reduction) |
 | `--validate` | Pre-execution risk assessment |
 
 ## Installation

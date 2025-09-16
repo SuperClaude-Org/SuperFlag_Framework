@@ -603,6 +603,133 @@ directives:
       ☐ Path forward defined
       </verify>
 
+  "--c7":
+    brief: "Enable Context7 for documentation lookup"
+    directive: |
+      <task>
+      Use Context7 MCP for curated documentation.
+      </task>
+
+      <approach>
+      Trigger: Library imports, framework questions
+      Action: Enable Context7 for official docs
+      </approach>
+
+      <verify>
+      ☐ Context7 enabled
+      ☐ Documentation retrieved
+      </verify>
+
+  "--seq-think":
+    brief: "Sequential thinking for complex reasoning"
+    directive: |
+      <task>
+      Enable sequential thinking MCP tool.
+      </task>
+
+      <approach>
+      Use for:
+      • Complex debugging
+      • System design
+      • Multi-component analysis
+      • Hypothesis testing
+      </approach>
+
+      <verify>
+      ☐ Sequential tool active
+      ☐ Step-by-step reasoning
+      </verify>
+
+  "--magic":
+    brief: "UI component generation from 21st.dev"
+    directive: |
+      <task>
+      Enable Magic MCP for modern UI patterns.
+      </task>
+
+      <approach>
+      Trigger: /ui, /21 commands
+      Source: 21st.dev patterns
+      Output: Modern React components
+      </approach>
+
+      <verify>
+      ☐ Magic MCP enabled
+      ☐ UI components generated
+      </verify>
+
+  "--all-mcp":
+    brief: "Enable all MCP servers"
+    directive: |
+      <task>
+      Activate all available MCP servers.
+      </task>
+
+      <approach>
+      Use for maximum complexity scenarios.
+      Enables: Context7, Sequential, Magic, etc.
+      </approach>
+
+      <verify>
+      ☐ All MCP servers active
+      </verify>
+
+  "--no-mcp":
+    brief: "Disable all MCP servers"
+    directive: |
+      <task>
+      Use native tools only, no MCP servers.
+      </task>
+
+      <approach>
+      Performance priority mode.
+      Fallback to WebSearch when needed.
+      </approach>
+
+      <verify>
+      ☐ MCP servers disabled
+      ☐ Native tools only
+      </verify>
+
+  "--iterations":
+    brief: "Set improvement cycle count"
+    directive: |
+      <task>
+      Control number of refinement iterations.
+      </task>
+
+      <approach>
+      Usage: --iterations n (1-10)
+      Works with --loop flag
+      Each cycle validates improvements
+      </approach>
+
+      <verify>
+      ☐ Iteration count set
+      ☐ Improvements measurable
+      </verify>
+
+  "--uc":
+    brief: "Ultra-concise mode with maximum compression"
+    directive: |
+      <task>
+      Extreme token efficiency mode.
+      </task>
+
+      <approach>
+      • Symbol-enhanced communication
+      • 30-50% token reduction
+      • Compressed output format
+      • Minimal verbosity
+      • Auto-enabled at >75% context
+      </approach>
+
+      <verify>
+      ☐ Output compressed
+      ☐ Token usage reduced
+      ☐ Clarity maintained
+      </verify>
+
   "--introspect":
     brief: "Transparent thinking with process markers"
     directive: |
@@ -685,7 +812,7 @@ hook_messages:
 
   standard_execution:
     # All other known flags
-    flags: ["--analyze", "--performance", "--refactor", "--strict", "--lean", "--discover", "--explain", "--save", "--delegate", "--todo", "--seq", "--concise", "--commit", "--readonly", "--load", "--collab", "--validate", "--safe-mode", "--loop", "--brainstorm", "--introspect"]
+    flags: ["--analyze", "--performance", "--refactor", "--strict", "--lean", "--discover", "--explain", "--save", "--delegate", "--todo", "--seq", "--concise", "--commit", "--readonly", "--load", "--collab", "--validate", "--safe-mode", "--loop", "--brainstorm", "--c7", "--seq-think", "--magic", "--all-mcp", "--no-mcp", "--iterations", "--uc", "--introspect"]
     message: "Execute get_directives({flag_list}) for systematic implementation."
 
   reset_with_others:
