@@ -365,11 +365,16 @@ directives:
   "--commit":
     brief: "Anonymous commits without attribution"
     directive: |
+      <task>
+      Create anonymous, technical commits without attribution.
+      </task>
+
       <philosophy>
       Complete anonymity - the code speaks, not the coder.
       </philosophy>
 
       <approach>
+      Core Principles:
       • Zero attribution or origin references
       • ASCII only - no emojis or Unicode
       • Technical precision without personality

@@ -1,5 +1,12 @@
 Changelog
 
+## Unreleased
+
+### Changed
+- Renamed `--git` flag to `--commit` for better clarity
+- Streamlined `--commit` flag to focus on anonymity philosophy
+- Added quantitative focus requirement to `--concise` flag for scientific verifiability
+
 ## 2.2.4 (2025-09-15)
 
 ### Fixed

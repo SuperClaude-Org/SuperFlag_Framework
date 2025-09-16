@@ -42,7 +42,7 @@ Then in your client/assistant, use prompts with flags:
 | `--concise` | Minimal communication |
 | `--discover` | Discover existing solutions before building new |
 | `--explain` | Progressive disclosure |
-| `--git` | Version control best practices |
+| `--commit` | Anonymous commits without attribution |
 | `--lean` | Essential focus only |
 | `--load` | Load handoff documentation |
 | `--parallel` | Multi-agent processing |
