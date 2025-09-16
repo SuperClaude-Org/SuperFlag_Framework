@@ -32,7 +32,7 @@ Then in your client/assistant, use prompts with flags:
 - "--save" (handoff documentation)
 - "Analyze --strict" (precise, zero-tolerance mode)
 
-## 34 Flags
+## 36 Flags
 
 | Flag | Purpose |
 |------|---------|
@@ -41,6 +41,7 @@ Then in your client/assistant, use prompts with flags:
 | `--auto` | AI selects optimal flag combination |
 | `--brainstorm` | Collaborative discovery for vague requests |
 | `--c7` | Context7 MCP for documentation |
+| `--cleanup` | Remove dead code and optimize structure |
 | `--collab` | Co-develop solutions through trust-based iteration |
 | `--commit` | Anonymous commits without attribution |
 | `--concise` | Minimal communication |
@@ -67,6 +68,7 @@ Then in your client/assistant, use prompts with flags:
 | `--strict` | Zero-error enforcement |
 | `--task-manage` | Orchestrate complex multi-step operations |
 | `--think` | Standard structured analysis (~4K tokens) |
+| `--troubleshoot` | Diagnose issues and find root causes |
 | `--uc` | Ultra-compressed mode (30-50% token reduction) |
 | `--ultrathink` | Maximum depth analysis (~32K tokens) |
 | `--validate` | Pre-execution risk assessment |

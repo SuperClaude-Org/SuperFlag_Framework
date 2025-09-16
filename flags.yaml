@@ -820,6 +820,68 @@ directives:
       ☐ Clarity maintained
       </verify>
 
+  "--troubleshoot":
+    brief: "Diagnose issues and find root causes"
+    directive: |
+      <task>
+      Systematic issue diagnosis and resolution.
+      </task>
+
+      <approach>
+      • Error pattern analysis
+      • Stack trace examination
+      • Root cause identification
+      • Dependency checking
+      • Configuration validation
+      • Solution generation
+      </approach>
+
+      <process>
+      1. Reproduce issue
+      2. Trace execution path
+      3. Identify root cause
+      4. Generate fix options
+      5. Validate solution
+      </process>
+
+      <verify>
+      ☐ Issue reproduced
+      ☐ Root cause identified
+      ☐ Solution validated
+      </verify>
+
+  "--cleanup":
+    brief: "Remove dead code and optimize structure"
+    directive: |
+      <task>
+      Clean codebase by removing unused elements.
+      </task>
+
+      <approach>
+      • Dead code detection
+      • Unused imports removal
+      • Duplicate code elimination
+      • Empty file cleanup
+      • Comment noise reduction
+      • Structure optimization
+      </approach>
+
+      <targets>
+      • Unused functions/classes
+      • Unreachable code
+      • Redundant imports
+      • Duplicate implementations
+      • Obsolete comments
+      • Empty directories
+      </targets>
+
+      <verify>
+      ☐ No functionality broken
+      ☐ Tests still pass
+      ☐ Code coverage maintained
+      ☐ Structure improved
+      </verify>
+
   "--introspect":
     brief: "Transparent thinking with process markers"
     directive: |
@@ -902,7 +964,7 @@ hook_messages:
 
   standard_execution:
     # All other known flags
-    flags: ["--analyze", "--performance", "--refactor", "--strict", "--lean", "--discover", "--explain", "--save", "--delegate", "--task-manage", "--seq", "--concise", "--commit", "--readonly", "--load", "--collab", "--validate", "--safe-mode", "--loop", "--brainstorm", "--c7", "--seq-think", "--magic", "--all-mcp", "--no-mcp", "--iterations", "--uc", "--introspect", "--orchestrate", "--think", "--megathink", "--ultrathink"]
+    flags: ["--analyze", "--performance", "--refactor", "--strict", "--lean", "--discover", "--explain", "--save", "--delegate", "--task-manage", "--seq", "--concise", "--commit", "--readonly", "--load", "--collab", "--validate", "--safe-mode", "--loop", "--brainstorm", "--c7", "--seq-think", "--magic", "--all-mcp", "--no-mcp", "--iterations", "--uc", "--troubleshoot", "--cleanup", "--introspect", "--orchestrate", "--think", "--megathink", "--ultrathink"]
     message: "Execute get_directives({flag_list}) for systematic implementation."
 
   reset_with_others:

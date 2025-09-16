@@ -19,6 +19,8 @@ Changelog
 - Added `--think` flag for standard structured analysis (~4K tokens)
 - Added `--megathink` flag for deep analysis (~10K tokens)
 - Added `--ultrathink` flag for maximum depth analysis (~32K tokens)
+- Added `--troubleshoot` flag for systematic issue diagnosis
+- Added `--cleanup` flag for dead code removal and structure optimization
 
 ### Changed
 - Renamed `--git` flag to `--commit` for better clarity
