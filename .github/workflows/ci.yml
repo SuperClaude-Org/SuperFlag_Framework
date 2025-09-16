@@ -55,11 +55,11 @@ jobs:
           "
           "$VENV_PY" -m pip check
           # CLI via module to avoid PATH differences across OS
-          "$VENV_PY" -m superflag.install --version
-          "$VENV_PY" -m superflag.install install --target cn
+          "$VENV_PY" -m superflag --version
+          "$VENV_PY" -m superflag install --target cn
           # Skip uninstall on Windows to avoid exit code 15 (process self-termination)
           if [ "$RUNNER_OS" != "Windows" ]; then
-            "$VENV_PY" -m superflag.install uninstall
+            "$VENV_PY" -m superflag uninstall
           else
             echo "Skipping uninstall test on Windows (would cause exit code 15)"
           fi
