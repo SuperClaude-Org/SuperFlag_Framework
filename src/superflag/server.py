@@ -132,14 +132,39 @@ def load_config() -> Dict[str, Any]:
     
     raise FileNotFoundError(f"flags.yaml not found. Tried paths: {config_paths}")
 
-# Load configuration at startup
+# Load configuration at startup and cache it
+CONFIG = {}
+DIRECTIVES = {}
+META_INSTRUCTIONS = {}
+CONFIG_CACHE_TIME = 0
+CONFIG_CACHE_TTL = 5  # Reload config every 5 seconds
+
+def get_current_config():
+    """Get configuration, reloading if cache expired"""
+    global CONFIG, DIRECTIVES, META_INSTRUCTIONS, CONFIG_CACHE_TIME
+
+    current_time = time.time()
+    if current_time - CONFIG_CACHE_TIME > CONFIG_CACHE_TTL:
+        try:
+            CONFIG = load_config()
+            DIRECTIVES = CONFIG.get('directives', {})
+            META_INSTRUCTIONS = CONFIG.get('meta_instructions', {})
+            CONFIG_CACHE_TIME = current_time
+            logger.info(f"Reloaded configuration: {len(DIRECTIVES)} flag directives")
+        except Exception as e:
+            if not DIRECTIVES:  # Only raise if we have no config at all
+                logger.error(f"Failed to load configuration: {e}")
+                raise
+            else:
+                logger.warning(f"Failed to reload configuration, using cached: {e}")
+
+    return DIRECTIVES, META_INSTRUCTIONS
+
+# Initial load
 try:
-    CONFIG = load_config()
-    DIRECTIVES = CONFIG.get('directives', {})
-    META_INSTRUCTIONS = CONFIG.get('meta_instructions', {})
-    logger.info(f"Loaded {len(DIRECTIVES)} flag directives")
+    get_current_config()
 except Exception as e:
-    logger.error(f"Failed to load configuration: {e}")
+    logger.error(f"Failed to load initial configuration: {e}")
     raise
 
 @mcp.tool()
@@ -151,9 +176,11 @@ def get_directives(flags: List[str]) -> str:
         flags: List of flag names (e.g., ["--analyze", "--performance"])
     """
     if not flags:
+        # Get current configuration
+        directives, _ = get_current_config()
         # Simplified error response format - removed available_flags field
         with config_lock:
-            available_flags = ', '.join(DIRECTIVES.keys())
+            available_flags = ', '.join(directives.keys())
         return f"No flags specified.\n\nAvailable flags: {available_flags}\n\nPlease specify at least one flag."
     
     # Handle --reset flag
@@ -175,10 +202,13 @@ def get_directives(flags: List[str]) -> str:
     new_flags = []  # Track which flags are new
     duplicate_flags = []  # Track which flags are duplicates
     
+    # Get current configuration
+    directives, _ = get_current_config()
+
     # Process flags with thread safety
     with config_lock:
         for flag in flags:
-            if flag in DIRECTIVES:
+            if flag in directives:
                 valid_flags.append(flag)
                 
                 # Categorize flag as new or duplicate
@@ -186,7 +216,7 @@ def get_directives(flags: List[str]) -> str:
                     duplicate_flags.append(flag)
                     # Only include directive if reset was requested
                     if reset_requested:
-                        directive_data = DIRECTIVES[flag]
+                        directive_data = directives[flag]
                         directive_text = directive_data.get('directive', '')
                         combined_directives.append(f"## {flag}")
                         combined_directives.append(directive_text)
@@ -194,7 +224,7 @@ def get_directives(flags: List[str]) -> str:
                 else:
                     new_flags.append(flag)
                     # Always include new flag directives
-                    directive_data = DIRECTIVES[flag]
+                    directive_data = directives[flag]
                     directive_text = directive_data.get('directive', '')
                     combined_directives.append(f"## {flag}")
                     combined_directives.append(directive_text)
@@ -205,7 +235,7 @@ def get_directives(flags: List[str]) -> str:
     if not_found_flags:
         # Simplified error response format - removed available_flags field
         flag_text = "flag" if len(not_found_flags) == 1 else "flags"
-        return f"Unknown {flag_text}: {not_found_flags}\n\nAvailable flags: {', '.join(DIRECTIVES.keys())}\n\nReference <available_flags> section in <system-reminder>'s SUPERFLAG.md"
+        return f"Unknown {flag_text}: {not_found_flags}\n\nAvailable flags: {', '.join(directives.keys())}\n\nReference <available_flags> section in <system-reminder>'s SUPERFLAG.md"
     
     # Update session with used flags
     if valid_flags:
@@ -231,7 +261,7 @@ def get_directives(flags: List[str]) -> str:
         # New flags announcement
         new_list = []
         for flag in new_flags:
-            brief = DIRECTIVES[flag].get('brief', '') if flag in DIRECTIVES else ""
+            brief = directives[flag].get('brief', '') if flag in directives else ""
             keywords = brief.split()[:3]
             new_list.append(f"'{flag}' ({' '.join(keywords)})")
         result_parts.append(f"New: {', '.join(new_list)}")
