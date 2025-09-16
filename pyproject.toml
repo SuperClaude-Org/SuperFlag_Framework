@@ -17,7 +17,7 @@ name = "Hyunjae Lim"
 email = "thecurrent.lim@gmail.com"
 
 [project.scripts]
-superflag = "superflag.cli:main"
+superflag = "superflag.install:main"
 
 [build-system]
 requires = ["hatchling"]
