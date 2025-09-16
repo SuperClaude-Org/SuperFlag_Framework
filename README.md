@@ -79,10 +79,10 @@ Register the MCP server with Claude CLI:
 claude mcp add superflag -s user superflag
 
 # pip without PATH (recommended for pip users)
-claude mcp add superflag -s user python -m superflag
+claude mcp add superflag -s user "python -m superflag"
 
 # UV installation
-claude mcp add superflag -s user uv run superflag
+claude mcp add superflag -s user "uv run superflag"
 ```
 
 This also writes `~/.claude/SUPERFLAG.md` and appends a reference to `~/.claude/CLAUDE.md`.
