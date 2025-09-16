@@ -32,15 +32,12 @@ Then in your client/assistant, use prompts with flags:
 - "--save" (handoff documentation)
 - "Analyze --strict" (precise, zero-tolerance mode)
 
-## 36 Flags
+## 20 Core Flags (Simplified)
 
 | Flag | Purpose |
 |------|---------|
-| `--all-mcp` | Enable all MCP servers |
 | `--analyze` | Multi-angle systematic analysis |
 | `--auto` | AI selects optimal flag combination |
-| `--brainstorm` | Collaborative discovery for vague requests |
-| `--c7` | Context7 MCP for documentation |
 | `--cleanup` | Remove dead code and optimize structure |
 | `--collab` | Co-develop solutions through trust-based iteration |
 | `--commit` | Anonymous commits without attribution |
@@ -48,29 +45,16 @@ Then in your client/assistant, use prompts with flags:
 | `--delegate` | Delegate tasks to specialized agents |
 | `--discover` | Discover existing solutions before building new |
 | `--explain` | Progressive disclosure |
-| `--introspect` | Transparent thinking with process markers |
-| `--iterations` | Set improvement cycle count |
-| `--lean` | Essential focus only |
 | `--load` | Load handoff documentation |
-| `--loop` | Iterative improvement cycles |
-| `--magic` | UI components from 21st.dev |
-| `--megathink` | Deep analysis (~10K tokens) |
-| `--no-mcp` | Disable all MCP servers |
-| `--orchestrate` | Optimize multi-tool operations |
 | `--performance` | Speed and efficiency optimization |
-| `--readonly` | Analysis only mode |
 | `--refactor` | Code quality improvement |
 | `--reset` | Reset all flag states to new (clears session cache) |
 | `--safe-mode` | Maximum safety for production environments |
 | `--save` | Handoff documentation |
-| `--seq` | Sequential thinking |
-| `--seq-think` | Sequential thinking MCP tool |
 | `--strict` | Zero-error enforcement |
 | `--task-manage` | Orchestrate complex multi-step operations |
-| `--think` | Standard structured analysis (~4K tokens) |
 | `--troubleshoot` | Diagnose issues and find root causes |
 | `--uc` | Ultra-compressed mode (30-50% token reduction) |
-| `--ultrathink` | Maximum depth analysis (~32K tokens) |
 | `--validate` | Pre-execution risk assessment |
 
 ## Installation

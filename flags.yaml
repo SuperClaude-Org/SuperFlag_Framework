@@ -919,6 +919,13 @@ directives:
       Execute get_directives([your_selected_flags]) with contextually chosen flags only.
 
 # ========================================
+# Archived Flags (Not Active)
+# ========================================
+archived_directives:
+  # These flags are kept for reference but not active
+  # Remove from standard_execution flags list to activate
+
+# ========================================
 # Meta Instructions
 # ========================================
 meta_instructions:
@@ -964,7 +971,7 @@ hook_messages:
 
   standard_execution:
     # All other known flags
-    flags: ["--analyze", "--performance", "--refactor", "--strict", "--lean", "--discover", "--explain", "--save", "--delegate", "--task-manage", "--seq", "--concise", "--commit", "--readonly", "--load", "--collab", "--validate", "--safe-mode", "--loop", "--brainstorm", "--c7", "--seq-think", "--magic", "--all-mcp", "--no-mcp", "--iterations", "--uc", "--troubleshoot", "--cleanup", "--introspect", "--orchestrate", "--think", "--megathink", "--ultrathink"]
+    flags: ["--analyze", "--performance", "--refactor", "--strict", "--discover", "--explain", "--save", "--delegate", "--task-manage", "--concise", "--commit", "--load", "--collab", "--validate", "--safe-mode", "--troubleshoot", "--cleanup", "--auto", "--reset", "--uc"]
     message: "Execute get_directives({flag_list}) for systematic implementation."
 
   reset_with_others:

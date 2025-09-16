@@ -2,6 +2,18 @@ Changelog
 
 ## Unreleased
 
+### Removed (Simplified to 20 core flags)
+- Removed `--lean` (redundant with --refactor)
+- Removed `--readonly` (too specific)
+- Removed `--loop` and `--iterations` (too complex)
+- Removed `--brainstorm` and `--introspect` (special cases)
+- Removed `--seq` and `--seq-think` (redundant)
+- Removed `--c7`, `--magic`, `--all-mcp`, `--no-mcp` (MCP specific)
+- Removed `--orchestrate` (too abstract)
+- Removed `--think`, `--megathink`, `--ultrathink` (over-segmented)
+
+## Previous (before simplification)
+
 ### Added
 - Added `--validate` flag for pre-execution risk assessment and validation
 - Added `--safe-mode` flag for maximum safety in production environments
