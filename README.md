@@ -32,7 +32,7 @@ Then in your client/assistant, use prompts with flags:
 - "--save" (handoff documentation)
 - "Analyze --strict" (precise, zero-tolerance mode)
 
-## 30 Flags
+## 34 Flags
 
 | Flag | Purpose |
 |------|---------|
@@ -53,7 +53,9 @@ Then in your client/assistant, use prompts with flags:
 | `--load` | Load handoff documentation |
 | `--loop` | Iterative improvement cycles |
 | `--magic` | UI components from 21st.dev |
+| `--megathink` | Deep analysis (~10K tokens) |
 | `--no-mcp` | Disable all MCP servers |
+| `--orchestrate` | Optimize multi-tool operations |
 | `--performance` | Speed and efficiency optimization |
 | `--readonly` | Analysis only mode |
 | `--refactor` | Code quality improvement |
@@ -63,8 +65,10 @@ Then in your client/assistant, use prompts with flags:
 | `--seq` | Sequential thinking |
 | `--seq-think` | Sequential thinking MCP tool |
 | `--strict` | Zero-error enforcement |
-| `--todo` | Task management |
+| `--task-manage` | Orchestrate complex multi-step operations |
+| `--think` | Standard structured analysis (~4K tokens) |
 | `--uc` | Ultra-compressed mode (30-50% token reduction) |
+| `--ultrathink` | Maximum depth analysis (~32K tokens) |
 | `--validate` | Pre-execution risk assessment |
 
 ## Installation

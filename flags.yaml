@@ -280,18 +280,107 @@ directives:
       ☐ No unnecessary sequencing
       </verify>
 
-  "--todo":
-    brief: "Track task progress with structured todos"
+  "--orchestrate":
+    brief: "Optimize multi-tool operations and parallel execution"
     directive: |
       <task>
-      Manage complex tasks with TodoWrite tool.
+      Optimize tool selection and parallel execution.
       </task>
 
       <approach>
+      • Multi-tool operation coordination
+      • Performance constraint adaptation
+      • Parallel execution optimization
+      • Tool selection matrix optimization
+      • Resource constraint adaptation
+      </approach>
+
+      <verify>
+      ☐ Optimal tool routing
+      ☐ Parallel opportunities identified
+      ☐ Performance optimized
+      </verify>
+
+  "--think":
+    brief: "Standard structured analysis (~4K tokens)"
+    directive: |
+      <task>
+      Standard depth structured analysis.
+      </task>
+
+      <approach>
+      • Multi-component analysis
+      • Moderate complexity handling
+      • ~4K token depth
+      • Enables Sequential thinking
+      • Systematic reasoning
+      </approach>
+
+      <verify>
+      ☐ Components analyzed
+      ☐ Dependencies mapped
+      ☐ Clear reasoning chain
+      </verify>
+
+  "--megathink":
+    brief: "Deep analysis (~10K tokens)"
+    directive: |
+      <task>
+      Deep architectural analysis with expanded scope.
+      </task>
+
+      <approach>
+      • Architectural analysis
+      • System-wide dependencies
+      • ~10K token depth
+      • Enables Sequential + Context7
+      • Comprehensive exploration
+      </approach>
+
+      <verify>
+      ☐ Architecture understood
+      ☐ All dependencies traced
+      ☐ Deep insights generated
+      </verify>
+
+  "--ultrathink":
+    brief: "Maximum depth analysis (~32K tokens)"
+    directive: |
+      <task>
+      Maximum depth analysis for critical redesign.
+      </task>
+
+      <approach>
+      • Critical system redesign
+      • Legacy modernization
+      • Complex debugging
+      • ~32K token depth
+      • Enables all MCP servers
+      • Exhaustive analysis
+      </approach>
+
+      <verify>
+      ☐ Complete system mapped
+      ☐ All aspects analyzed
+      ☐ Comprehensive solution
+      </verify>
+
+  "--task-manage":
+    brief: "Orchestrate complex multi-step operations"
+    directive: |
+      <task>
+      Manage complex tasks through systematic organization.
+      </task>
+
+      <approach>
+      Trigger: >3 steps, >2 directories OR >3 files
+
+      TodoWrite tool usage:
       • Break into measurable units
+      • Progressive enhancement
       • One task in_progress at a time
       • Update status in real-time
-      • Mark complete immediately
+      • Systematic delegation
 
       States: pending → in_progress → completed
       </approach>
@@ -300,6 +389,7 @@ directives:
       ☐ Clear completion criteria
       ☐ Single active task
       ☐ Real-time updates
+      ☐ Systematic organization
       </verify>
 
   "--seq":
@@ -812,7 +902,7 @@ hook_messages:
 
   standard_execution:
     # All other known flags
-    flags: ["--analyze", "--performance", "--refactor", "--strict", "--lean", "--discover", "--explain", "--save", "--delegate", "--todo", "--seq", "--concise", "--commit", "--readonly", "--load", "--collab", "--validate", "--safe-mode", "--loop", "--brainstorm", "--c7", "--seq-think", "--magic", "--all-mcp", "--no-mcp", "--iterations", "--uc", "--introspect"]
+    flags: ["--analyze", "--performance", "--refactor", "--strict", "--lean", "--discover", "--explain", "--save", "--delegate", "--task-manage", "--seq", "--concise", "--commit", "--readonly", "--load", "--collab", "--validate", "--safe-mode", "--loop", "--brainstorm", "--c7", "--seq-think", "--magic", "--all-mcp", "--no-mcp", "--iterations", "--uc", "--introspect", "--orchestrate", "--think", "--megathink", "--ultrathink"]
     message: "Execute get_directives({flag_list}) for systematic implementation."
 
   reset_with_others:

@@ -15,10 +15,15 @@ Changelog
 - Added `--no-mcp` flag to disable all MCP servers
 - Added `--iterations` flag to control improvement cycle count
 - Added `--uc` flag for ultra-compressed mode with 30-50% token reduction
+- Added `--orchestrate` flag for multi-tool operation optimization
+- Added `--think` flag for standard structured analysis (~4K tokens)
+- Added `--megathink` flag for deep analysis (~10K tokens)
+- Added `--ultrathink` flag for maximum depth analysis (~32K tokens)
 
 ### Changed
 - Renamed `--git` flag to `--commit` for better clarity
 - Renamed `--parallel` flag to `--delegate` for consistency with SuperClaude Framework
+- Renamed `--todo` flag to `--task-manage` for enhanced task orchestration
 - Streamlined `--commit` flag to focus on anonymity philosophy
 - Added quantitative focus requirement to `--concise` flag for scientific verifiability
 
