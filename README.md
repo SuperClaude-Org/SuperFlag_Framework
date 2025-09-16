@@ -19,6 +19,8 @@ SuperFlag provides 18 contextual flags that guide assistant behavior (e.g., `--s
 ```bash
 # Install (recommended)
 pipx install superflag
+pipx ensurepath  # Required once on Windows - adds pipx to PATH
+# Restart terminal after ensurepath
 
 # For Claude Code
 superflag install
@@ -61,6 +63,8 @@ Then in your client/assistant, use prompts with flags:
 ```bash
 # Install package
 pipx install superflag
+pipx ensurepath  # Required once on Windows - adds pipx to PATH
+# Restart terminal after ensurepath
 
 # Install configuration files
 superflag install
@@ -83,10 +87,12 @@ claude mcp add -s user -- superflag <your-command>
 
 This also writes `~/.claude/SUPERFLAG.md` and appends a reference to `~/.claude/CLAUDE.md`.
 
-### Continue Extension  
+### Continue Extension
 ```bash
 # Install package
 pipx install superflag
+pipx ensurepath  # Required once on Windows - adds pipx to PATH
+# Restart terminal after ensurepath
 
 # Install configuration files
 superflag install --target cn
@@ -115,6 +121,8 @@ Restart VS Code, then type `@` in Continue chat to access MCP tools.
 ```bash
 # Install package
 pipx install superflag
+pipx ensurepath  # Required once on Windows - adds pipx to PATH
+# Restart terminal after ensurepath
 
 # Install configuration files for Gemini CLI
 superflag install --target gemini-cli
