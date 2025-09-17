@@ -1,0 +1,56 @@
+{
+  "name": "superflag-mcp",
+  "version": "4.0.0",
+  "description": "MCP-based contextual flag system for AI assistants",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "superflag": "dist/index.js",
+    "superflag-install": "dist/install.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "prepare": "npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SuperClaude-Org/context-engine-mcp.git"
+  },
+  "keywords": [
+    "mcp",
+    "claude",
+    "ai",
+    "assistant",
+    "context",
+    "flags"
+  ],
+  "author": "hyunjae-labs",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hyunjae-labs/superflag/issues"
+  },
+  "homepage": "https://github.com/hyunjae-labs/superflag#readme",
+  "files": [
+    "dist",
+    "hooks",
+    "README.md"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.5.0",
+    "js-yaml": "^4.1.0",
+    "chalk": "^5.3.0",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/js-yaml": "^4.0.9",
+    "@types/yargs": "^17.0.32",
+    "typescript": "^5.3.3",
+    "shx": "^0.3.4"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
