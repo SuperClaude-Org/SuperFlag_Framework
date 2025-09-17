@@ -5,7 +5,7 @@
 # MCP Server Configuration
 # ========================================
 server:
-  name: "superflag-mcp"
+  name: "@superclaude-org/superflag"
   description: "SuperFlag - MCP-based flag system with scientific optimization"
 
 mcp:

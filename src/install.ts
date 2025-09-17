@@ -442,7 +442,7 @@ function showNextSteps(platformNames: string[]): void {
   if (platformNames.includes("Claude Code")) {
     console.log(chalk.white("\nFor Claude Code:"));
     console.log(chalk.cyan("  1. Register MCP server:"));
-    console.log(chalk.gray(`     claude mcp add superflag "npx" "-y" "superflag-mcp" -s user`));
+    console.log(chalk.gray(`     claude mcp add superflag npx @superclaude-org/superflag@latest -s user`));
     console.log(chalk.cyan("  2. Restart Claude Code"));
   }
 

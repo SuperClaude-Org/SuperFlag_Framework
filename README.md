@@ -1,9 +1,10 @@
 # SuperFlag
 
-> **⚠️ MIGRATION NOTICE**: If you previously installed `context-engine-mcp`, please uninstall it and install `superflag` instead:
+> **⚠️ MIGRATION NOTICE**: TypeScript/MCP version now available:
 > ```bash
-> pip uninstall context-engine-mcp
-> pip install superflag
+> npm install -g @superclaude-org/superflag
+> # or use with npx
+> npx @superclaude-org/superflag install
 > ```
 
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-supported-F37435)
@@ -17,16 +18,19 @@ SuperFlag provides 18 contextual flags that guide assistant behavior (e.g., `--s
 ## Quick Start
 
 ```bash
-# Install
-pip install superflag
+# Install globally
+npm install -g @superclaude-org/superflag
 
 # Interactive installation (choose platforms)
 superflag install
 
 # Direct installation
-superflag install --target claude-code  # Claude Code only
-superflag install --target gemini-cli   # Gemini CLI only
-superflag install --target cn           # Continue only
+superflag install cc       # Claude Code
+superflag install gemini   # Gemini CLI
+superflag install cn       # Continue
+
+# Register MCP server in Claude Code
+claude mcp add superflag npx @superclaude-org/superflag@latest -s user
 ```
 
 Then in your client/assistant, use prompts with flags:

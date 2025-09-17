@@ -1,0 +1,27 @@
+# Source files
+src/
+*.ts
+
+# Configuration files
+tsconfig.json
+.gitignore
+.git/
+
+# Development files
+*.log
+node_modules/
+.env
+.env.local
+
+# Test files
+test/
+*.test.js
+*.spec.js
+
+# Documentation files that shouldn't be in npm package
+docs/
+*.md
+!README.md
+
+# Build artifacts not needed
+*.map

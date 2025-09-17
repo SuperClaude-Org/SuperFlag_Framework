@@ -1,5 +1,5 @@
 {
-  "name": "superflag-mcp",
+  "name": "@superclaude-org/superflag",
   "version": "3.1.0",
   "description": "SuperFlag - MCP-based flag system for AI assistants",
   "type": "module",
@@ -16,7 +16,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SuperClaude-Org/superflag-mcp.git"
+    "url": "git+https://github.com/SuperClaude-Org/superflag.git"
   },
   "keywords": [
     "mcp",
@@ -26,12 +26,12 @@
     "context",
     "flags"
   ],
-  "author": "hyunjae-labs",
+  "author": "SuperClaude-Org",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/hyunjae-labs/superflag/issues"
+    "url": "https://github.com/SuperClaude-Org/superflag/issues"
   },
-  "homepage": "https://github.com/hyunjae-labs/superflag#readme",
+  "homepage": "https://github.com/SuperClaude-Org/superflag#readme",
   "files": [
     "dist",
     "hooks",
