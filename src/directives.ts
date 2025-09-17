@@ -11,7 +11,7 @@ const __dirname = dirname(__filename);
 interface FlagConfig {
   brief: string;
   directive: string;
-  verification: string;
+  verification?: string;
 }
 
 interface FlagsYaml {
@@ -24,7 +24,7 @@ interface FlagsYaml {
 }
 
 interface Directive {
-  task: string;
+  brief: string;
   raw: string;
 }
 
@@ -54,7 +54,7 @@ export class DirectiveLoader {
       } else {
         // Handle unknown flag
         directives[flag] = {
-          task: "Unknown flag",
+          brief: "Unknown flag",
           raw: `<task>\nUnknown flag: ${flag}\n</task>\n\n<verify>\n☐ Flag not found in configuration\n</verify>`,
         };
       }
@@ -105,40 +105,11 @@ export class DirectiveLoader {
    * Format a flag config into a directive
    */
   private formatDirective(flagConfig: FlagConfig): Directive {
-    const parts: string[] = [];
-
-    // Add task section
-    if (flagConfig.directive) {
-      const taskLines = flagConfig.directive.split("\\n");
-      parts.push("<task>");
-      parts.push(taskLines[0]); // First line as main task
-      parts.push("</task>");
-
-      // Add approach if available
-      if (taskLines.length > 1) {
-        parts.push("");
-        parts.push("<approach>");
-        parts.push(...taskLines.slice(1));
-        parts.push("</approach>");
-      }
-    }
-
-    // Add verification section
-    if (flagConfig.verification) {
-      parts.push("");
-      parts.push("<verify>");
-      const verifyLines = flagConfig.verification
-        .split("\\n")
-        .map((line) => `☐ ${line}`);
-      parts.push(...verifyLines);
-      parts.push("</verify>");
-    }
-
-    const raw = parts.join("\n");
-
+    // Just use the directive as-is from YAML
+    // The YAML already has proper formatting
     return {
-      task: flagConfig.directive || flagConfig.brief,
-      raw: raw,
+      brief: flagConfig.brief,
+      raw: flagConfig.directive,
     };
   }
 

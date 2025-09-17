@@ -77,45 +77,52 @@ Args:
         throw new Error("flags must be an array");
       }
 
-      const flags = input.flags as string[];
+      let flags = input.flags as string[];
 
-      // Check for --reset flag
-      if (flags.includes("--reset")) {
-        this.sessionManager.resetCurrentSession();
-        // Remove --reset from processing
-        const processingFlags = flags.filter(f => f !== "--reset");
-
-        if (processingFlags.length === 0) {
+      // Check for --auto flag special handling
+      if (flags.includes("--auto")) {
+        // --auto is a META flag that should guide flag selection
+        // For now, return guidance message
+        const otherFlags = flags.filter(f => f !== "--auto");
+        if (otherFlags.length === 0) {
           return {
             content: [
               {
                 type: "text",
-                text: "Session reset. No other flags to process.",
+                text: "META FLAG: Skip get_directives(['--auto']). Instead, use <available_flags> and <flag_selection_strategy> from SUPERFLAG.md.\nExecute get_directives([your_selected_flags]) with contextually chosen flags only.",
               },
             ],
           };
         }
+        // If --auto with other flags, just process the other flags
+        flags = otherFlags;
+      }
 
-        // Continue with other flags
-        return this.processFlags(processingFlags);
+      // Check for --reset flag
+      const resetRequested = flags.includes("--reset");
+      if (resetRequested) {
+        this.sessionManager.resetCurrentSession();
+        // Remove --reset from processing
+        flags = flags.filter(f => f !== "--reset");
+
+        if (flags.length === 0) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: "Session reset successfully. Ready for new flags.",
+              },
+            ],
+          };
+        }
+        // Continue processing other flags after reset
       }
 
       // Check for duplicates
-      const duplicates = this.sessionManager.checkDuplicateFlags(flags);
-      if (duplicates) {
-        return {
-          content: [
-            {
-              type: "text",
-              text: `Duplicate flags detected: ${duplicates.detected.join(", ")}. Use --reset with your flags to force fresh directives.`,
-            },
-          ],
-          isError: true,
-        };
-      }
+      const duplicateInfo = this.sessionManager.checkDuplicateFlags(flags);
 
-      // Process flags normally
-      return this.processFlags(flags);
+      // Process flags and build response
+      return this.processFlags(flags, duplicateInfo, resetRequested);
     } catch (error) {
       return {
         content: [
@@ -129,45 +136,105 @@ Args:
     }
   }
 
-  private async processFlags(flags: string[]): Promise<DirectiveResult> {
+  private async processFlags(
+    flags: string[],
+    duplicateInfo: ReturnType<SessionManager['checkDuplicateFlags']>,
+    resetRequested: boolean
+  ): Promise<DirectiveResult> {
     // Load directives
     const directives = await this.directiveLoader.loadDirectives(flags, this.flagsYamlPath);
 
     // Load YAML configuration for enforcement text
     const config = await this.directiveLoader.loadYamlConfig(this.flagsYamlPath);
 
-    // Update session
-    this.sessionManager.updateFlags(flags);
+    // Categorize flags
+    const newFlags: string[] = [];
+    const duplicateFlags: string[] = [];
+    const validFlags: string[] = [];
 
-    // Format response
-    const newFlags = flags.map((flag) => {
-      const directive = directives[flag];
-      if (directive) {
-        return `'${flag}' (${directive.task.split('\n')[0].substring(0, 20)})`;
+    for (const flag of flags) {
+      if (directives[flag] && directives[flag].brief !== "Unknown flag") {
+        validFlags.push(flag);
+        if (duplicateInfo && duplicateInfo.detected.includes(flag)) {
+          duplicateFlags.push(flag);
+        } else {
+          newFlags.push(flag);
+        }
       }
-      return `'${flag}' (unknown)`;
-    });
+    }
 
-    const directiveText = Object.entries(directives)
-      .map(([flag, content]) => `## ${flag}\n${content.raw}`)
-      .join('\n\n');
+    // Build response parts
+    const resultParts: string[] = [];
 
-    // Get enforcement text from YAML or use empty string
-    const enforcementText = config.meta_instructions?.get_directives || '';
+    // Handle duplicates
+    if (duplicateFlags.length > 0 && !resetRequested) {
+      // Return duplicate hint with guidance (not an error)
+      const flagText = duplicateFlags.length === 1 ? "Flag" : "Flags";
+      resultParts.push(`${flagText} ${duplicateFlags.join(", ")} already active in current session.`);
+      resultParts.push("\nDirectives already in <system-reminder>.");
+      resultParts.push("IF duplicate AND directives NOT in <system-reminder>: IMMEDIATE get_directives(['--reset', ...flags])");
+      resultParts.push(""); // Empty line
+    } else if (resetRequested && (duplicateFlags.length > 0 || newFlags.length > 0)) {
+      // Reset confirmation
+      resultParts.push("Session cache cleared.");
+      resultParts.push("");
+    }
 
-    const response = `New: ${newFlags.join(", ")}
+    // Announce new flags
+    if (newFlags.length > 0) {
+      const newList = newFlags.map((flag) => {
+        const directive = directives[flag];
+        if (directive && directive.brief !== "Unknown flag") {
+          // Use brief field, taking first 3 words like Python version
+          const keywords = directive.brief.split(/\s+/).slice(0, 3).join(" ");
+          return `'${flag}' (${keywords})`;
+        }
+        return `'${flag}'`;
+      });
+      resultParts.push(`New: ${newList.join(", ")}`);
+      resultParts.push("");
+    }
 
-${directiveText}
+    // Add directives only for new flags (or all if reset)
+    const flagsToShow = resetRequested ? validFlags : newFlags;
+    if (flagsToShow.length > 0) {
+      const directiveText = flagsToShow
+        .map((flag) => {
+          const directive = directives[flag];
+          if (directive) {
+            return `## ${flag}\n${directive.raw}`;
+          }
+          return "";
+        })
+        .filter(text => text !== "")
+        .join('\n\n');
 
-${enforcementText}
+      resultParts.push(directiveText);
+    }
 
-Applied flags: ${flags.join(", ")}`;
+    // Add enforcement text if we have directives
+    if ((newFlags.length > 0 || (resetRequested && validFlags.length > 0)) && config.meta_instructions?.get_directives) {
+      resultParts.push("");
+      resultParts.push(config.meta_instructions.get_directives);
+    }
+
+    // Update session only with new flags
+    if (!duplicateFlags.length || resetRequested) {
+      this.sessionManager.updateFlags(validFlags);
+    }
+
+    // Add applied flags at the end
+    if (validFlags.length > 0) {
+      resultParts.push("");
+      const appliedText = validFlags.length === 1 ? "Applied flag" : "Applied flags";
+      resultParts.push(`${appliedText}: ${validFlags.join(", ")}`);
+    }
 
     return {
       content: [
         {
           type: "text",
-          text: response,
+          text: resultParts.join("\n"),
         },
       ],
     };
