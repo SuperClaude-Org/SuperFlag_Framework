@@ -42,6 +42,8 @@ jobs:
 
       - name: Install wheel and smoke test (pip)
         shell: bash
+        env:
+          PYTHONIOENCODING: utf-8
         run: |
           # Check wheel exists and install safely
           "$VENV_PY" -c "
@@ -85,6 +87,8 @@ jobs:
 
       - name: Install with pipx and smoke test
         shell: bash
+        env:
+          PYTHONIOENCODING: utf-8
         run: |
           # Verify wheel exists before pipx install
           python -c "
