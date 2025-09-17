@@ -218,7 +218,8 @@ def get_directives(flags: List[str]) -> str:
     if duplicate_flags and not reset_requested:
         # Return duplicate hint with guidance
         flag_text = "Flag" if len(duplicate_flags) == 1 else "Flags"
-        result_parts.append(f"{flag_text} {duplicate_flags} already active in current session.")
+        formatted_duplicates = ", ".join(duplicate_flags)
+        result_parts.append(f"{flag_text} {formatted_duplicates} already active in current session.")
         result_parts.append("\nDirectives already in <system-reminder>.")
         result_parts.append("IF duplicate AND directives NOT in <system-reminder>: IMMEDIATE get_directives(['--reset', ...flags])")
         result_parts.append("")  # Empty line for separation
