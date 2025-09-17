@@ -1,3 +1,5 @@
+import { threadId } from 'worker_threads';
+
 interface SessionData {
   flags: Map<string, number>;
   lastUsed: number;
@@ -23,8 +25,8 @@ export class SessionManager {
   private getCurrentSessionId(): string {
     // In Node.js, we use process.pid and a pseudo-thread identifier
     const processId = process.pid;
-    const threadId = require('worker_threads').threadId || 0;
-    return `mcp_${processId}_${threadId}`;
+    const currentThreadId = threadId || 0;
+    return `mcp_${processId}_${currentThreadId}`;
   }
 
   /**

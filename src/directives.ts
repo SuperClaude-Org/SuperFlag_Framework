@@ -2,17 +2,20 @@ import * as yaml from "js-yaml";
 import * as fs from "fs/promises";
 import * as path from "path";
 import * as os from "os";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 interface FlagConfig {
-  name: string;
-  description: string;
+  brief: string;
   directive: string;
   verification: string;
-  priority: number;
 }
 
 interface FlagsYaml {
-  available_flags: FlagConfig[];
+  directives: Record<string, FlagConfig>;
   hook_messages?: Record<string, any>;
   meta_instructions?: {
     list_available_flags?: string;
@@ -44,9 +47,7 @@ export class DirectiveLoader {
     const directives: Record<string, Directive> = {};
 
     for (const flag of flags) {
-      const flagConfig = config.available_flags.find(
-        (f) => f.name === flag
-      );
+      const flagConfig = config.directives?.[flag];
 
       if (flagConfig) {
         directives[flag] = this.formatDirective(flagConfig);
@@ -136,7 +137,7 @@ export class DirectiveLoader {
     const raw = parts.join("\n");
 
     return {
-      task: flagConfig.directive || flagConfig.description,
+      task: flagConfig.directive || flagConfig.brief,
       raw: raw,
     };
   }

@@ -6,6 +6,11 @@ import chalk from "chalk";
 import * as yaml from "js-yaml";
 import inquirer from "inquirer";
 import { VERSION } from "./version.js";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 interface InstallationTask {
   name: string;
@@ -56,9 +61,12 @@ export async function handleCommand(command: string, args: string[] = []): Promi
   const targetIndex = args.indexOf("--target");
   const hasExplicitTarget = targetIndex !== -1 && args[targetIndex + 1];
 
-  if (hasExplicitTarget) {
+  // Also check for direct target argument (e.g., "install cc")
+  const directTarget = args.length > 0 && !args[0].startsWith("-") ? args[0] : null;
+  const target = hasExplicitTarget ? args[targetIndex + 1] : directTarget;
+
+  if (target) {
     // Non-interactive mode with explicit target
-    const target = args[targetIndex + 1];
     if (command === "install") {
       await install(target);
     } else if (command === "uninstall") {
@@ -259,6 +267,14 @@ async function installInteractive(platformNames: string[]): Promise<void> {
         status: hookResult ? "OK" : "SKIP",
         detail: hookResult ? "~/.claude/hooks/" : "Already exists"
       });
+
+      // Register hook in settings.json
+      const settingsResult = await registerHookInSettings();
+      tasks.push({
+        name: "Claude settings",
+        status: settingsResult ? "OK" : "SKIP",
+        detail: settingsResult ? "Hook registered" : "Already registered"
+      });
     }
   }
 
@@ -295,6 +311,14 @@ async function uninstallInteractive(platformNames: string[]): Promise<void> {
           detail: "Not found",
         });
       }
+
+      // Remove hook from settings.json
+      const settingsResult = await unregisterHookFromSettings();
+      tasks.push({
+        name: "Claude settings",
+        status: settingsResult ? "OK" : "SKIP",
+        detail: settingsResult ? "Hook unregistered" : "Not found"
+      });
     }
   }
 
@@ -344,6 +368,14 @@ async function install(targetArg: string): Promise<void> {
         status: hookResult ? "OK" : "SKIP",
         detail: hookResult ? "~/.claude/hooks/" : "Already exists"
       });
+
+      // Register hook in settings.json
+      const settingsResult = await registerHookInSettings();
+      tasks.push({
+        name: "Claude settings",
+        status: settingsResult ? "OK" : "SKIP",
+        detail: settingsResult ? "Hook registered" : "Already registered"
+      });
     }
   }
 
@@ -385,6 +417,14 @@ async function uninstall(targetArg: string): Promise<void> {
           detail: "Not found",
         });
       }
+
+      // Remove hook from settings.json
+      const settingsResult = await unregisterHookFromSettings();
+      tasks.push({
+        name: "Claude settings",
+        status: settingsResult ? "OK" : "SKIP",
+        detail: settingsResult ? "Hook unregistered" : "Not found"
+      });
     }
   }
 
@@ -437,13 +477,16 @@ function getPlatforms(targetArg: string): Platform[] {
 
   const platformMap: Record<string, Platform> = {
     "claude-code": PLATFORMS[0],
+    "cc": PLATFORMS[0],  // Add shortcut
     "gemini-cli": PLATFORMS[1],
-    "cn": PLATFORMS[2]
+    "gemini": PLATFORMS[1],  // Add shortcut
+    "cn": PLATFORMS[2],
+    "continue": PLATFORMS[2]  // Add full name
   };
 
   if (!platformMap[targetArg]) {
     console.error(chalk.red(`Error: Invalid target '${targetArg}'`));
-    console.log(chalk.yellow("Valid targets: claude-code, gemini-cli, cn, all"));
+    console.log(chalk.yellow("Valid targets: claude-code (cc), gemini-cli (gemini), cn (continue), all"));
     process.exit(1);
   }
 
@@ -679,6 +722,90 @@ async function setupFlagsYaml(flagsPath: string): Promise<boolean> {
   }
 }
 
+async function unregisterHookFromSettings(): Promise<boolean> {
+  const settingsPath = path.join(os.homedir(), ".claude", "settings.json");
+  const hookPath = path.join(os.homedir(), ".claude", "hooks", "superflag.py");
+
+  try {
+    const settingsContent = await fs.readFile(settingsPath, 'utf-8');
+    const settings = JSON.parse(settingsContent);
+
+    if (!settings.hooks || !settings.hooks.UserPromptSubmit) {
+      return false; // No hooks to remove
+    }
+
+    const hookCommand = `python "${hookPath}"`;
+    const initialLength = settings.hooks.UserPromptSubmit.length;
+
+    // Remove SuperFlag hook
+    settings.hooks.UserPromptSubmit = settings.hooks.UserPromptSubmit.filter((h: any) => {
+      if (h.hooks && h.hooks.some((hook: any) =>
+        hook.command && hook.command.includes("superflag.py"))) return false;
+      return true;
+    });
+
+    if (settings.hooks.UserPromptSubmit.length === initialLength) {
+      return false; // Nothing was removed
+    }
+
+    // Save updated settings
+    await fs.writeFile(settingsPath, JSON.stringify(settings, null, 2), 'utf-8');
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+async function registerHookInSettings(): Promise<boolean> {
+  const settingsPath = path.join(os.homedir(), ".claude", "settings.json");
+  const hookPath = path.join(os.homedir(), ".claude", "hooks", "superflag.py");
+
+  try {
+    // Read existing settings or create new
+    let settings: any = {};
+    try {
+      const settingsContent = await fs.readFile(settingsPath, 'utf-8');
+      settings = JSON.parse(settingsContent);
+    } catch {
+      // Create new settings if doesn't exist
+      settings = { hooks: { UserPromptSubmit: [] } };
+    }
+
+    // Ensure hooks structure exists
+    if (!settings.hooks) {
+      settings.hooks = {};
+    }
+    if (!settings.hooks.UserPromptSubmit) {
+      settings.hooks.UserPromptSubmit = [];
+    }
+
+    // Check if hook already exists
+    const hookCommand = `python "${hookPath}"`;
+    const existingHook = settings.hooks.UserPromptSubmit.find((h: any) =>
+      h.hooks && h.hooks.some((hook: any) => hook.command === hookCommand)
+    );
+
+    if (existingHook) {
+      return false; // Already registered
+    }
+
+    // Add hook (matching Python format exactly)
+    settings.hooks.UserPromptSubmit.push({
+      matcher: "",
+      hooks: [{
+        type: "command",
+        command: hookCommand
+      }]
+    });
+
+    // Save settings
+    await fs.writeFile(settingsPath, JSON.stringify(settings, null, 2), 'utf-8');
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 async function setupPythonHooks(): Promise<boolean> {
   const hooksDir = path.join(os.homedir(), ".claude", "hooks");
 
@@ -692,9 +819,17 @@ async function setupPythonHooks(): Promise<boolean> {
       await fs.access(hookPath);
       return false; // Already exists
     } catch {
-      // Create the hook file
-      await fs.writeFile(hookPath, getPythonHookContent(), "utf-8");
-      return true;
+      // Copy the actual hook file from hooks directory
+      const sourceHookPath = path.join(__dirname, '..', 'hooks', 'superflag.py');
+      try {
+        const hookContent = await fs.readFile(sourceHookPath, 'utf-8');
+        await fs.writeFile(hookPath, hookContent, "utf-8");
+        return true;
+      } catch {
+        // Fallback to simple hook if source file not found
+        await fs.writeFile(hookPath, getPythonHookContent(), "utf-8");
+        return true;
+      }
     }
   } catch {
     return false;
@@ -848,3 +983,15 @@ if __name__ == "__main__":
     sys.exit(main())
 `;
 }
+
+// Main execution
+async function main() {
+  const args = process.argv.slice(2);
+  const command = args[0];
+  const commandArgs = args.slice(1);
+
+  await handleCommand(command || "", commandArgs);
+}
+
+// Run if this is the main module
+main().catch(console.error);
