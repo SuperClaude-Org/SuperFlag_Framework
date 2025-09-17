@@ -66,10 +66,10 @@ Then in your client/assistant, use prompts with flags:
 ### Claude Code
 ```bash
 # Install package
-pip install superflag
+npm install -g @superclaude-org/superflag
 
 # Install configuration files (automatic MCP registration)
-superflag install
+superflag install cc
 ```
 
 ### Continue Extension
