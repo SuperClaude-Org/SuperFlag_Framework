@@ -9,13 +9,38 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { SuperFlagServer } from "./server.js";
 import chalk from "chalk";
+import { VERSION } from "./version.js";
 
-// Check for CLI commands (install/uninstall)
+// Check for CLI commands
 const args = process.argv.slice(2);
+
+// Handle version flags (NPM best practice)
+if (args[0] === "--version" || args[0] === "-v" || args[0] === "version") {
+  console.log(VERSION);
+  process.exit(0);
+}
+
+// Handle help flags
+if (args[0] === "--help" || args[0] === "-h" || args[0] === "help") {
+  console.log(`SuperFlag v${VERSION}`);
+  console.log("\nUsage:");
+  console.log("  superflag --version, -v              Show version");
+  console.log("  superflag --help, -h                 Show help");
+  console.log("  superflag install [--target TARGET]  Install SuperFlag");
+  console.log("  superflag uninstall [--target TARGET] Uninstall SuperFlag");
+  console.log("  superflag                            Run as MCP server");
+  console.log("\nTargets:");
+  console.log("  claude-code  Claude Code platform");
+  console.log("  gemini-cli   Gemini CLI platform");
+  console.log("  cn           Continue platform");
+  console.log("  all          All platforms");
+  process.exit(0);
+}
+
 if (args[0] === "install" || args[0] === "uninstall") {
   // Delegate to install script
   import("./install.js").then(module => {
-    module.handleCommand(args[0]);
+    module.handleCommand(args[0], args.slice(1));
   }).catch(err => {
     console.error(chalk.red(`Failed to load install module: ${err.message}`));
     process.exit(1);
@@ -34,7 +59,7 @@ async function runServer() {
   const server = new Server(
     {
       name: "superflag",
-      version: "4.0.0",
+      version: VERSION,
     },
     {
       capabilities: {

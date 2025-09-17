@@ -1,34 +1,314 @@
 import * as fs from "fs/promises";
+import * as fsSync from "fs";
 import * as path from "path";
 import * as os from "os";
 import chalk from "chalk";
-import { exec } from "child_process";
-import { promisify } from "util";
-
-const execAsync = promisify(exec);
+import * as yaml from "js-yaml";
+import inquirer from "inquirer";
+import { VERSION } from "./version.js";
 
 interface InstallationTask {
   name: string;
-  status: "OK" | "SKIP" | "FAIL" | "MANUAL";
+  status: "OK" | "SKIP" | "FAIL";
   detail: string;
 }
 
-export async function handleCommand(command: string): Promise<void> {
-  if (command === "install") {
-    await install();
-  } else if (command === "uninstall") {
-    await uninstall();
+interface Platform {
+  name: string;
+  configDir: string;
+  mainFile: string;
+  contextFile: string;
+  type: "markdown" | "yaml";
+}
+
+const PLATFORMS: Platform[] = [
+  {
+    name: "Claude Code",
+    configDir: path.join(os.homedir(), ".claude"),
+    mainFile: "CLAUDE.md",
+    contextFile: "SUPERFLAG.md",
+    type: "markdown"
+  },
+  {
+    name: "Gemini CLI",
+    configDir: path.join(os.homedir(), ".gemini"),
+    mainFile: "GEMINI.md",
+    contextFile: "SUPERFLAG.md",
+    type: "markdown"
+  },
+  {
+    name: "Continue",
+    configDir: path.join(os.homedir(), ".continue"),
+    mainFile: "config.yaml",
+    contextFile: "",
+    type: "yaml"
+  }
+];
+
+export async function handleCommand(command: string, args: string[] = []): Promise<void> {
+  // Handle version in install command
+  if (args.includes("--version") || args.includes("-v")) {
+    console.log(VERSION);
+    process.exit(0);
+  }
+
+  // Check if --target argument is provided for non-interactive mode
+  const targetIndex = args.indexOf("--target");
+  const hasExplicitTarget = targetIndex !== -1 && args[targetIndex + 1];
+
+  if (hasExplicitTarget) {
+    // Non-interactive mode with explicit target
+    const target = args[targetIndex + 1];
+    if (command === "install") {
+      await install(target);
+    } else if (command === "uninstall") {
+      await uninstall(target);
+    } else {
+      console.error(chalk.red(`Unknown command: ${command}`));
+      showUsage();
+      process.exit(1);
+    }
   } else {
-    console.error(chalk.red(`Unknown command: ${command}`));
-    process.exit(1);
+    // Interactive mode - action determined by command
+    if (command === "install") {
+      await interactiveInstall();
+    } else if (command === "uninstall") {
+      await interactiveUninstall();
+    } else {
+      console.error(chalk.red(`Unknown command: ${command}`));
+      showUsage();
+      process.exit(1);
+    }
   }
 }
 
-async function install(): Promise<void> {
+async function interactiveInstall(): Promise<void> {
   console.log(chalk.cyan.bold("\n============================================================"));
-  console.log(chalk.cyan.bold("                SuperFlag v4.0.0 - Installer"));
-  console.log(chalk.cyan.bold("            Contextual AI Enhancement Framework"));
-  console.log(chalk.cyan.bold("                 TypeScript Edition"));
+  console.log(chalk.cyan.bold(`                SuperFlag v${VERSION} - Installer`));
+  console.log(chalk.cyan.bold("============================================================\n"));
+
+  // Check current installation status
+  const installedPlatforms = await checkInstalledPlatforms();
+
+  // Ask which platforms to install
+  const platformChoices = PLATFORMS.map(p => ({
+    name: installedPlatforms.includes(p.name)
+      ? `${p.name} ${chalk.green("(installed)")}`
+      : p.name,
+    value: p.name,
+    checked: !installedPlatforms.includes(p.name) // Pre-select non-installed platforms
+  }));
+
+  const platformAnswer = await inquirer.prompt([
+    {
+      type: "checkbox",
+      name: "platforms",
+      message: "Select platforms to install:",
+      choices: platformChoices,
+      validate: (answer) => {
+        if (answer.length === 0) {
+          return "Please select at least one platform.";
+        }
+        return true;
+      }
+    }
+  ]);
+
+  if (platformAnswer.platforms.length === 0) {
+    console.log(chalk.yellow("No platforms selected. Exiting."));
+    process.exit(0);
+  }
+
+  // Confirmation
+  const confirmAnswer = await inquirer.prompt([
+    {
+      type: "confirm",
+      name: "confirm",
+      message: `Install SuperFlag for ${platformAnswer.platforms.join(", ")}?`,
+      default: true
+    }
+  ]);
+
+  if (!confirmAnswer.confirm) {
+    console.log(chalk.gray("Operation cancelled."));
+    process.exit(0);
+  }
+
+  await installInteractive(platformAnswer.platforms);
+}
+
+async function interactiveUninstall(): Promise<void> {
+  console.log(chalk.yellow.bold("\n============================================================"));
+  console.log(chalk.yellow.bold(`                SuperFlag v${VERSION} - Uninstaller`));
+  console.log(chalk.yellow.bold("============================================================\n"));
+
+  // Check current installation status
+  const installedPlatforms = await checkInstalledPlatforms();
+
+  if (installedPlatforms.length === 0) {
+    console.log(chalk.yellow("SuperFlag is not installed on any platform."));
+    process.exit(0);
+  }
+
+  // Ask which platforms to uninstall
+  const platformChoices = PLATFORMS.map(p => ({
+    name: installedPlatforms.includes(p.name)
+      ? `${p.name} ${chalk.green("(installed)")}`
+      : `${p.name} ${chalk.gray("(not installed)")}`,
+    value: p.name,
+    disabled: !installedPlatforms.includes(p.name),
+    checked: installedPlatforms.includes(p.name) // Pre-select installed platforms
+  }));
+
+  const platformAnswer = await inquirer.prompt([
+    {
+      type: "checkbox",
+      name: "platforms",
+      message: "Select platforms to uninstall:",
+      choices: platformChoices,
+      validate: (answer) => {
+        if (answer.length === 0) {
+          return "Please select at least one platform.";
+        }
+        return true;
+      }
+    }
+  ]);
+
+  if (platformAnswer.platforms.length === 0) {
+    console.log(chalk.yellow("No platforms selected. Exiting."));
+    process.exit(0);
+  }
+
+  // Confirmation
+  const confirmAnswer = await inquirer.prompt([
+    {
+      type: "confirm",
+      name: "confirm",
+      message: `Uninstall SuperFlag from ${platformAnswer.platforms.join(", ")}?`,
+      default: true
+    }
+  ]);
+
+  if (!confirmAnswer.confirm) {
+    console.log(chalk.gray("Operation cancelled."));
+    process.exit(0);
+  }
+
+  await uninstallInteractive(platformAnswer.platforms);
+}
+
+async function checkInstalledPlatforms(): Promise<string[]> {
+  const installed: string[] = [];
+
+  for (const platform of PLATFORMS) {
+    try {
+      if (platform.type === "markdown") {
+        const mainPath = path.join(platform.configDir, platform.mainFile);
+        const content = await fs.readFile(mainPath, "utf-8");
+        if (content.includes("@SUPERFLAG.md")) {
+          installed.push(platform.name);
+        }
+      } else if (platform.type === "yaml") {
+        const configPath = path.join(platform.configDir, platform.mainFile);
+        const content = await fs.readFile(configPath, "utf-8");
+        const config = yaml.load(content) as any;
+        if (config.rules?.some((rule: any) => rule.title === "SuperFlag")) {
+          installed.push(platform.name);
+        }
+      }
+    } catch {
+      // Not installed or file doesn't exist
+    }
+  }
+
+  return installed;
+}
+
+async function installInteractive(platformNames: string[]): Promise<void> {
+  const tasks: InstallationTask[] = [];
+
+  // 1. Setup flags.yaml
+  const flagsPath = path.join(os.homedir(), ".superflag", "flags.yaml");
+  if (await setupFlagsYaml(flagsPath)) {
+    tasks.push({
+      name: "Flags config",
+      status: "OK",
+      detail: "~/.superflag/flags.yaml",
+    });
+  } else {
+    tasks.push({
+      name: "Flags config",
+      status: "SKIP",
+      detail: "Already exists",
+    });
+  }
+
+  // 2. Setup selected platforms
+  const selectedPlatforms = PLATFORMS.filter(p => platformNames.includes(p.name));
+
+  for (const platform of selectedPlatforms) {
+    const result = await setupPlatform(platform, "install");
+    tasks.push(result);
+
+    // Setup Python hooks for Claude only
+    if (platform.name === "Claude Code") {
+      const hookResult = await setupPythonHooks();
+      tasks.push({
+        name: "Claude hooks",
+        status: hookResult ? "OK" : "SKIP",
+        detail: hookResult ? "~/.claude/hooks/" : "Already exists"
+      });
+    }
+  }
+
+  // Display results
+  displayResults(tasks);
+
+  // Show next steps
+  showNextSteps(platformNames);
+}
+
+async function uninstallInteractive(platformNames: string[]): Promise<void> {
+  const tasks: InstallationTask[] = [];
+
+  // Remove from selected platforms
+  const selectedPlatforms = PLATFORMS.filter(p => platformNames.includes(p.name));
+
+  for (const platform of selectedPlatforms) {
+    const result = await setupPlatform(platform, "uninstall");
+    tasks.push(result);
+
+    // Remove Python hooks for Claude only
+    if (platform.name === "Claude Code") {
+      const hookPath = path.join(os.homedir(), ".claude", "hooks", "superflag.py");
+      if (await removeFile(hookPath)) {
+        tasks.push({
+          name: "Claude hooks",
+          status: "OK",
+          detail: "Removed",
+        });
+      } else {
+        tasks.push({
+          name: "Claude hooks",
+          status: "SKIP",
+          detail: "Not found",
+        });
+      }
+    }
+  }
+
+  displayResults(tasks);
+
+  if (platformNames.includes("Claude Code")) {
+    console.log(chalk.yellow("\n⚠  Note: Remove MCP server manually with:"));
+    console.log(chalk.gray("   claude mcp remove superflag"));
+  }
+}
+
+async function install(targetArg: string): Promise<void> {
+  console.log(chalk.cyan.bold("\n============================================================"));
+  console.log(chalk.cyan.bold(`                SuperFlag v${VERSION} - Installer`));
   console.log(chalk.cyan.bold("============================================================\n"));
 
   const tasks: InstallationTask[] = [];
@@ -49,100 +329,331 @@ async function install(): Promise<void> {
     });
   }
 
-  // 2. Setup Claude context files
-  if (await setupClaudeContext()) {
-    tasks.push({
-      name: "Context files",
-      status: "OK",
-      detail: "~/.claude/",
-    });
-  } else {
-    tasks.push({
-      name: "Context files",
-      status: "SKIP",
-      detail: "Already configured",
-    });
-  }
+  // 2. Setup platforms
+  const platforms = getPlatforms(targetArg);
 
-  // 3. Setup Python hooks (hybrid approach)
-  if (await setupPythonHooks()) {
-    tasks.push({
-      name: "Hook system",
-      status: "OK",
-      detail: "~/.claude/hooks/",
-    });
-  } else {
-    tasks.push({
-      name: "Hook system",
-      status: "SKIP",
-      detail: "MCP will still work",
-    });
-  }
+  for (const platform of platforms) {
+    const result = await setupPlatform(platform, "install");
+    tasks.push(result);
 
-  // 4. Display MCP registration instructions
-  tasks.push({
-    name: "MCP server",
-    status: "MANUAL",
-    detail: "Manual registration required",
-  });
+    // Setup Python hooks for Claude only
+    if (platform.name === "Claude Code") {
+      const hookResult = await setupPythonHooks();
+      tasks.push({
+        name: "Claude hooks",
+        status: hookResult ? "OK" : "SKIP",
+        detail: hookResult ? "~/.claude/hooks/" : "Already exists"
+      });
+    }
+  }
 
   // Display results
   displayResults(tasks);
 
   // Show next steps
-  console.log(chalk.yellow("\n📝 Next Steps:"));
-  console.log(chalk.white("1. Register MCP server with Claude:"));
-  console.log(chalk.cyan(`   claude mcp add superflag "npx" "-y" "superflag-mcp" -s user`));
-  console.log(chalk.white("\n2. Restart Claude Code to activate changes"));
-  console.log(chalk.white("\n3. Test with a prompt containing flags:"));
-  console.log(chalk.green(`   "Analyze this code --analyze --strict"`));
+  const platformNames = platforms.map(p => p.name);
+  showNextSteps(platformNames);
 }
 
-async function uninstall(): Promise<void> {
+async function uninstall(targetArg: string): Promise<void> {
   console.log(chalk.yellow.bold("\n============================================================"));
-  console.log(chalk.yellow.bold("                SuperFlag v4.0.0 - Uninstaller"));
+  console.log(chalk.yellow.bold(`                SuperFlag v${VERSION} - Uninstaller`));
   console.log(chalk.yellow.bold("============================================================\n"));
 
   const tasks: InstallationTask[] = [];
 
-  // Remove hook file
-  const hookPath = path.join(os.homedir(), ".claude", "hooks", "superflag.py");
-  if (await removeFile(hookPath)) {
-    tasks.push({
-      name: "Hook file",
-      status: "OK",
-      detail: "Removed",
-    });
-  } else {
-    tasks.push({
-      name: "Hook file",
-      status: "SKIP",
-      detail: "Not found",
-    });
-  }
+  // Remove from platforms
+  const platforms = getPlatforms(targetArg);
 
-  // Remove context files
-  const claudeDir = path.join(os.homedir(), ".claude");
-  const contextFiles = ["SUPERFLAG.md", "CLAUDE.md"];
-  for (const file of contextFiles) {
-    const filePath = path.join(claudeDir, file);
-    if (await removeFile(filePath)) {
-      tasks.push({
-        name: file,
-        status: "OK",
-        detail: "Removed",
-      });
+  for (const platform of platforms) {
+    const result = await setupPlatform(platform, "uninstall");
+    tasks.push(result);
+
+    // Remove Python hooks for Claude only
+    if (platform.name === "Claude Code") {
+      const hookPath = path.join(os.homedir(), ".claude", "hooks", "superflag.py");
+      if (await removeFile(hookPath)) {
+        tasks.push({
+          name: "Claude hooks",
+          status: "OK",
+          detail: "Removed",
+        });
+      } else {
+        tasks.push({
+          name: "Claude hooks",
+          status: "SKIP",
+          detail: "Not found",
+        });
+      }
     }
   }
 
-  // Note about MCP removal
-  tasks.push({
-    name: "MCP server",
-    status: "MANUAL",
-    detail: "Remove with: claude mcp remove superflag",
-  });
-
   displayResults(tasks);
+
+  if (targetArg === "all" || targetArg === "claude-code") {
+    console.log(chalk.yellow("\n⚠  Note: Remove MCP server manually with:"));
+    console.log(chalk.gray("   claude mcp remove superflag"));
+  }
+}
+
+function showNextSteps(platformNames: string[]): void {
+  console.log(chalk.yellow("\n📝 Next Steps:"));
+
+  if (platformNames.includes("Claude Code")) {
+    console.log(chalk.white("\nFor Claude Code:"));
+    console.log(chalk.cyan("  1. Register MCP server:"));
+    console.log(chalk.gray(`     claude mcp add superflag "npx" "-y" "superflag-mcp" -s user`));
+    console.log(chalk.cyan("  2. Restart Claude Code"));
+  }
+
+  if (platformNames.includes("Gemini CLI")) {
+    console.log(chalk.white("\nFor Gemini CLI:"));
+    console.log(chalk.cyan("  1. Register MCP server in Gemini settings"));
+    console.log(chalk.cyan("  2. Restart Gemini CLI"));
+  }
+
+  if (platformNames.includes("Continue")) {
+    console.log(chalk.white("\nFor Continue:"));
+    console.log(chalk.cyan("  1. Restart Continue extension"));
+  }
+
+  console.log(chalk.green("\n3. Test with: \"Analyze this code --analyze --strict\""));
+}
+
+function showUsage(): void {
+  console.log("\nUsage:");
+  console.log("  Interactive mode:");
+  console.log("    superflag-install install");
+  console.log("    superflag-install uninstall");
+  console.log("\n  Non-interactive mode:");
+  console.log("    superflag-install install --target claude-code|gemini-cli|cn|all");
+  console.log("    superflag-install uninstall --target claude-code|gemini-cli|cn|all");
+}
+
+function getPlatforms(targetArg: string): Platform[] {
+  if (targetArg === "all") {
+    return PLATFORMS;
+  }
+
+  const platformMap: Record<string, Platform> = {
+    "claude-code": PLATFORMS[0],
+    "gemini-cli": PLATFORMS[1],
+    "cn": PLATFORMS[2]
+  };
+
+  if (!platformMap[targetArg]) {
+    console.error(chalk.red(`Error: Invalid target '${targetArg}'`));
+    console.log(chalk.yellow("Valid targets: claude-code, gemini-cli, cn, all"));
+    process.exit(1);
+  }
+
+  return [platformMap[targetArg]];
+}
+
+async function setupPlatform(platform: Platform, mode: "install" | "uninstall"): Promise<InstallationTask> {
+  try {
+    if (platform.type === "markdown") {
+      if (mode === "install") {
+        return await installMarkdownPlatform(platform);
+      } else {
+        return await uninstallMarkdownPlatform(platform);
+      }
+    } else if (platform.type === "yaml") {
+      if (mode === "install") {
+        return await installYamlPlatform(platform);
+      } else {
+        return await uninstallYamlPlatform(platform);
+      }
+    }
+
+    return {
+      name: platform.name,
+      status: "FAIL",
+      detail: "Unknown platform type"
+    };
+  } catch (error) {
+    return {
+      name: platform.name,
+      status: "FAIL",
+      detail: error instanceof Error ? error.message : "Unknown error"
+    };
+  }
+}
+
+async function installMarkdownPlatform(platform: Platform): Promise<InstallationTask> {
+  // Create directory if needed
+  await fs.mkdir(platform.configDir, { recursive: true });
+
+  // 1. Create SUPERFLAG.md
+  const contextPath = path.join(platform.configDir, platform.contextFile);
+  await fs.writeFile(contextPath, getSuperflagMdContent(), "utf-8");
+
+  // 2. Update main file (CLAUDE.md or GEMINI.md)
+  const mainPath = path.join(platform.configDir, platform.mainFile);
+  let mainContent = "";
+  let fileExists = false;
+
+  try {
+    mainContent = await fs.readFile(mainPath, "utf-8");
+    fileExists = true;
+  } catch {
+    // File doesn't exist, will create new
+    mainContent = "";
+  }
+
+  // Check if already has @SUPERFLAG.md
+  if (!mainContent.includes("@SUPERFLAG.md")) {
+    // Add @SUPERFLAG.md at the end
+    if (mainContent && !mainContent.endsWith("\n")) {
+      mainContent += "\n";
+    }
+    mainContent += "@SUPERFLAG.md\n";
+    await fs.writeFile(mainPath, mainContent, "utf-8");
+
+    return {
+      name: platform.name,
+      status: "OK",
+      detail: fileExists ? `${platform.mainFile} updated` : `${platform.mainFile} created`
+    };
+  }
+
+  return {
+    name: platform.name,
+    status: "SKIP",
+    detail: "@SUPERFLAG.md already exists"
+  };
+}
+
+async function uninstallMarkdownPlatform(platform: Platform): Promise<InstallationTask> {
+  let hasChanges = false;
+
+  // 1. Remove SUPERFLAG.md file
+  const contextPath = path.join(platform.configDir, platform.contextFile);
+  if (await removeFile(contextPath)) {
+    hasChanges = true;
+  }
+
+  // 2. Remove @SUPERFLAG.md from main file
+  const mainPath = path.join(platform.configDir, platform.mainFile);
+  try {
+    let content = await fs.readFile(mainPath, "utf-8");
+    // Remove all occurrences of @SUPERFLAG.md (with or without newline)
+    const newContent = content.replace(/@SUPERFLAG\.md\n?/g, "");
+
+    if (newContent !== content) {
+      await fs.writeFile(mainPath, newContent, "utf-8");
+      hasChanges = true;
+    }
+  } catch {
+    // File doesn't exist, nothing to remove
+  }
+
+  return {
+    name: platform.name,
+    status: hasChanges ? "OK" : "SKIP",
+    detail: hasChanges ? "Removed" : "Not found"
+  };
+}
+
+async function installYamlPlatform(platform: Platform): Promise<InstallationTask> {
+  // For Continue platform
+  await fs.mkdir(platform.configDir, { recursive: true });
+
+  const configPath = path.join(platform.configDir, platform.mainFile);
+  let config: any = {};
+  let fileExists = false;
+
+  try {
+    const content = await fs.readFile(configPath, "utf-8");
+    config = yaml.load(content) || {};
+    fileExists = true;
+  } catch {
+    // File doesn't exist, create new config
+    config = {};
+  }
+
+  // Ensure rules array exists
+  if (!config.rules) {
+    config.rules = [];
+  }
+
+  // Check if SuperFlag rule already exists
+  const hasSuperflag = config.rules.some((rule: any) =>
+    rule.title === "SuperFlag"
+  );
+
+  if (!hasSuperflag) {
+    // Add SuperFlag rule
+    config.rules.push({
+      title: "SuperFlag",
+      pattern: "--\\w+",
+      message: "Flag detected. Execute MCP: get_directives([detected_flags])\n" +
+               "Available: --analyze, --strict, --performance, --refactor, --lean, --discover, " +
+               "--explain, --save, --parallel, --todo, --seq, --concise, --git, --readonly, " +
+               "--load, --collab, --reset, --auto"
+    });
+
+    const yamlStr = yaml.dump(config, {
+      indent: 2,
+      lineWidth: 120,
+      noRefs: true
+    });
+
+    await fs.writeFile(configPath, yamlStr, "utf-8");
+
+    return {
+      name: platform.name,
+      status: "OK",
+      detail: fileExists ? "Rule added" : "config.yaml created"
+    };
+  }
+
+  return {
+    name: platform.name,
+    status: "SKIP",
+    detail: "Rule already exists"
+  };
+}
+
+async function uninstallYamlPlatform(platform: Platform): Promise<InstallationTask> {
+  const configPath = path.join(platform.configDir, platform.mainFile);
+
+  try {
+    const content = await fs.readFile(configPath, "utf-8");
+    const config = yaml.load(content) as any;
+
+    if (config.rules) {
+      const originalLength = config.rules.length;
+      // Remove SuperFlag rule
+      config.rules = config.rules.filter((rule: any) =>
+        rule.title !== "SuperFlag"
+      );
+
+      if (config.rules.length < originalLength) {
+        const yamlStr = yaml.dump(config, {
+          indent: 2,
+          lineWidth: 120,
+          noRefs: true
+        });
+
+        await fs.writeFile(configPath, yamlStr, "utf-8");
+
+        return {
+          name: platform.name,
+          status: "OK",
+          detail: "Rule removed"
+        };
+      }
+    }
+  } catch {
+    // File doesn't exist or error reading
+  }
+
+  return {
+    name: platform.name,
+    status: "SKIP",
+    detail: "Not found"
+  };
 }
 
 async function setupFlagsYaml(flagsPath: string): Promise<boolean> {
@@ -154,40 +665,17 @@ async function setupFlagsYaml(flagsPath: string): Promise<boolean> {
     // Create directory
     await fs.mkdir(path.dirname(flagsPath), { recursive: true });
 
-    // Copy from package or use embedded default
+    // Copy from package
     const sourcePath = path.join(__dirname, "..", "flags.yaml");
     try {
       await fs.copyFile(sourcePath, flagsPath);
     } catch {
-      // Create default if source doesn't exist
+      // Create from bundled content if copy fails
       const defaultContent = getDefaultFlagsYaml();
       await fs.writeFile(flagsPath, defaultContent, "utf-8");
     }
 
     return true;
-  }
-}
-
-async function setupClaudeContext(): Promise<boolean> {
-  const claudeDir = path.join(os.homedir(), ".claude");
-
-  try {
-    await fs.mkdir(claudeDir, { recursive: true });
-
-    // Copy CLAUDE.md and SUPERFLAG.md
-    const files = [
-      { name: "CLAUDE.md", content: getClaudeMdContent() },
-      { name: "SUPERFLAG.md", content: getSuperflagMdContent() },
-    ];
-
-    for (const file of files) {
-      const filePath = path.join(claudeDir, file.name);
-      await fs.writeFile(filePath, file.content, "utf-8");
-    }
-
-    return true;
-  } catch {
-    return false;
   }
 }
 
@@ -197,57 +685,20 @@ async function setupPythonHooks(): Promise<boolean> {
   try {
     await fs.mkdir(hooksDir, { recursive: true });
 
-    // Copy Python hook file (keeping Python for hook compatibility)
     const hookPath = path.join(hooksDir, "superflag.py");
-    const hookContent = getPythonHookContent();
-    await fs.writeFile(hookPath, hookContent, "utf-8");
 
-    // Update settings.json to register hook
-    const settingsPath = path.join(os.homedir(), ".claude", "settings.json");
-    await updateClaudeSettings(settingsPath);
-
-    return true;
+    // Check if already exists
+    try {
+      await fs.access(hookPath);
+      return false; // Already exists
+    } catch {
+      // Create the hook file
+      await fs.writeFile(hookPath, getPythonHookContent(), "utf-8");
+      return true;
+    }
   } catch {
     return false;
   }
-}
-
-async function updateClaudeSettings(settingsPath: string): Promise<void> {
-  let settings: any = {};
-
-  try {
-    const content = await fs.readFile(settingsPath, "utf-8");
-    settings = JSON.parse(content);
-  } catch {
-    // Create new settings if doesn't exist
-  }
-
-  // Ensure hooks structure exists
-  if (!settings.hooks) {
-    settings.hooks = {};
-  }
-  if (!settings.hooks.UserPromptSubmit) {
-    settings.hooks.UserPromptSubmit = [];
-  }
-
-  // Remove old superflag hooks
-  settings.hooks.UserPromptSubmit = settings.hooks.UserPromptSubmit.filter(
-    (hook: any) => !hook.hooks?.[0]?.command?.includes("superflag.py")
-  );
-
-  // Add new hook
-  const hookPath = path.join(os.homedir(), ".claude", "hooks", "superflag.py");
-  settings.hooks.UserPromptSubmit.push({
-    description: "SuperFlag Context Engine",
-    hooks: [
-      {
-        trigger: "UserPromptSubmit",
-        command: `python "${hookPath}"`,
-      },
-    ],
-  });
-
-  await fs.writeFile(settingsPath, JSON.stringify(settings, null, 2), "utf-8");
 }
 
 async function removeFile(filePath: string): Promise<boolean> {
@@ -260,30 +711,26 @@ async function removeFile(filePath: string): Promise<boolean> {
 }
 
 function displayResults(tasks: InstallationTask[]): void {
-  console.log(chalk.bold("\n📋 Installation Summary:"));
+  console.log(chalk.blue("\n📋 Summary:"));
   console.log("─".repeat(60));
 
   for (const task of tasks) {
+    const symbol =
+      task.status === "OK"
+        ? chalk.green("✓")
+        : task.status === "SKIP"
+        ? chalk.gray("○")
+        : chalk.red("✗");
+
     const statusColor =
       task.status === "OK"
         ? chalk.green
         : task.status === "SKIP"
-        ? chalk.yellow
-        : task.status === "FAIL"
-        ? chalk.red
-        : chalk.cyan;
-
-    const statusIcon =
-      task.status === "OK"
-        ? "✓"
-        : task.status === "SKIP"
-        ? "○"
-        : task.status === "FAIL"
-        ? "✗"
-        : "⚠";
+        ? chalk.gray
+        : chalk.red;
 
     console.log(
-      `${statusColor(statusIcon)} ${task.name.padEnd(20)} ${statusColor(
+      `${symbol} ${task.name.padEnd(20)} ${statusColor(
         `[${task.status}]`
       )} ${chalk.gray(task.detail)}`
     );
@@ -291,68 +738,113 @@ function displayResults(tasks: InstallationTask[]): void {
   console.log("─".repeat(60));
 }
 
-// Content generation functions (simplified versions)
 function getDefaultFlagsYaml(): string {
-  return `# SuperFlag Configuration
-available_flags:
-  - name: "--analyze"
-    description: "Analyze through pattern, root, and validation lenses"
-    directive: "Identify root causes through multi-perspective analysis."
-    verification: "Analyzed from 3+ perspectives"
-    priority: 1
-
-  - name: "--strict"
-    description: "Execute with zero errors and full transparency"
-    directive: "Ensure zero-error execution with complete transparency."
-    verification: "Zero warnings/errors"
-    priority: 1
-`;
-}
-
-function getClaudeMdContent(): string {
-  return `# Context Engine Instructions
-@SUPERFLAG.md
-`;
+  // Copy from bundled flags.yaml
+  const packageFlagsPath = path.join(__dirname, '..', 'flags.yaml');
+  try {
+    return fsSync.readFileSync(packageFlagsPath, 'utf-8');
+  } catch (error) {
+    throw new Error('Cannot find bundled flags.yaml. Package installation is corrupted.');
+  }
 }
 
 function getSuperflagMdContent(): string {
-  return `# SuperFlag Context Engine
+  return `# SuperFlag
 MCP Protocol: get_directives([flags])
 
+## Core Workflow
 <core_workflow>
-When --flag detected:
-1. Call MCP tool: get_directives([flags])
-2. Apply directives completely
+When flags detected in user input:
+1. Execute MCP tool: get_directives([detected_flags])
+2. Apply directives completely and in order
+3. Verify compliance at checkpoints
 </core_workflow>
+
+## Available Flags
+
+### Analysis & Optimization
+- **--analyze**: Multi-perspective root cause analysis
+- **--performance**: Measure and optimize bottlenecks
+- **--refactor**: Safe code structure improvements
+- **--strict**: Zero-error execution with transparency
+- **--lean**: Eliminate waste with minimal implementation
+
+### Discovery & Documentation
+- **--discover**: Research existing solutions first
+- **--explain**: Progressive disclosure from overview to details
+- **--save**: Create handoff documents for continuity
+- **--load**: Restore context from handoff documents
+
+### Workflow Management
+- **--parallel**: Execute independent tasks simultaneously
+- **--todo**: Track progress with structured task management
+- **--seq**: Sequential step-by-step problem solving
+- **--collab**: Co-develop with quantitative validation
+
+### Output Control
+- **--concise**: Professional, culturally neutral content
+- **--git**: Anonymous, ASCII-only commit messages
+- **--readonly**: Analysis without file modifications
+
+### Meta Control
+- **--reset**: Clear session and force fresh directives
+- **--auto**: Grant autonomous flag selection authority
+
+## Flag Selection Strategy
+<flag_selection_strategy>
+When --auto is used:
+1. Analyze user intent and task requirements
+2. Select complementary flags that work together
+3. Avoid conflicting flags (e.g., --readonly with --git)
+4. Prioritize based on task type:
+   - Bugs: --analyze, --strict, --todo
+   - Performance: --performance, --lean
+   - Features: --discover, --parallel, --todo
+   - Documentation: --explain, --save, --concise
+</flag_selection_strategy>
+
+## Examples
+\`\`\`
+"Fix this bug --analyze --strict"
+"Optimize the code --performance --lean"
+"Refactor safely --refactor --git"
+"Research alternatives --discover --parallel"
+"Track complex task --todo --seq"
+\`\`\`
 `;
 }
 
 function getPythonHookContent(): string {
-  // This remains in Python for Claude Code compatibility
   return `#!/usr/bin/env python3
 """SuperFlag Claude Code Hook - TypeScript Edition Bridge"""
 
 import sys
 import json
+import re
 
 def main():
     try:
         user_input = sys.stdin.read()
-        # Basic flag detection (simplified)
-        flags = []
-        for word in user_input.split():
-            if word.startswith('--'):
-                flags.append(word)
+
+        # Detect flags in user input
+        flags = re.findall(r'--\\w+', user_input)
 
         if flags:
-            print(json.dumps({
+            # Output hook message for Claude Code
+            message = {
                 "type": "system",
-                "message": f"Flags detected: {', '.join(flags)}. Use get_directives() tool."
-            }))
-    except Exception as e:
+                "message": f"Flags detected: {', '.join(flags)}\\n" +
+                          "Execute: get_directives(" + str(flags) + ") for systematic implementation."
+            }
+            print(json.dumps(message))
+            return 0
+
+    except Exception:
         pass
 
+    return 1
+
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
 `;
 }

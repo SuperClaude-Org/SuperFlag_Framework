@@ -1,12 +1,12 @@
-# Context Engine MCP - Optimized Version
+# SuperFlag - Optimized Version
 # Scientific Prompt Engineering + Philosophical Wisdom
 
 # ========================================
 # MCP Server Configuration
 # ========================================
 server:
-  name: "context-engine-mcp"
-  description: "MCP-based contextual flag system with scientific optimization"
+  name: "superflag-mcp"
+  description: "SuperFlag - MCP-based flag system with scientific optimization"
 
 mcp:
   tools:

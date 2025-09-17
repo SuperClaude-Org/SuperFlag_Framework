@@ -1,7 +1,7 @@
 {
   "name": "superflag-mcp",
-  "version": "4.0.0",
-  "description": "MCP-based contextual flag system for AI assistants",
+  "version": "3.1.0",
+  "description": "SuperFlag - MCP-based flag system for AI assistants",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
@@ -9,14 +9,14 @@
     "superflag-install": "dist/install.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node update-version.js",
     "watch": "tsc --watch",
     "prepare": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SuperClaude-Org/context-engine-mcp.git"
+    "url": "git+https://github.com/SuperClaude-Org/superflag-mcp.git"
   },
   "keywords": [
     "mcp",
@@ -40,16 +40,18 @@
   ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^0.5.0",
-    "js-yaml": "^4.1.0",
+    "@types/inquirer": "^9.0.9",
     "chalk": "^5.3.0",
+    "inquirer": "^12.9.6",
+    "js-yaml": "^4.1.0",
     "yargs": "^17.7.2"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
     "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.0.0",
     "@types/yargs": "^17.0.32",
-    "typescript": "^5.3.3",
-    "shx": "^0.3.4"
+    "shx": "^0.3.4",
+    "typescript": "^5.3.3"
   },
   "engines": {
     "node": ">=16.0.0"

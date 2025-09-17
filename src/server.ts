@@ -133,6 +133,9 @@ Args:
     // Load directives
     const directives = await this.directiveLoader.loadDirectives(flags, this.flagsYamlPath);
 
+    // Load YAML configuration for enforcement text
+    const config = await this.directiveLoader.loadYamlConfig(this.flagsYamlPath);
+
     // Update session
     this.sessionManager.updateFlags(flags);
 
@@ -149,19 +152,14 @@ Args:
       .map(([flag, content]) => `## ${flag}\n${content.raw}`)
       .join('\n\n');
 
+    // Get enforcement text from YAML or use empty string
+    const enforcementText = config.meta_instructions?.get_directives || '';
+
     const response = `New: ${newFlags.join(", ")}
 
 ${directiveText}
 
-==================================================
-<enforcement>
-Directives are contracts, not suggestions.
-Apply each method completely and in order.
-Maintain ALL constraints throughout execution.
-Verify compliance at every checkpoint.
-</enforcement>
-
-==================================================
+${enforcementText}
 
 Applied flags: ${flags.join(", ")}`;
 

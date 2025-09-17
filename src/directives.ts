@@ -14,6 +14,10 @@ interface FlagConfig {
 interface FlagsYaml {
   available_flags: FlagConfig[];
   hook_messages?: Record<string, any>;
+  meta_instructions?: {
+    list_available_flags?: string;
+    get_directives?: string;
+  };
 }
 
 interface Directive {
@@ -61,7 +65,7 @@ export class DirectiveLoader {
   /**
    * Load and cache YAML configuration
    */
-  private async loadYamlConfig(yamlPath: string): Promise<FlagsYaml> {
+  async loadYamlConfig(yamlPath: string): Promise<FlagsYaml> {
     const now = Date.now();
 
     // Check cache
@@ -86,8 +90,13 @@ export class DirectiveLoader {
 
       return config;
     } catch (error) {
-      // If file doesn't exist or is invalid, create default config
-      return this.createDefaultConfig(yamlPath);
+      // If user's file doesn't exist, copy from package
+      try {
+        return await this.copyBundledConfig(yamlPath);
+      } catch (copyError) {
+        // Fatal error: No flags.yaml found
+        throw new Error(`Cannot find flags.yaml. The package is corrupted or incomplete. Please reinstall.`);
+      }
     }
   }
 
@@ -133,52 +142,19 @@ export class DirectiveLoader {
   }
 
   /**
-   * Create default configuration if file doesn't exist
+   * Copy bundled flags.yaml to user directory
    */
-  private async createDefaultConfig(yamlPath: string): Promise<FlagsYaml> {
-    // Try to read from package's bundled flags.yaml first
-    try {
-      const packageFlagsPath = path.join(__dirname, '..', 'flags.yaml');
-      const content = await fs.readFile(packageFlagsPath, 'utf-8');
-      const config = yaml.load(content) as FlagsYaml;
+  private async copyBundledConfig(yamlPath: string): Promise<FlagsYaml> {
+    const packageFlagsPath = path.join(__dirname, '..', 'flags.yaml');
+    const content = await fs.readFile(packageFlagsPath, 'utf-8');
+    const config = yaml.load(content) as FlagsYaml;
 
-      // Copy to user's home directory
-      const dir = path.dirname(yamlPath);
-      await fs.mkdir(dir, { recursive: true });
-      await fs.writeFile(yamlPath, content, 'utf-8');
+    // Copy to user's home directory
+    const dir = path.dirname(yamlPath);
+    await fs.mkdir(dir, { recursive: true });
+    await fs.writeFile(yamlPath, content, 'utf-8');
 
-      return config;
-    } catch {
-      // If bundled file doesn't exist, return minimal config
-      // This should rarely happen in production
-      const minimalConfig: FlagsYaml = {
-        available_flags: [
-          {
-            name: "--help",
-            description: "Show available flags",
-            directive: "Display all available flags and their descriptions",
-            verification: "Help displayed",
-            priority: 0,
-          }
-        ],
-      };
-
-      // Ensure directory exists
-      const dir = path.dirname(yamlPath);
-      await fs.mkdir(dir, { recursive: true });
-
-      // Write minimal config
-      const yamlContent = yaml.dump(minimalConfig, {
-        indent: 2,
-        lineWidth: 120,
-      });
-      await fs.writeFile(yamlPath, yamlContent, "utf-8");
-
-      console.error("Warning: Could not find bundled flags.yaml. Created minimal configuration.");
-      console.error("Please ensure flags.yaml is included in the package.");
-
-      return minimalConfig;
-    }
+    return config;
   }
 
   /**
