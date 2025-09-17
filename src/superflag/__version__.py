@@ -1,3 +1,3 @@
 """Version information for superflag."""
 
-__version__ = "3.0.1rc7"
+__version__ = "3.0.1rc8"
