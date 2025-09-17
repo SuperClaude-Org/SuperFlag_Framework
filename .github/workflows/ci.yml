@@ -59,7 +59,7 @@ jobs:
           "$VENV_PY" -m superflag install --target cn
           # Skip uninstall on Windows to avoid exit code 15 (process self-termination)
           if [ "$RUNNER_OS" != "Windows" ]; then
-            "$VENV_PY" -m superflag uninstall
+            "$VENV_PY" -m superflag uninstall --target cn
           else
             echo "Skipping uninstall test on Windows (would cause exit code 15)"
           fi
@@ -99,5 +99,5 @@ jobs:
           APP=$(python -c "import json, subprocess; j=json.loads(subprocess.check_output(['python','-m','pipx','list','--json'])); print(j['venvs']['superflag']['metadata']['main_package']['app_paths'][0]['__Path__'])")
           "$APP" --version
           "$APP" install --target cn
-          "$APP" uninstall
+          "$APP" uninstall --target cn
           python -m pipx uninstall superflag
