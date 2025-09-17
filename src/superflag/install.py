@@ -10,7 +10,6 @@ import json
 import sys
 import time
 import subprocess
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 try:
     import psutil
@@ -25,82 +24,6 @@ except ImportError:
     from prompts import setup_claude_context_files, setup_continue_config, setup_gemini_context_files
     from environment_detector import EnvironmentDetector
     from mcp_manager import MCPManager
-
-
-class Style:
-    CYAN = "\033[96m"
-    GREEN = "\033[92m"
-    YELLOW = "\033[93m"
-    RED = "\033[91m"
-    RESET = "\033[0m"
-    BOLD = "\033[1m"
-
-
-PLATFORM_CHOICES: Sequence[Tuple[str, str, str]] = (
-    ("1", "claude-code", "Claude Code"),
-    ("2", "gemini-cli", "Gemini CLI"),
-    ("3", "cn", "Continue"),
-)
-
-DISPLAY_NAMES: Dict[str, str] = {code: label for _, code, label in PLATFORM_CHOICES}
-MENU_INDEX: Dict[str, str] = {code: key for key, code, _ in PLATFORM_CHOICES}
-TARGET_ALIASES: Dict[str, str] = {
-    "continue": "cn",
-    "gemini": "gemini-cli",
-    "claude": "claude-code",
-}
-
-SUPERFLAG_HOOK_SENTINEL = "superflag.py"
-CONTEXT_REFERENCE = "@SUPERFLAG.md"
-
-
-def normalize_target(target: str) -> str:
-    normalized = (target or "").lower()
-    return TARGET_ALIASES.get(normalized, normalized)
-
-
-def display_name_for(target: str) -> str:
-    resolved = normalize_target(target)
-    return DISPLAY_NAMES.get(resolved, target)
-
-
-def _is_superflag_hook(entry: Any) -> bool:
-    if not isinstance(entry, dict):
-        return False
-    hooks = entry.get("hooks")
-    if not isinstance(hooks, list) or not hooks:
-        return False
-    command = str(hooks[0].get("command", ""))
-    return SUPERFLAG_HOOK_SENTINEL in command
-
-
-def scrub_superflag_hooks(entries: Iterable[Any]) -> Tuple[List[Any], bool]:
-    cleaned: List[Any] = []
-    removed = False
-    for entry in entries or []:
-        if _is_superflag_hook(entry):
-            removed = True
-            continue
-        cleaned.append(entry)
-    return cleaned, removed
-
-
-def strip_reference_markers(content: str, reference: str = CONTEXT_REFERENCE) -> Tuple[str, bool]:
-    updated = content
-    for pattern in (f"\n\n{reference}", f"\n{reference}", reference):
-        updated = updated.replace(pattern, "")
-    return updated, updated != content
-
-
-def remove_context_reference(path: Path, reference: str = CONTEXT_REFERENCE) -> bool:
-    if not path.exists():
-        return False
-    content = path.read_text(encoding="utf-8")
-    updated, changed = strip_reference_markers(content, reference)
-    if changed:
-        path.write_text(updated, encoding="utf-8")
-    return changed
-
 
 def get_home_dir():
     """Get the user's home directory"""
@@ -267,12 +190,25 @@ def setup_claude_code_hooks():
                 except json.JSONDecodeError:
                     settings = {}
 
-        hooks_section = settings.setdefault('hooks', {})
-        submit_hooks = hooks_section.get('UserPromptSubmit', [])
-        cleaned_hooks, _ = scrub_superflag_hooks(submit_hooks)
-        hooks_section['UserPromptSubmit'] = cleaned_hooks
+        # Add or update hooks section
+        if 'hooks' not in settings:
+            settings['hooks'] = {}
 
-        hooks_section['UserPromptSubmit'].append({
+        # Register our hook in UserPromptSubmit array
+        if 'UserPromptSubmit' not in settings['hooks']:
+            settings['hooks']['UserPromptSubmit'] = []
+
+        # Remove any existing context-engine hooks first
+        settings['hooks']['UserPromptSubmit'] = [
+            hook for hook in settings['hooks']['UserPromptSubmit']
+            if not (isinstance(hook, dict) and
+                   'hooks' in hook and
+                   len(hook['hooks']) > 0 and
+                   'superflag.py' in str(hook['hooks'][0].get('command', '')))
+        ]
+
+        # Add our hook
+        settings['hooks']['UserPromptSubmit'].append({
             "matcher": "",
             "hooks": [
                 {
@@ -371,27 +307,24 @@ def setup_continue_mcp_servers():
     # Detect installation method
     detector = EnvironmentDetector()
     detection = detector.detect()
-    command_spec = detector.get_command_spec(detection)
-    method = detection.get('method', 'unknown')
 
-    if command_spec:
-        command = command_spec.executable
-        args = list(command_spec.args)
-    else:
+    # Determine command and args based on detection
+    if detection['method'] == 'pipx' or (detection['method'] == 'pip' and detection['in_path']):
         command = 'superflag'
         args = []
-
-    if method == 'pipx' or (method == 'pip' and detection.get('in_path')):
-        detected_note = f"# Auto-detected: {method} installation"
-    elif method == 'uv':
+        detected_note = f"# Auto-detected: {detection['method']} installation"
+    elif detection['method'] == 'uv':
+        command = 'uv'
+        args = ['run', 'superflag']
         detected_note = "# Auto-detected: uv installation"
-    elif method == 'pip' and not detection.get('in_path'):
+    elif detection['method'] == 'pip' and not detection['in_path']:
+        command = 'python'
+        args = ['-m', 'superflag']
         detected_note = "# Auto-detected: pip installation (not in PATH)"
-    elif method == 'not_installed':
-        detected_note = "# Default configuration (modify if needed)"
+    else:
+        # Default fallback
         command = 'superflag'
         args = []
-    else:
         detected_note = "# Default configuration (modify if needed)"
 
     # Define server configuration with auto-detected values
@@ -461,105 +394,147 @@ mcpServers:
 
 def select_uninstall_platforms(installed_targets):
     """Interactive platform selection for uninstallation"""
-    normalized: List[str] = []
-    seen = set()
-    for target in installed_targets or []:
-        canonical = normalize_target(target)
-        if canonical not in seen:
-            normalized.append(canonical)
-            seen.add(canonical)
+    # ANSI color codes
+    CYAN = "\033[96m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    RESET = "\033[0m"
+    BOLD = "\033[1m"
 
-    print(f"{Style.CYAN}Select what to remove:{Style.RESET}")
+    # Map installed targets to display options
+    platform_map = {
+        'claude-code': ('1', 'Claude Code'),
+        'cn': ('2', 'Continue'),
+        'gemini-cli': ('3', 'Gemini CLI'),
+    }
 
-    options: List[Tuple[str, str]] = []
-    for canonical in normalized:
-        key = MENU_INDEX.get(canonical, str(len(options) + 1))
-        label = display_name_for(canonical)
-        print(f"  {Style.BOLD}{key}{Style.RESET}) {label}")
-        options.append((key, canonical))
+    print(f"{CYAN}Select what to remove:{RESET}")
 
-    print(f"  {Style.BOLD}a{Style.RESET}) All detected platforms")
-    print(f"\n{Style.YELLOW}Enter your choice (e.g., '1', '2,3', 'a'):{Style.RESET} ", end='')
+    options = []
+    for target in installed_targets:
+        if target in platform_map:
+            num, name = platform_map[target]
+            print(f"  {BOLD}{num}{RESET}) {name}")
+            options.append((num, target))
+
+    print(f"  {BOLD}a{RESET}) All detected platforms")
+    print(f"\n{YELLOW}Enter your choice (e.g., '1', '2,3', 'a'):{RESET} ", end='')
 
     choice = input().strip().lower()
 
-    if choice in {'a', 'all'}:
-        return normalized
+    # Handle special cases
+    if choice == 'a' or choice == 'all':
+        return installed_targets
 
-    selected: List[str] = []
-    tokens = [token for token in choice.replace(' ', '').split(',') if token]
-    for token in tokens:
-        for key, code in options:
-            if token == key:
-                selected.append(code)
+    # Handle single or multiple selection
+    selected = []
+    for char in choice.replace(' ', '').split(','):
+        for num, target in options:
+            if char == num:
+                selected.append(target)
                 break
 
+    # Default to all if nothing selected
     if not selected:
-        if normalized:
-            print(f"{Style.YELLOW}No valid selection. Defaulting to all detected platforms.{Style.RESET}")
-        return normalized
+        print(f"{YELLOW}No valid selection. Defaulting to all detected platforms.{RESET}")
+        return installed_targets
 
     return selected
 
 
 def select_platforms():
     """Interactive platform selection for installation"""
-    print(f"{Style.CYAN}Select installation targets:{Style.RESET}")
-    for key, code, label in PLATFORM_CHOICES:
-        print(f"  {Style.BOLD}{key}{Style.RESET}) {label}")
-    print(f"  {Style.BOLD}a{Style.RESET}) All platforms")
-    print(f"\n{Style.YELLOW}Enter your choice (e.g., '1', '2,3', 'a'):{Style.RESET} ", end='')
+    # ANSI color codes
+    CYAN = "\033[96m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    RESET = "\033[0m"
+    BOLD = "\033[1m"
+
+    platforms = {
+        '1': ('claude-code', 'Claude Code'),
+        '2': ('gemini-cli', 'Gemini CLI'),
+        '3': ('cn', 'Continue'),
+    }
+
+    print(f"{CYAN}Select installation targets:{RESET}")
+    print(f"  {BOLD}1{RESET}) Claude Code")
+    print(f"  {BOLD}2{RESET}) Gemini CLI")
+    print(f"  {BOLD}3{RESET}) Continue")
+    print(f"  {BOLD}a{RESET}) All platforms")
+    print(f"\n{YELLOW}Enter your choice (e.g., '1', '2,3', 'a'):{RESET} ", end='')
 
     choice = input().strip().lower()
 
-    if choice in {'a', 'all'}:
-        return [code for _, code, _ in PLATFORM_CHOICES]
+    # Handle special cases
+    if choice == 'a' or choice == 'all':
+        return [code for code, _ in platforms.values()]
 
-    selected: List[str] = []
-    tokens = [token for token in choice.replace(' ', '').split(',') if token]
-    for token in tokens:
-        for key, code, _ in PLATFORM_CHOICES:
-            if token == key:
-                selected.append(code)
-                break
+    # Handle single or multiple selection
+    selected = []
+    for char in choice.replace(' ', '').split(','):
+        if char in platforms:
+            selected.append(platforms[char][0])
 
+    # Default to Claude Code if nothing selected
     if not selected:
-        print(f"{Style.YELLOW}No selection made. Defaulting to Claude Code.{Style.RESET}")
+        print(f"{YELLOW}No selection made. Defaulting to Claude Code.{RESET}")
         return ['claude-code']
 
-    ordered: List[str] = []
-    seen = set()
-    for code in selected:
-        if code not in seen:
-            ordered.append(code)
-            seen.add(code)
-    return ordered
-
+    return selected
 
 
 def install_single_target(target):
     """Install SuperFlag for a single target platform"""
-    canonical = normalize_target(target)
-    display = display_name_for(canonical)
-    print(f"\n{Style.BOLD}Installing for {display}...{Style.RESET}")
+    from .__version__ import __version__
 
+    # ANSI color codes
+    CYAN = "\033[96m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    RED = "\033[91m"
+    RESET = "\033[0m"
+    BOLD = "\033[1m"
+
+    target_display = {
+        "claude-code": "Claude Code",
+        "cn": "Continue",
+        "continue": "Continue",
+        "gemini-cli": "Gemini CLI",
+        "gemini": "Gemini CLI"
+    }.get(target, target)
+
+    print(f"\n{BOLD}Installing for {target_display}...{RESET}")
+
+    # Get home directory for later use
     home = get_home_dir()
+
+    # Track installation progress
     tasks = []
 
-    if canonical == 'claude-code':
+    # 1. Set up flags.yaml (only once for all targets)
+    # This is handled in the main install() function
+
+    # 2. Install based on target
+    if target == "claude-code":
+        # Check for Claude CLI and install MCP servers
         if check_claude_cli():
+            # Try to register MCP server automatically
             mcp_success, mcp_message = install_mcp_servers_via_cli()
 
+            # Setup CLAUDE.md
             if setup_claude_context_files():
                 tasks.append(("Context files", "OK", "~/.claude/"))
             else:
                 tasks.append(("Context files", "SKIP", "Already configured"))
 
+            # Setup Claude Code Hooks
             if setup_claude_code_hooks():
                 tasks.append(("Hook system", "OK", "~/.claude/hooks/"))
             else:
                 tasks.append(("Hook system", "SKIP", "MCP will still work"))
 
+            # Add MCP registration status
             if mcp_success:
                 if "already" in mcp_message.lower():
                     tasks.append(("MCP server", "SKIP", "Already registered"))
@@ -569,11 +544,13 @@ def install_single_target(target):
                 tasks.append(("MCP server", "MANUAL", "Manual registration needed"))
         else:
             tasks.append(("Claude CLI", "FAIL", "Not installed"))
-            print(f"\n{Style.YELLOW}Install Claude Code first: npm install -g @anthropic/claude-code{Style.RESET}")
+            print(f"\n{YELLOW}Install Claude Code first: npm install -g @anthropic/claude-code{RESET}")
 
-    elif canonical == 'cn':
+    elif target == "cn":
+        # Install for Continue extension
         if setup_continue_mcp_servers():
             tasks.append(("MCP config", "OK", "~/.continue/mcpServers/"))
+            # Setup config.yaml with rules
             continue_dir = home / ".continue"
             if setup_continue_config(continue_dir):
                 tasks.append(("Global rules", "OK", "~/.continue/config.yaml"))
@@ -582,19 +559,24 @@ def install_single_target(target):
         else:
             tasks.append(("MCP config", "FAIL", "Could not create files"))
 
-    elif canonical == 'gemini-cli':
+    elif target == "gemini-cli":
+        # Set up context files in ~/.gemini
         if setup_gemini_context_files():
             tasks.append(("Context files", "OK", "~/.gemini/"))
         else:
             tasks.append(("Context files", "FAIL", "Setup failed"))
 
+        # Try to register MCP server automatically for Gemini
         detector = EnvironmentDetector()
         detection = detector.detect()
-        if detection.get('method') != 'not_installed':
-            spec = detector.get_command_spec(detection)
+
+        if detection['method'] != 'not_installed':
             mcp_manager = MCPManager()
-            if spec:
-                success, message = mcp_manager.register_gemini_mcp(spec.executable, list(spec.args))
+            # Determine command and args based on detection
+            if detection['method'] == 'uv':
+                success, message = mcp_manager.register_gemini_mcp('uv', ['run', 'superflag'])
+            elif detection['method'] == 'pip' and not detection['in_path']:
+                success, message = mcp_manager.register_gemini_mcp('python', ['-m', 'superflag'])
             else:
                 success, message = mcp_manager.register_gemini_mcp('superflag', [])
 
@@ -608,129 +590,145 @@ def install_single_target(target):
         else:
             tasks.append(("MCP server", "FAIL", "SuperFlag not installed"))
 
-    else:
-        tasks.append(("Target", "FAIL", f"Unknown target '{target}'"))
-
-    return tasks, display
+    # Return results for aggregation
+    return tasks, target_display
 
 
 def install(target=None):
-    """Main installation function with interactive mode."""
+    """Main installation function with interactive mode
+
+    Args:
+        target: Installation target(s). If None, prompts for selection.
+                Can be a string or list of strings.
+    """
     from .__version__ import __version__
 
-    width = 60
-    print()
-    print(f"{Style.CYAN}{'=' * width}{Style.RESET}")
-    print(f"{Style.CYAN}{f'SuperFlag v{__version__} - Installer'.center(width)}{Style.RESET}")
-    print(f"{Style.CYAN}{'Contextual AI Enhancement Framework'.center(width)}{Style.RESET}")
-    print(f"{Style.CYAN}{'<thecurrent.lim@gmail.com>'.center(width)}{Style.RESET}")
-    print(f"{Style.CYAN}{'=' * width}{Style.RESET}")
-    print()
+    # ANSI color codes
+    CYAN = "\033[96m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    RED = "\033[91m"
+    RESET = "\033[0m"
+    BOLD = "\033[1m"
 
+    # Print banner with center alignment
+    width = 60
+    print(f"\n{CYAN}{'=' * width}{RESET}")
+    print(f"{CYAN}{f'SuperFlag v{__version__} - Installer'.center(width)}{RESET}")
+    print(f"{CYAN}{'Contextual AI Enhancement Framework'.center(width)}{RESET}")
+    print(f"{CYAN}{'<thecurrent.lim@gmail.com>'.center(width)}{RESET}")
+    print(f"{CYAN}{'=' * width}{RESET}\n")
+
+    # Determine targets
     if target is None:
-        if not installed_targets:
-            print("No SuperFlag installations detected.")
-            print()
-            print(f"{Style.YELLOW}Note: Shared files (~/.superflag/) will still be cleaned{Style.RESET}")
-            canonical_targets: List[str] = []
-        else:
-            detected_labels = ", ".join(display_name_for(t) for t in installed_targets)
-            print(f"Detected: {detected_labels}")
-            canonical_targets = select_uninstall_platforms(installed_targets)
+        # Interactive mode
+        targets = select_platforms()
     elif isinstance(target, str):
-        selected_targets = [target]
+        # Single target from CLI
+        targets = [target]
     elif isinstance(target, list):
-        selected_targets = target
+        # Multiple targets
+        targets = target
     else:
-        print(f"{Style.RED}Invalid target type{Style.RESET}")
+        print(f"{RED}Invalid target type{RESET}")
         return
 
-    canonical_targets: List[str] = []
-    for entry in selected_targets:
-        canonical = normalize_target(entry)
-        if canonical and canonical not in canonical_targets:
-            canonical_targets.append(canonical)
+    # Set up flags.yaml once for all targets
+    flags_setup = False
+    if setup_flags_yaml():
+        flags_setup = True
 
-    flags_setup = bool(setup_flags_yaml())
+    # Install for each selected target
+    all_results = []
+    for target in targets:
+        tasks, display_name = install_single_target(target)
+        all_results.append((display_name, tasks))
 
-    all_results: List[Tuple[str, str, List[Tuple[str, str, str]]]] = []
-    for canonical in canonical_targets:
-        tasks, display_name = install_single_target(canonical)
-        all_results.append((canonical, display_name, tasks))
+    # Display consolidated results
+    print(f"\n{CYAN}Installation Results:{RESET}")
 
-    print()
-    print(f"{Style.CYAN}Installation Results:{Style.RESET}")
-
+    # Show flags.yaml status (common for all)
     if flags_setup:
-        print(f"  {Style.GREEN}✓{Style.RESET} {'flags.yaml':<15} ~/.superflag/flags.yaml")
+        print(f"  {GREEN}✓{RESET} {'flags.yaml':<15} ~/.superflag/flags.yaml")
     else:
-        print(f"  {Style.RED}✗{Style.RESET} {'flags.yaml':<15} Setup failed")
+        print(f"  {RED}✗{RESET} {'flags.yaml':<15} Setup failed")
 
-    for _, platform_name, tasks in all_results:
-        if not tasks:
-            continue
-        print()
-        print(f"  {Style.BOLD}{platform_name}:{Style.RESET}")
-        for task_name, status, details in tasks:
-            if status == 'OK':
-                print(f"    {Style.GREEN}✓{Style.RESET} {task_name:<13} {details}")
-            elif status == 'SKIP':
-                print(f"    {Style.YELLOW}⚠{Style.RESET} {task_name:<13} {details}")
-            elif status == 'MANUAL':
-                print(f"    {Style.YELLOW}⚡{Style.RESET} {task_name:<13} {details}")
-            else:
-                print(f"    {Style.RED}✗{Style.RESET} {task_name:<13} {details}")
+    # Show results for each platform
+    for platform_name, tasks in all_results:
+        if tasks:
+            print(f"\n  {BOLD}{platform_name}:{RESET}")
+            for task_name, status, details in tasks:
+                if status == "OK":
+                    print(f"    {GREEN}✓{RESET} {task_name:<13} {details}")
+                elif status == "SKIP":
+                    print(f"    {YELLOW}⚠{RESET} {task_name:<13} {details}")
+                elif status == "MANUAL":
+                    print(f"    {YELLOW}⚡{RESET} {task_name:<13} {details}")
+                else:
+                    print(f"    {RED}✗{RESET} {task_name:<13} {details}")
 
-    total_ok = sum(len([t for t in tasks if t[1] == 'OK']) for _, _, tasks in all_results)
+    # Calculate success
+    total_ok = sum(len([t for t in tasks if t[1] == "OK"]) for _, tasks in all_results)
     if flags_setup:
         total_ok += 1
 
     if total_ok > 0:
-        print()
-        print(f"{Style.GREEN}Installation complete ({total_ok} components configured){Style.RESET}")
-        print()
-        print(f"{Style.BOLD}Next Steps:{Style.RESET}")
+        print(f"\n{GREEN}Installation complete ({total_ok} components configured){RESET}")
+
+        # Show next steps for each installed platform
+        print(f"\n{BOLD}Next Steps:{RESET}")
         step_num = 1
 
-        for canonical, _, tasks in all_results:
-            if canonical == 'claude-code':
+        for platform_name, tasks in all_results:
+            platform_key = None
+            for target in targets:
+                if platform_name == {"claude-code": "Claude Code", "cn": "Continue",
+                                   "continue": "Continue", "gemini-cli": "Gemini CLI"}.get(target):
+                    platform_key = target
+                    break
+
+            if platform_key == "claude-code":
+                # Check MCP registration status
                 mcp_manager = MCPManager()
-                if not mcp_manager.check_claude_mcp_registered():
-                    mcp_task = [t for t in tasks if t[0] == 'MCP server']
-                    if mcp_task and mcp_task[0][1] == 'MANUAL':
+                is_registered = mcp_manager.check_claude_mcp_registered()
+
+                if not is_registered:
+                    mcp_task = [t for t in tasks if t[0] == "MCP server"]
+                    if mcp_task and mcp_task[0][1] == "MANUAL":
                         detector = EnvironmentDetector()
                         mcp_command = detector.get_mcp_install_command()
-                        print(f"{step_num}. {Style.BOLD}[Claude Code]{Style.RESET} Register MCP server:")
+                        print(f"{step_num}. {BOLD}[Claude Code]{RESET} Register MCP server:")
                         if mcp_command:
-                            print(f"   {Style.GREEN}{mcp_command}{Style.RESET}")
+                            print(f"   {GREEN}{mcp_command}{RESET}")
                         else:
-                            print(f"   {Style.YELLOW}claude mcp add superflag -s user superflag{Style.RESET}")
+                            print(f"   {YELLOW}claude mcp add superflag -s user superflag{RESET}")
                         step_num += 1
 
-            elif canonical == 'cn':
+            elif platform_key == "cn":
                 detector = EnvironmentDetector()
                 detection = detector.detect()
-                if detection.get('method') != 'not_installed':
-                    print(f"{step_num}. {Style.BOLD}[Continue]{Style.RESET} MCP auto-configured in ~/.continue/mcpServers/")
+                if detection['method'] != 'not_installed':
+                    print(f"{step_num}. {BOLD}[Continue]{RESET} MCP auto-configured in ~/.continue/mcpServers/")
                 else:
-                    print(f"{step_num}. {Style.BOLD}[Continue]{Style.RESET} Edit ~/.continue/mcpServers/superflag.yaml")
+                    print(f"{step_num}. {BOLD}[Continue]{RESET} Edit ~/.continue/mcpServers/superflag.yaml")
                 step_num += 1
 
-            elif canonical == 'gemini-cli':
+            elif platform_key == "gemini-cli":
                 mcp_manager = MCPManager()
-                if not mcp_manager.check_gemini_mcp_registered():
-                    mcp_task = [t for t in tasks if t[0] == 'MCP server']
-                    if mcp_task and mcp_task[0][1] == 'MANUAL':
-                        print(f"{step_num}. {Style.BOLD}[Gemini CLI]{Style.RESET} Check ~/.gemini/settings.json")
+                is_registered = mcp_manager.check_gemini_mcp_registered()
+                if not is_registered:
+                    mcp_task = [t for t in tasks if t[0] == "MCP server"]
+                    if mcp_task and mcp_task[0][1] == "MANUAL":
+                        print(f"{step_num}. {BOLD}[Gemini CLI]{RESET} Check ~/.gemini/settings.json")
                         step_num += 1
 
         print(f"{step_num}. Restart your AI assistant(s)")
         print(f"{step_num + 1}. Use MCP tools: get_directives(['--analyze', '--performance'])")
-        print()
-        print(f"{Style.CYAN}Documentation: ~/.claude/SUPERFLAG.md{Style.RESET}")
+
+        print(f"\n{CYAN}Documentation: ~/.claude/SUPERFLAG.md{RESET}")
     else:
-        print()
-        print(f"{Style.YELLOW}Installation completed with issues. Check error messages above.{Style.RESET}")
+        print(f"\n{YELLOW}Installation completed with issues. Check error messages above.{RESET}")
+
 def kill_context_engine_processes():
     """Kill running superflag server processes without killing shells or self
 
@@ -837,7 +835,10 @@ def uninstall_claude_code():
         # 1. Remove @SUPERFLAG.md reference from CLAUDE.md
         claude_md = home / ".claude" / "CLAUDE.md"
         if claude_md.exists():
-            if remove_context_reference(claude_md):
+            content = claude_md.read_text(encoding='utf-8')
+            if "@SUPERFLAG.md" in content:
+                new_content = content.replace("\n\n@SUPERFLAG.md", "").replace("\n@SUPERFLAG.md", "").replace("@SUPERFLAG.md", "")
+                claude_md.write_text(new_content, encoding='utf-8')
                 results.append("[COMPLETE] Removed @SUPERFLAG.md reference from CLAUDE.md")
             else:
                 results.append("[INFO] @SUPERFLAG.md reference not found in CLAUDE.md")
@@ -851,10 +852,19 @@ def uninstall_claude_code():
 
                 # Remove from UserPromptSubmit array
                 if 'hooks' in settings and 'UserPromptSubmit' in settings['hooks']:
-                    cleaned_hooks, removed = scrub_superflag_hooks(settings['hooks']['UserPromptSubmit'])
+                    original_count = len(settings['hooks']['UserPromptSubmit'])
 
-                    if removed:
-                        settings['hooks']['UserPromptSubmit'] = cleaned_hooks
+                    # Filter out our hook
+                    settings['hooks']['UserPromptSubmit'] = [
+                        hook for hook in settings['hooks']['UserPromptSubmit']
+                        if not (isinstance(hook, dict) and
+                               'hooks' in hook and
+                               len(hook['hooks']) > 0 and
+                               'superflag.py' in str(hook['hooks'][0].get('command', '')))
+                    ]
+
+                    if len(settings['hooks']['UserPromptSubmit']) < original_count:
+                        # Write updated settings
                         with open(settings_path, 'w', encoding='utf-8') as f:
                             json.dump(settings, f, indent=2)
                         results.append("[COMPLETE] Removed Context Engine hook from settings.json")
@@ -993,7 +1003,15 @@ def uninstall_gemini():
     try:
         gemini_md = home / ".gemini" / "GEMINI.md"
         if gemini_md.exists():
-            if remove_context_reference(gemini_md):
+            content = gemini_md.read_text(encoding='utf-8')
+            if "@SUPERFLAG.md" in content:
+                new_content = (
+                    content
+                    .replace("\n\n@SUPERFLAG.md", "")
+                    .replace("\n@SUPERFLAG.md", "")
+                    .replace("@SUPERFLAG.md", "")
+                )
+                gemini_md.write_text(new_content, encoding='utf-8')
                 results.append("[COMPLETE] Removed @SUPERFLAG.md reference from GEMINI.md")
             else:
                 results.append("[INFO] @SUPERFLAG.md reference not found in GEMINI.md")
@@ -1062,54 +1080,67 @@ def cleanup_common_files():
     return results
 
 def uninstall(target=None):
-    """Main uninstall function - removes SuperFlag with interactive mode."""
+    """Main uninstall function - removes SuperFlag with interactive mode
+
+    Args:
+        target: Uninstall target(s). If None, prompts for selection.
+                Can be a string or list of strings.
+    """
     from .__version__ import __version__
 
+    # ANSI color codes
+    CYAN = "\033[96m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    RED = "\033[91m"
+    RESET = "\033[0m"
+    BOLD = "\033[1m"
+
+    # Print banner with center alignment
     width = 60
-    print()
-    print(f"{Style.CYAN}{'=' * width}{Style.RESET}")
-    print(f"{Style.CYAN}{f'SuperFlag v{__version__} - Uninstaller'.center(width)}{Style.RESET}")
-    print(f"{Style.CYAN}{'Removing all SuperFlag components'.center(width)}{Style.RESET}")
-    print(f"{Style.CYAN}{'<thecurrent.lim@gmail.com>'.center(width)}{Style.RESET}")
-    print(f"{Style.CYAN}{'=' * width}{Style.RESET}")
-    print()
+    print(f"\n{CYAN}{'=' * width}{RESET}")
+    print(f"{CYAN}{f'SuperFlag v{__version__} - Uninstaller'.center(width)}{RESET}")
+    print(f"{CYAN}{'Removing all SuperFlag components'.center(width)}{RESET}")
+    print(f"{CYAN}{'<thecurrent.lim@gmail.com>'.center(width)}{RESET}")
+    print(f"{CYAN}{'=' * width}{RESET}\n")
 
+    # Detect what's actually installed
     home = get_home_dir()
-    installed_targets: List[str] = []
+    installed_targets = []
 
-    if (home / '.claude' / 'SUPERFLAG.md').exists() or (home / '.claude' / 'hooks' / 'superflag.py').exists():
-        installed_targets.append('claude-code')
-    if (home / '.continue' / 'mcpServers' / 'superflag.yaml').exists():
-        installed_targets.append('cn')
-    if (home / '.gemini' / 'SUPERFLAG.md').exists():
-        installed_targets.append('gemini-cli')
+    if (home / ".claude" / "SUPERFLAG.md").exists() or (home / ".claude" / "hooks" / "superflag.py").exists():
+        installed_targets.append("claude-code")
+    if (home / ".continue" / "mcpServers" / "superflag.yaml").exists():
+        installed_targets.append("cn")
+    if (home / ".gemini" / "SUPERFLAG.md").exists():
+        installed_targets.append("gemini-cli")
 
+    # Determine targets to remove
     if target is None:
+        # Interactive mode - let user select from installed targets
         if not installed_targets:
-            print("No SuperFlag installations detected.")
-            print()
-            print(f"{Style.YELLOW}Note: Shared files (~/.superflag/) will still be cleaned{Style.RESET}")
-            canonical_targets: List[str] = []
+            print(f"No SuperFlag installations detected.")
+            print(f"\n{YELLOW}Note: Shared files (~/.superflag/) will still be cleaned{RESET}")
+            targets = []  # Just clean shared files
         else:
-            detected_labels = ", ".join(display_name_for(t) for t in installed_targets)
-            print(f"Detected: {detected_labels}")
-            canonical_targets = select_uninstall_platforms(installed_targets)
+            print(f"Detected: {', '.join(installed_targets)}")
+            targets = select_uninstall_platforms(installed_targets)
     elif isinstance(target, str):
-        canonical_targets = [normalize_target(target)]
+        targets = [target]
     elif isinstance(target, list):
-        canonical_targets = [normalize_target(t) for t in target]
+        targets = target
     else:
-        print(f"{Style.RED}Invalid target type{Style.RESET}")
+        print(f"{RED}Invalid target type{RESET}")
         return
 
-    canonical_targets = [t for t in canonical_targets if t]
-
     print()
 
-    cleanup_tasks: List[Tuple[str, str, str]] = []
+    # Track cleanup progress
+    cleanup_tasks = []
     backup_path = None
 
-    if 'claude-code' in canonical_targets:
+    # Process each selected target
+    if "claude-code" in targets:
         try:
             claude_results = uninstall_claude_code()
             success = any("[COMPLETE]" in r for r in claude_results)
@@ -1121,10 +1152,11 @@ def uninstall(target=None):
                 cleanup_tasks.append(("Claude Code", "WARN", f"{len(errors)} warnings"))
             else:
                 cleanup_tasks.append(("Claude Code", "SKIP", "No changes needed"))
-        except Exception:
+
+        except Exception as e:
             cleanup_tasks.append(("Claude Code", "FAIL", "Cleanup failed"))
 
-    if 'cn' in canonical_targets:
+    if "cn" in targets:
         try:
             continue_results = uninstall_continue()
             success = any("[COMPLETE]" in r for r in continue_results)
@@ -1136,10 +1168,11 @@ def uninstall(target=None):
                 cleanup_tasks.append(("Continue", "WARN", f"{len(errors)} warnings"))
             else:
                 cleanup_tasks.append(("Continue", "SKIP", "No changes needed"))
-        except Exception:
+
+        except Exception as e:
             cleanup_tasks.append(("Continue", "FAIL", "Cleanup failed"))
 
-    if 'gemini-cli' in canonical_targets:
+    if "gemini-cli" in targets:
         try:
             gemini_results = uninstall_gemini()
             success = any("[COMPLETE]" in r for r in gemini_results)
@@ -1151,14 +1184,17 @@ def uninstall(target=None):
                 cleanup_tasks.append(("Gemini CLI", "WARN", f"{len(errors)} warnings"))
             else:
                 cleanup_tasks.append(("Gemini CLI", "SKIP", "No changes needed"))
-        except Exception:
+
+        except Exception as e:
             cleanup_tasks.append(("Gemini CLI", "FAIL", "Cleanup failed"))
 
+    # Common files cleanup (always run)
     try:
         cleanup_results = cleanup_common_files()
         success = any("[COMPLETE]" in r for r in cleanup_results)
         errors = [r for r in cleanup_results if "[ERROR]" in r or "[WARN]" in r]
 
+        # Extract backup info
         for result in cleanup_results:
             if "backup_" in result:
                 backup_path = result.split("backup_")[1].split()[0]
@@ -1173,37 +1209,43 @@ def uninstall(target=None):
             cleanup_tasks.append(("Shared files", "WARN", "Some files may remain"))
         else:
             cleanup_tasks.append(("Shared files", "SKIP", "No files found"))
-    except Exception:
+
+    except Exception as e:
         cleanup_tasks.append(("Shared files", "FAIL", "Cleanup failed"))
 
-    print(f"{Style.CYAN}Cleanup Results:{Style.RESET}")
+    # Display results in structured format
+    print(f"{CYAN}Cleanup Results:{RESET}")
     for task_name, status, details in cleanup_tasks:
-        if status == 'OK':
-            print(f"  {Style.GREEN}✓{Style.RESET} {task_name:<15} {details}")
-        elif status == 'WARN':
-            print(f"  {Style.YELLOW}⚠{Style.RESET} {task_name:<15} {details}")
-        elif status == 'SKIP':
-            print(f"  {Style.YELLOW}○{Style.RESET} {task_name:<15} {details}")
+        if status == "OK":
+            print(f"  {GREEN}✓{RESET} {task_name:<15} {details}")
+        elif status == "WARN":
+            print(f"  {YELLOW}⚠{RESET} {task_name:<15} {details}")
+        elif status == "SKIP":
+            print(f"  {YELLOW}○{RESET} {task_name:<15} {details}")
         else:
-            print(f"  {Style.RED}✗{Style.RESET} {task_name:<15} {details}")
+            print(f"  {RED}✗{RESET} {task_name:<15} {details}")
 
-    success_count = len([t for t in cleanup_tasks if t[1] == 'OK'])
-    warn_count = len([t for t in cleanup_tasks if t[1] == 'WARN'])
+    # Final status
+    success_count = len([t for t in cleanup_tasks if t[1] == "OK"])
+    warn_count = len([t for t in cleanup_tasks if t[1] == "WARN"])
 
     print()
     if warn_count == 0:
-        print(f"{Style.GREEN}Uninstall complete ({success_count} components cleaned){Style.RESET}")
+        print(f"{GREEN}Uninstall complete ({success_count} components cleaned){RESET}")
     else:
-        print(f"{Style.YELLOW}Uninstall complete with {warn_count} warning(s){Style.RESET}")
-        print("Some files may require manual removal or system restart")
+        print(f"{YELLOW}Uninstall complete with {warn_count} warning(s){RESET}")
+        print(f"Some files may require manual removal or system restart")
 
-    print()
-    print(f"{Style.BOLD}To remove package:{Style.RESET}")
-    print("  pip uninstall superflag -y")
-    print("  pipx uninstall superflag")
-    print()
-    print(f"{Style.CYAN}{'=' * width}{Style.RESET}")
+    # Package removal instructions
+    print(f"\n{BOLD}To remove package:{RESET}")
+    print(f"  pip uninstall superflag -y")
+    print(f"  pipx uninstall superflag")
+
+    print(f"\n{CYAN}{'=' * width}{RESET}")
+
+    # Return 0 for successful uninstall
     return 0
+
 def main():
     """Main CLI entry point with subcommands"""
     import argparse
