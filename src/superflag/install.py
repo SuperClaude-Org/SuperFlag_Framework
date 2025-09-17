@@ -17,13 +17,9 @@ except ImportError:
     psutil = None
 try:
     from .prompts import setup_claude_context_files, setup_continue_config, setup_gemini_context_files
-    from .environment_detector import EnvironmentDetector
-    from .mcp_manager import MCPManager
 except ImportError:
     # For direct script execution
     from prompts import setup_claude_context_files, setup_continue_config, setup_gemini_context_files
-    from environment_detector import EnvironmentDetector
-    from mcp_manager import MCPManager
 
 def get_home_dir():
     """Get the user's home directory"""
@@ -271,7 +267,7 @@ def install_gemini_cli_instructions():
     pass
 
 def setup_continue_mcp_servers():
-    """Set up Continue extension MCP server configurations with auto-detection"""
+    """Set up Continue extension MCP server configurations"""
     # Get current version dynamically
     try:
         from .__version__ import __version__
@@ -284,28 +280,10 @@ def setup_continue_mcp_servers():
     # Create directory if it doesn't exist
     continue_dir.mkdir(parents=True, exist_ok=True)
 
-    # Detect installation method
-    detector = EnvironmentDetector()
-    detection = detector.detect()
-
-    # Determine command and args based on detection
-    if detection['method'] == 'pipx' or (detection['method'] == 'pip' and detection['in_path']):
-        command = 'superflag'
-        args = []
-        detected_note = f"# Auto-detected: {detection['method']} installation"
-    elif detection['method'] == 'uv':
-        command = 'uv'
-        args = ['run', 'superflag']
-        detected_note = "# Auto-detected: uv installation"
-    elif detection['method'] == 'pip' and not detection['in_path']:
-        command = 'python'
-        args = ['-m', 'superflag']
-        detected_note = "# Auto-detected: pip installation (not in PATH)"
-    else:
-        # Default fallback
-        command = 'superflag'
-        args = []
-        detected_note = "# Default configuration (modify if needed)"
+    # Default to python -m superflag for consistency
+    command = 'python'
+    args = ['-m', 'superflag']
+    detected_note = "# Default configuration"
 
     # Define server configuration with auto-detected values
     servers = [
@@ -334,14 +312,7 @@ mcpServers:
 #   args: []
 #   env: {{}}
 
-# --- Option 2: UV (Python package manager) ---
-# mcpServers:
-# - name: context-engine
-#   command: uv
-#   args: ["run", "superflag"]
-#   env: {{}}
-
-# --- Option 3: pip without PATH ---
+# --- Option 2: pip without PATH ---
 # mcpServers:
 # - name: context-engine
 #   command: python
@@ -381,21 +352,21 @@ def select_uninstall_platforms(installed_targets):
     RESET = "\033[0m"
     BOLD = "\033[1m"
 
-    # Map installed targets to display options
-    platform_map = {
-        'claude-code': ('1', 'Claude Code'),
-        'cn': ('2', 'Continue'),
-        'gemini-cli': ('3', 'Gemini CLI'),
+    # Always show all platforms with consistent numbering
+    platforms = {
+        '1': ('claude-code', 'Claude Code'),
+        '2': ('gemini-cli', 'Gemini CLI'),
+        '3': ('cn', 'Continue'),
     }
 
     print(f"{CYAN}Select what to remove:{RESET}")
 
-    options = []
-    for target in installed_targets:
-        if target in platform_map:
-            num, name = platform_map[target]
+    # Show all platforms, marking which ones are installed
+    for num, (code, name) in platforms.items():
+        if code in installed_targets:
+            print(f"  {BOLD}{num}{RESET}) {name} {GREEN}[installed]{RESET}")
+        else:
             print(f"  {BOLD}{num}{RESET}) {name}")
-            options.append((num, target))
 
     print(f"  {BOLD}a{RESET}) All detected platforms")
     print(f"\n{YELLOW}Enter your choice (e.g., '1', '2,3', 'a'):{RESET} ", end='')
@@ -409,10 +380,10 @@ def select_uninstall_platforms(installed_targets):
     # Handle single or multiple selection
     selected = []
     for char in choice.replace(' ', '').split(','):
-        for num, target in options:
-            if char == num:
-                selected.append(target)
-                break
+        if char in platforms:
+            code = platforms[char][0]
+            if code in installed_targets:
+                selected.append(code)
 
     # Default to all if nothing selected
     if not selected:
@@ -640,22 +611,12 @@ def install(target=None):
             if platform_key == "claude-code":
                 mcp_task = [t for t in tasks if t[0] == "MCP server"]
                 if mcp_task and mcp_task[0][1] == "MANUAL":
-                    detector = EnvironmentDetector()
-                    mcp_command = detector.get_mcp_install_command()
                     print(f"{step_num}. {BOLD}[Claude Code]{RESET} Register MCP server:")
-                    if mcp_command:
-                        print(f"   {GREEN}{mcp_command}{RESET}")
-                    else:
-                        print(f"   {YELLOW}claude mcp add superflag -s user \"python -m superflag\"{RESET}")
+                    print(f"   {GREEN}claude mcp add superflag -s user \"python -m superflag\"{RESET}")
                     step_num += 1
 
             elif platform_key == "cn":
-                detector = EnvironmentDetector()
-                detection = detector.detect()
-                if detection['method'] != 'not_installed':
-                    print(f"{step_num}. {BOLD}[Continue]{RESET} MCP auto-configured in ~/.continue/mcpServers/")
-                else:
-                    print(f"{step_num}. {BOLD}[Continue]{RESET} Edit ~/.continue/mcpServers/superflag.yaml")
+                print(f"{step_num}. {BOLD}[Continue]{RESET} MCP configured in ~/.continue/mcpServers/superflag.yaml")
                 step_num += 1
 
             elif platform_key == "gemini-cli":
@@ -665,7 +626,7 @@ def install(target=None):
                     step_num += 1
 
         print(f"{step_num}. Restart your AI assistant(s)")
-        print(f"{step_num + 1}. Use MCP tools: get_directives(['--analyze', '--performance'])")
+        print(f"{step_num + 1}. Test with a prompt like: \"Fix this bug --auto\" or \"--analyze --strict\"")
 
         print(f"\n{CYAN}Documentation: ~/.claude/SUPERFLAG.md{RESET}")
     else:
@@ -830,13 +791,8 @@ def uninstall_claude_code():
         success, message = delete_with_retry(context_engine_md)
         results.append(message)
 
-        # 5. Remove MCP server registration
-        mcp_manager = MCPManager()
-        mcp_success, mcp_message = mcp_manager.unregister_claude_mcp()
-        if mcp_success:
-            results.append(f"[COMPLETE] {mcp_message}")
-        else:
-            results.append(f"[WARNING] {mcp_message}")
+        # 5. MCP server registration must be removed manually
+        results.append("[INFO] MCP server must be removed manually with: claude mcp remove superflag")
 
     except Exception as e:
         results.append(f"[ERROR] Error removing Claude Code config: {str(e)}")
@@ -962,13 +918,8 @@ def uninstall_gemini():
         success, message = delete_with_retry(context_engine_md)
         results.append(message)
 
-        # Remove MCP server registration
-        mcp_manager = MCPManager()
-        mcp_success, mcp_message = mcp_manager.unregister_gemini_mcp()
-        if mcp_success:
-            results.append(f"[COMPLETE] {mcp_message}")
-        else:
-            results.append(f"[WARNING] {mcp_message}")
+        # MCP server registration must be removed manually
+        results.append("[INFO] MCP server must be removed manually from ~/.gemini/settings.json")
 
     except Exception as e:
         results.append(f"[ERROR] Error removing Gemini config: {str(e)}")
@@ -1088,8 +1039,19 @@ def uninstall(target=None):
             success = any("[COMPLETE]" in r for r in claude_results)
             errors = [r for r in claude_results if "[ERROR]" in r or "[WARN]" in r]
 
+            # Check for MCP info message
+            mcp_message = None
+            for r in claude_results:
+                if "MCP server must be removed manually" in r:
+                    mcp_message = "MCP: Remove manually with 'claude mcp remove superflag'"
+                    break
+
             if success:
-                cleanup_tasks.append(("Claude Code", "OK", "Hooks and context files removed"))
+                if mcp_message:
+                    cleanup_tasks.append(("Claude Code", "OK", "Hooks and context files removed"))
+                    cleanup_tasks.append(("", "INFO", mcp_message))
+                else:
+                    cleanup_tasks.append(("Claude Code", "OK", "Hooks and context files removed"))
             elif errors:
                 cleanup_tasks.append(("Claude Code", "WARN", f"{len(errors)} warnings"))
             else:
@@ -1120,8 +1082,19 @@ def uninstall(target=None):
             success = any("[COMPLETE]" in r for r in gemini_results)
             errors = [r for r in gemini_results if "[ERROR]" in r or "[WARN]" in r]
 
+            # Check for MCP info message
+            mcp_message = None
+            for r in gemini_results:
+                if "MCP server must be removed manually" in r:
+                    mcp_message = "MCP: Edit ~/.gemini/settings.json manually"
+                    break
+
             if success:
-                cleanup_tasks.append(("Gemini CLI", "OK", "Context files removed"))
+                if mcp_message:
+                    cleanup_tasks.append(("Gemini CLI", "OK", "Context files removed"))
+                    cleanup_tasks.append(("", "INFO", mcp_message))
+                else:
+                    cleanup_tasks.append(("Gemini CLI", "OK", "Context files removed"))
             elif errors:
                 cleanup_tasks.append(("Gemini CLI", "WARN", f"{len(errors)} warnings"))
             else:
@@ -1164,6 +1137,8 @@ def uninstall(target=None):
             print(f"  {YELLOW}⚠{RESET} {task_name:<15} {details}")
         elif status == "SKIP":
             print(f"  {YELLOW}○{RESET} {task_name:<15} {details}")
+        elif status == "INFO":
+            print(f"    {YELLOW}→{RESET} {details}")
         else:
             print(f"  {RED}✗{RESET} {task_name:<15} {details}")
 

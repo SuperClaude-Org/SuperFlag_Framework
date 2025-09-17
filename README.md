@@ -64,20 +64,8 @@ Then in your client/assistant, use prompts with flags:
 # Install package
 pip install superflag
 
-# Install configuration files
+# Install configuration files (automatic MCP registration)
 superflag install
-```
-
-Register the MCP server with Claude CLI:
-
-```bash
-# Choose ONE of these commands:
-
-# pip without PATH (recommended for pip users)
-claude mcp add superflag -s user "python -m superflag"
-
-# UV installation
-claude mcp add superflag -s user "uv run superflag"
 ```
 
 ### Continue Extension
@@ -89,22 +77,18 @@ pip install superflag
 superflag install --target cn
 ```
 
-Edit `~/.continue/mcpServers/superflag.yaml` and uncomment ONE option:
+Edit `~/.continue/mcpServers/superflag.yaml`:
 
 ```yaml
-# Option 1: Standard Python (most common)
+# Standard Python (most common)
 name: SuperFlag
 command: python
 args: ["-m", "superflag"]
 
-# Option 2: UV installation
+# Or use absolute path to specific environment
 # name: SuperFlag
-# command: uv
-# args: ["run", "superflag"]
-
-# Option 3: Custom installation
-# name: SuperFlag
-# command: <your-custom-command>
+# command: /path/to/venv/bin/python
+# args: ["-m", "superflag"]
 ```
 
 Restart VS Code, then type `@` in Continue chat to access MCP tools.
@@ -123,7 +107,7 @@ This command:
 - Writes latest instructions to `~/.gemini/SUPERFLAG.md`
 
 Register the MCP stdio command in Gemini CLI settings:
-  - Command: `python -m superflag` or `uv run superflag`
+  - Command: `python -m superflag`
   - Args: `[]`
   - Transport: stdio
 
@@ -170,20 +154,6 @@ Common setups
       "type": "stdio",
       "command": "python",
       "args": ["-m", "superflag"],
-      "env": {}
-    }
-  }
-}
-```
-
-- uv (run):
-```json
-{
-  "mcpServers": {
-    "superflag": {
-      "type": "stdio",
-      "command": "uv",
-      "args": ["run", "superflag"],
       "env": {}
     }
   }
