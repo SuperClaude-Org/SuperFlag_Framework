@@ -5,7 +5,7 @@
     "moduleResolution": "NodeNext",
     "lib": ["ES2022"],
     "outDir": "./dist",
-    "rootDir": "./typescript-src",
+    "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -16,6 +16,6 @@
     "sourceMap": true,
     "allowSyntheticDefaultImports": true
   },
-  "include": ["typescript-src/**/*"],
-  "exclude": ["node_modules", "dist", "src"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
