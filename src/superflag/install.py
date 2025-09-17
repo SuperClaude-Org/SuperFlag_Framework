@@ -123,26 +123,6 @@ def stop_mcp_server(server_name):
         pass
     return False
 
-def install_mcp_servers_via_cli():
-    """Install MCP servers using Claude CLI with auto-detection"""
-    # Ensure Python package is installed (silently)
-    ensure_safe_installation()
-
-    # Detect installation method
-    detector = EnvironmentDetector()
-    detection = detector.detect()
-
-    # Get the appropriate command
-    if detection['method'] == 'not_installed':
-        return False, "SuperFlag not installed"
-
-    command = detection['command']
-
-    # Register with MCP manager
-    mcp_manager = MCPManager()
-    success, message = mcp_manager.register_claude_mcp(command)
-
-    return success, message
 
 def setup_claude_code_hooks():
     """Setup Claude Code Hooks for automatic flag detection"""
@@ -517,11 +497,8 @@ def install_single_target(target):
 
     # 2. Install based on target
     if target == "claude-code":
-        # Check for Claude CLI and install MCP servers
+        # Check for Claude CLI
         if check_claude_cli():
-            # Try to register MCP server automatically
-            mcp_success, mcp_message = install_mcp_servers_via_cli()
-
             # Setup CLAUDE.md
             if setup_claude_context_files():
                 tasks.append(("Context files", "OK", "~/.claude/"))
@@ -534,14 +511,8 @@ def install_single_target(target):
             else:
                 tasks.append(("Hook system", "SKIP", "MCP will still work"))
 
-            # Add MCP registration status
-            if mcp_success:
-                if "already" in mcp_message.lower():
-                    tasks.append(("MCP server", "SKIP", "Already registered"))
-                else:
-                    tasks.append(("MCP server", "OK", "Auto-registered"))
-            else:
-                tasks.append(("MCP server", "MANUAL", "Manual registration needed"))
+            # Manual MCP registration required
+            tasks.append(("MCP server", "MANUAL", "Manual registration required"))
         else:
             tasks.append(("Claude CLI", "FAIL", "Not installed"))
             print(f"\n{YELLOW}Install Claude Code first: npm install -g @anthropic/claude-code{RESET}")
@@ -566,29 +537,8 @@ def install_single_target(target):
         else:
             tasks.append(("Context files", "FAIL", "Setup failed"))
 
-        # Try to register MCP server automatically for Gemini
-        detector = EnvironmentDetector()
-        detection = detector.detect()
-
-        if detection['method'] != 'not_installed':
-            mcp_manager = MCPManager()
-            # Determine command and args based on detection
-            if detection['method'] == 'uv':
-                success, message = mcp_manager.register_gemini_mcp('uv', ['run', 'superflag'])
-            elif detection['method'] == 'pip' and not detection['in_path']:
-                success, message = mcp_manager.register_gemini_mcp('python', ['-m', 'superflag'])
-            else:
-                success, message = mcp_manager.register_gemini_mcp('superflag', [])
-
-            if success:
-                if "already" in message.lower():
-                    tasks.append(("MCP server", "SKIP", "Already registered"))
-                else:
-                    tasks.append(("MCP server", "OK", "Auto-configured"))
-            else:
-                tasks.append(("MCP server", "MANUAL", "Manual config needed"))
-        else:
-            tasks.append(("MCP server", "FAIL", "SuperFlag not installed"))
+        # Manual MCP registration required
+        tasks.append(("MCP server", "MANUAL", "Manual configuration required"))
 
     # Return results for aggregation
     return tasks, target_display
@@ -688,21 +638,16 @@ def install(target=None):
                     break
 
             if platform_key == "claude-code":
-                # Check MCP registration status
-                mcp_manager = MCPManager()
-                is_registered = mcp_manager.check_claude_mcp_registered()
-
-                if not is_registered:
-                    mcp_task = [t for t in tasks if t[0] == "MCP server"]
-                    if mcp_task and mcp_task[0][1] == "MANUAL":
-                        detector = EnvironmentDetector()
-                        mcp_command = detector.get_mcp_install_command()
-                        print(f"{step_num}. {BOLD}[Claude Code]{RESET} Register MCP server:")
-                        if mcp_command:
-                            print(f"   {GREEN}{mcp_command}{RESET}")
-                        else:
-                            print(f"   {YELLOW}claude mcp add superflag -s user superflag{RESET}")
-                        step_num += 1
+                mcp_task = [t for t in tasks if t[0] == "MCP server"]
+                if mcp_task and mcp_task[0][1] == "MANUAL":
+                    detector = EnvironmentDetector()
+                    mcp_command = detector.get_mcp_install_command()
+                    print(f"{step_num}. {BOLD}[Claude Code]{RESET} Register MCP server:")
+                    if mcp_command:
+                        print(f"   {GREEN}{mcp_command}{RESET}")
+                    else:
+                        print(f"   {YELLOW}claude mcp add superflag -s user \"python -m superflag\"{RESET}")
+                    step_num += 1
 
             elif platform_key == "cn":
                 detector = EnvironmentDetector()
@@ -714,13 +659,10 @@ def install(target=None):
                 step_num += 1
 
             elif platform_key == "gemini-cli":
-                mcp_manager = MCPManager()
-                is_registered = mcp_manager.check_gemini_mcp_registered()
-                if not is_registered:
-                    mcp_task = [t for t in tasks if t[0] == "MCP server"]
-                    if mcp_task and mcp_task[0][1] == "MANUAL":
-                        print(f"{step_num}. {BOLD}[Gemini CLI]{RESET} Check ~/.gemini/settings.json")
-                        step_num += 1
+                mcp_task = [t for t in tasks if t[0] == "MCP server"]
+                if mcp_task and mcp_task[0][1] == "MANUAL":
+                    print(f"{step_num}. {BOLD}[Gemini CLI]{RESET} Check ~/.gemini/settings.json")
+                    step_num += 1
 
         print(f"{step_num}. Restart your AI assistant(s)")
         print(f"{step_num + 1}. Use MCP tools: get_directives(['--analyze', '--performance'])")

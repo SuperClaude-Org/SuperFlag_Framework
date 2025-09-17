@@ -3,7 +3,7 @@
 > **⚠️ MIGRATION NOTICE**: If you previously installed `context-engine-mcp`, please uninstall it and install `superflag` instead:
 > ```bash
 > pip uninstall context-engine-mcp
-> pipx install superflag
+> pip install superflag
 > ```
 
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-supported-F37435)
@@ -17,10 +17,8 @@ SuperFlag provides 18 contextual flags that guide assistant behavior (e.g., `--s
 ## Quick Start
 
 ```bash
-# Install (recommended)
-pipx install superflag
-pipx ensurepath  # Required once on Windows - adds pipx to PATH
-# Restart terminal after ensurepath
+# Install
+pip install superflag
 
 # Interactive installation (choose platforms)
 superflag install
@@ -64,9 +62,7 @@ Then in your client/assistant, use prompts with flags:
 ### Claude Code
 ```bash
 # Install package
-pipx install superflag
-pipx ensurepath  # Required once on Windows - adds pipx to PATH
-# Restart terminal after ensurepath
+pip install superflag
 
 # Install configuration files
 superflag install
@@ -77,9 +73,6 @@ Register the MCP server with Claude CLI:
 ```bash
 # Choose ONE of these commands:
 
-# pipx or pip with PATH
-claude mcp add superflag -s user superflag
-
 # pip without PATH (recommended for pip users)
 claude mcp add superflag -s user "python -m superflag"
 
@@ -87,14 +80,10 @@ claude mcp add superflag -s user "python -m superflag"
 claude mcp add superflag -s user "uv run superflag"
 ```
 
-This also writes `~/.claude/SUPERFLAG.md` and appends a reference to `~/.claude/CLAUDE.md`.
-
 ### Continue Extension
 ```bash
 # Install package
-pipx install superflag
-pipx ensurepath  # Required once on Windows - adds pipx to PATH
-# Restart terminal after ensurepath
+pip install superflag
 
 # Install configuration files
 superflag install --target cn
@@ -105,9 +94,10 @@ Edit `~/.continue/mcpServers/superflag.yaml` and uncomment ONE option:
 ```yaml
 # Option 1: Standard Python (most common)
 name: SuperFlag
-command: superflag
+command: python
+args: ["-m", "superflag"]
 
-# Option 2: UV installation  
+# Option 2: UV installation
 # name: SuperFlag
 # command: uv
 # args: ["run", "superflag"]
@@ -122,9 +112,7 @@ Restart VS Code, then type `@` in Continue chat to access MCP tools.
 ### Gemini CLI
 ```bash
 # Install package
-pipx install superflag
-pipx ensurepath  # Required once on Windows - adds pipx to PATH
-# Restart terminal after ensurepath
+pip install superflag
 
 # Install configuration files for Gemini CLI
 superflag install --target gemini-cli
@@ -134,9 +122,8 @@ This command:
 - Appends `@SUPERFLAG.md` to `~/.gemini/GEMINI.md` (adds once; no duplicate)
 - Writes latest instructions to `~/.gemini/SUPERFLAG.md`
 
-It does not modify `~/.gemini/settings.json`.
-If required, register the MCP stdio command in Gemini CLI settings:
-  - Command: `superflag`
+Register the MCP stdio command in Gemini CLI settings:
+  - Command: `python -m superflag` or `uv run superflag`
   - Args: `[]`
   - Transport: stdio
 
@@ -149,8 +136,8 @@ MCP registration (example)
   "mcpServers": {
     "superflag": {
       "type": "stdio",
-      "command": "superflag",
-      "args": [],
+      "command": "python",
+      "args": ["-m", "superflag"],
       "env": {}
     }
   }
@@ -175,14 +162,14 @@ Gemini CLI settings
 ```
 
 Common setups
-- pipx (PATH):
+- pip (python -m):
 ```json
 {
   "mcpServers": {
     "superflag": {
       "type": "stdio",
-      "command": "superflag",
-      "args": [],
+      "command": "python",
+      "args": ["-m", "superflag"],
       "env": {}
     }
   }
@@ -316,7 +303,7 @@ Behavior
 superflag uninstall
 
 # Remove Python package
-pipx uninstall superflag
+pip uninstall superflag
 ```
 
 Note: During uninstallation, `~/.superflag/flags.yaml` is backed up to `~/flags.yaml.backup_YYYYMMDD_HHMMSS` before removal. During installation, existing flags.yaml is backed up and updated to the latest version.
