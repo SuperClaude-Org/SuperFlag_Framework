@@ -35,6 +35,7 @@
   "files": [
     "dist",
     "hooks",
+    "flags.yaml",
     "README.md"
   ],
   "dependencies": {

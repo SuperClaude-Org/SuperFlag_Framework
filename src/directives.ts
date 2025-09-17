@@ -136,51 +136,49 @@ export class DirectiveLoader {
    * Create default configuration if file doesn't exist
    */
   private async createDefaultConfig(yamlPath: string): Promise<FlagsYaml> {
-    const defaultConfig: FlagsYaml = {
-      available_flags: [
-        {
-          name: "--analyze",
-          description: "Analyze through pattern, root, and validation lenses",
-          directive: "Identify root causes through multi-perspective analysis.\\nPattern Recognition - discover hidden connections\\nRoot Understanding - explain from multiple angles\\nScientific Validation - test hypotheses systematically",
-          verification: "Analyzed from 3+ perspectives\\nEvidence supports each claim\\nSteps are reproducible",
-          priority: 1,
-        },
-        {
-          name: "--performance",
-          description: "Optimize performance through measurement and profiling",
-          directive: "Measure, profile, and optimize performance bottlenecks.\\nBaseline metrics first\\nProfile before optimizing\\nMeasure impact of changes",
-          verification: "Baseline metrics recorded\\nBottlenecks identified\\nImprovements measured",
-          priority: 2,
-        },
-        {
-          name: "--refactor",
-          description: "Refactor code for quality and maintainability",
-          directive: "Improve code structure without changing functionality.\\nSmall steps with continuous testing\\nStructure improvement, not features\\nExpress intent through naming",
-          verification: "Tests still pass\\nCyclomatic complexity ≤ 10\\nMethod length ≤ 20 lines",
-          priority: 3,
-        },
-        {
-          name: "--strict",
-          description: "Execute with zero errors and full transparency",
-          directive: "Ensure zero-error execution with complete transparency.\\nValidate ALL assumptions\\nReport failures immediately\\nComplete solutions only",
-          verification: "Zero warnings/errors\\nAll tests pass\\n100% error handling",
-          priority: 1,
-        },
-      ],
-    };
+    // Try to read from package's bundled flags.yaml first
+    try {
+      const packageFlagsPath = path.join(__dirname, '..', 'flags.yaml');
+      const content = await fs.readFile(packageFlagsPath, 'utf-8');
+      const config = yaml.load(content) as FlagsYaml;
 
-    // Ensure directory exists
-    const dir = path.dirname(yamlPath);
-    await fs.mkdir(dir, { recursive: true });
+      // Copy to user's home directory
+      const dir = path.dirname(yamlPath);
+      await fs.mkdir(dir, { recursive: true });
+      await fs.writeFile(yamlPath, content, 'utf-8');
 
-    // Write default config
-    const yamlContent = yaml.dump(defaultConfig, {
-      indent: 2,
-      lineWidth: 120,
-    });
-    await fs.writeFile(yamlPath, yamlContent, "utf-8");
+      return config;
+    } catch {
+      // If bundled file doesn't exist, return minimal config
+      // This should rarely happen in production
+      const minimalConfig: FlagsYaml = {
+        available_flags: [
+          {
+            name: "--help",
+            description: "Show available flags",
+            directive: "Display all available flags and their descriptions",
+            verification: "Help displayed",
+            priority: 0,
+          }
+        ],
+      };
 
-    return defaultConfig;
+      // Ensure directory exists
+      const dir = path.dirname(yamlPath);
+      await fs.mkdir(dir, { recursive: true });
+
+      // Write minimal config
+      const yamlContent = yaml.dump(minimalConfig, {
+        indent: 2,
+        lineWidth: 120,
+      });
+      await fs.writeFile(yamlPath, yamlContent, "utf-8");
+
+      console.error("Warning: Could not find bundled flags.yaml. Created minimal configuration.");
+      console.error("Please ensure flags.yaml is included in the package.");
+
+      return minimalConfig;
+    }
   }
 
   /**
