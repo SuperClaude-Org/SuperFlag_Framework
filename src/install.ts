@@ -276,6 +276,10 @@ async function installInteractive(platformNames: string[]): Promise<void> {
         detail: settingsResult ? "Hook registered" : "Already registered"
       });
     }
+
+    // Register MCP server for all platforms
+    const mcpResult = await registerMcpServer(platform);
+    tasks.push(mcpResult);
   }
 
   // Display results
@@ -320,14 +324,13 @@ async function uninstallInteractive(platformNames: string[]): Promise<void> {
         detail: settingsResult ? "Hook unregistered" : "Not found"
       });
     }
+
+    // Unregister MCP server for all platforms
+    const mcpResult = await unregisterMcpServer(platform);
+    tasks.push(mcpResult);
   }
 
   displayResults(tasks);
-
-  if (platformNames.includes("Claude Code")) {
-    console.log(chalk.yellow("\n⚠  Note: Remove MCP server manually with:"));
-    console.log(chalk.gray("   claude mcp remove superflag"));
-  }
 }
 
 async function install(targetArg: string): Promise<void> {
@@ -377,6 +380,10 @@ async function install(targetArg: string): Promise<void> {
         detail: settingsResult ? "Hook registered" : "Already registered"
       });
     }
+
+    // Register MCP server for all platforms
+    const mcpResult = await registerMcpServer(platform);
+    tasks.push(mcpResult);
   }
 
   // Display results
@@ -426,12 +433,18 @@ async function uninstall(targetArg: string): Promise<void> {
         detail: settingsResult ? "Hook unregistered" : "Not found"
       });
     }
+
+    // Unregister MCP server for all platforms
+    const mcpResult = await unregisterMcpServer(platform);
+    tasks.push(mcpResult);
   }
 
   displayResults(tasks);
 
-  if (targetArg === "all" || targetArg === "claude-code") {
-    console.log(chalk.yellow("\n⚠  Note: Remove MCP server manually with:"));
+  // Check if Claude Code was in the uninstall and show manual MCP removal note
+  const claudeCodeIncluded = platforms.some(p => p.name === "Claude Code");
+  if (claudeCodeIncluded) {
+    console.log(chalk.yellow("\n⚠  Note: Remove Claude Code MCP server manually with:"));
     console.log(chalk.gray("   claude mcp remove superflag"));
   }
 }
@@ -441,23 +454,23 @@ function showNextSteps(platformNames: string[]): void {
 
   if (platformNames.includes("Claude Code")) {
     console.log(chalk.white("\nFor Claude Code:"));
-    console.log(chalk.cyan("  1. Register MCP server:"));
-    console.log(chalk.gray(`     claude mcp add superflag npx @superclaude-org/superflag@latest -s user`));
-    console.log(chalk.cyan("  2. Restart Claude Code"));
+    console.log(chalk.cyan("  1. Restart Claude Code"));
+    console.log(chalk.cyan("  2. Verify connection: claude mcp list"));
   }
 
   if (platformNames.includes("Gemini CLI")) {
     console.log(chalk.white("\nFor Gemini CLI:"));
-    console.log(chalk.cyan("  1. Register MCP server in Gemini settings"));
-    console.log(chalk.cyan("  2. Restart Gemini CLI"));
+    console.log(chalk.cyan("  1. Restart Gemini CLI"));
+    console.log(chalk.cyan("  2. MCP server already configured"));
   }
 
   if (platformNames.includes("Continue")) {
     console.log(chalk.white("\nFor Continue:"));
-    console.log(chalk.cyan("  1. Restart Continue extension"));
+    console.log(chalk.cyan("  1. Restart VS Code with Continue extension"));
+    console.log(chalk.cyan("  2. MCP server already configured"));
   }
 
-  console.log(chalk.green("\n3. Test with: \"Analyze this code --analyze --strict\""));
+  console.log(chalk.green("\n✅ Test with: \"Analyze this code --analyze --strict\""));
 }
 
 function showUsage(): void {
@@ -984,7 +997,272 @@ if __name__ == "__main__":
 `;
 }
 
-// Main execution
+// =====================================================
+// MCP Auto-Registration Functions
+// =====================================================
+
+async function registerMcpServer(platform: Platform): Promise<InstallationTask> {
+  try {
+    switch (platform.name) {
+      case "Claude Code":
+        return await registerClaudeCodeMcp();
+      case "Gemini CLI":
+        return await registerGeminiMcp();
+      case "Continue":
+        return await registerContinueMcp();
+      default:
+        return {
+          name: `${platform.name} MCP`,
+          status: "SKIP",
+          detail: "Not supported"
+        };
+    }
+  } catch (error) {
+    return {
+      name: `${platform.name} MCP`,
+      status: "FAIL",
+      detail: error instanceof Error ? error.message : "Unknown error"
+    };
+  }
+}
+
+async function unregisterMcpServer(platform: Platform): Promise<InstallationTask> {
+  try {
+    switch (platform.name) {
+      case "Claude Code":
+        return await unregisterClaudeCodeMcp();
+      case "Gemini CLI":
+        return await unregisterGeminiMcp();
+      case "Continue":
+        return await unregisterContinueMcp();
+      default:
+        return {
+          name: `${platform.name} MCP`,
+          status: "SKIP",
+          detail: "Not supported"
+        };
+    }
+  } catch (error) {
+    return {
+      name: `${platform.name} MCP`,
+      status: "FAIL",
+      detail: error instanceof Error ? error.message : "Unknown error"
+    };
+  }
+}
+
+// Claude Code MCP Registration
+async function registerClaudeCodeMcp(): Promise<InstallationTask> {
+  const configPath = path.join(os.homedir(), ".claude.json");
+
+  try {
+    let config: any = {};
+
+    // Read existing config
+    try {
+      const content = await fs.readFile(configPath, "utf-8");
+      config = JSON.parse(content);
+    } catch {
+      // File doesn't exist, create new config
+      config = {};
+    }
+
+    // Ensure mcpServers section exists
+    if (!config.mcpServers) {
+      config.mcpServers = {};
+    }
+
+    // Add SuperFlag MCP server
+    config.mcpServers.superflag = {
+      type: "stdio",
+      command: "npx",
+      args: ["@superclaude-org/superflag@latest"],
+      env: {}
+    };
+
+    // Write back to file
+    await fs.writeFile(configPath, JSON.stringify(config, null, 2) + "\n");
+
+    return {
+      name: "Claude Code MCP",
+      status: "OK",
+      detail: "Registered"
+    };
+  } catch (error) {
+    return {
+      name: "Claude Code MCP",
+      status: "FAIL",
+      detail: error instanceof Error ? error.message : "Unknown error"
+    };
+  }
+}
+
+async function unregisterClaudeCodeMcp(): Promise<InstallationTask> {
+  const configPath = path.join(os.homedir(), ".claude.json");
+
+  try {
+    const content = await fs.readFile(configPath, "utf-8");
+    const config = JSON.parse(content);
+
+    if (config.mcpServers && config.mcpServers.superflag) {
+      delete config.mcpServers.superflag;
+      await fs.writeFile(configPath, JSON.stringify(config, null, 2) + "\n");
+
+      return {
+        name: "Claude Code MCP",
+        status: "OK",
+        detail: "Unregistered"
+      };
+    }
+
+    return {
+      name: "Claude Code MCP",
+      status: "SKIP",
+      detail: "Not found"
+    };
+  } catch {
+    return {
+      name: "Claude Code MCP",
+      status: "SKIP",
+      detail: "Config not found"
+    };
+  }
+}
+
+// Gemini CLI MCP Registration
+async function registerGeminiMcp(): Promise<InstallationTask> {
+  const configPath = path.join(os.homedir(), ".gemini", "settings.json");
+
+  try {
+    // Ensure directory exists
+    await fs.mkdir(path.dirname(configPath), { recursive: true });
+
+    let config: any = {};
+
+    // Read existing config
+    try {
+      const content = await fs.readFile(configPath, "utf-8");
+      config = JSON.parse(content);
+    } catch {
+      // File doesn't exist, create new config
+      config = {};
+    }
+
+    // Ensure mcpServers section exists
+    if (!config.mcpServers) {
+      config.mcpServers = {};
+    }
+
+    // Add SuperFlag MCP server
+    config.mcpServers.superflag = {
+      type: "stdio",
+      command: "npx",
+      args: ["@superclaude-org/superflag@latest"],
+      env: {}
+    };
+
+    // Write back to file
+    await fs.writeFile(configPath, JSON.stringify(config, null, 2) + "\n");
+
+    return {
+      name: "Gemini CLI MCP",
+      status: "OK",
+      detail: "Registered"
+    };
+  } catch (error) {
+    return {
+      name: "Gemini CLI MCP",
+      status: "FAIL",
+      detail: error instanceof Error ? error.message : "Unknown error"
+    };
+  }
+}
+
+async function unregisterGeminiMcp(): Promise<InstallationTask> {
+  const configPath = path.join(os.homedir(), ".gemini", "settings.json");
+
+  try {
+    const content = await fs.readFile(configPath, "utf-8");
+    const config = JSON.parse(content);
+
+    if (config.mcpServers && config.mcpServers.superflag) {
+      delete config.mcpServers.superflag;
+      await fs.writeFile(configPath, JSON.stringify(config, null, 2) + "\n");
+
+      return {
+        name: "Gemini CLI MCP",
+        status: "OK",
+        detail: "Unregistered"
+      };
+    }
+
+    return {
+      name: "Gemini CLI MCP",
+      status: "SKIP",
+      detail: "Not found"
+    };
+  } catch {
+    return {
+      name: "Gemini CLI MCP",
+      status: "SKIP",
+      detail: "Config not found"
+    };
+  }
+}
+
+// Continue MCP Registration
+async function registerContinueMcp(): Promise<InstallationTask> {
+  const mcpDir = path.join(os.homedir(), ".continue", "mcpServers");
+  const configPath = path.join(mcpDir, "superflag.yaml");
+
+  try {
+    // Ensure directory exists
+    await fs.mkdir(mcpDir, { recursive: true });
+
+    const mcpConfig = {
+      name: "SuperFlag",
+      command: "npx",
+      args: ["@superclaude-org/superflag@latest"],
+      env: {}
+    };
+
+    // Write MCP server config
+    await fs.writeFile(configPath, yaml.dump(mcpConfig));
+
+    return {
+      name: "Continue MCP",
+      status: "OK",
+      detail: "Registered"
+    };
+  } catch (error) {
+    return {
+      name: "Continue MCP",
+      status: "FAIL",
+      detail: error instanceof Error ? error.message : "Unknown error"
+    };
+  }
+}
+
+async function unregisterContinueMcp(): Promise<InstallationTask> {
+  const configPath = path.join(os.homedir(), ".continue", "mcpServers", "superflag.yaml");
+
+  try {
+    await fs.unlink(configPath);
+    return {
+      name: "Continue MCP",
+      status: "OK",
+      detail: "Unregistered"
+    };
+  } catch {
+    return {
+      name: "Continue MCP",
+      status: "SKIP",
+      detail: "Not found"
+    };
+  }
+}
+
+// Main execution (only for direct execution)
 async function main() {
   const args = process.argv.slice(2);
   const command = args[0];
@@ -993,5 +1271,7 @@ async function main() {
   await handleCommand(command || "", commandArgs);
 }
 
-// Run if this is the main module
-main().catch(console.error);
+// Run only if this is the main module (not imported)
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch(console.error);
+}

@@ -37,8 +37,7 @@ superflag install
 # Direct installation for Claude Code
 superflag install cc
 
-# Register MCP server in Claude Code
-claude mcp add superflag npx @superclaude-org/superflag@latest -s user
+# MCP server automatically registered during installation
 ```
 
 Then use flags in your AI assistant:
@@ -73,34 +72,116 @@ Then use flags in your AI assistant:
 
 ### Prerequisites
 - Node.js 16+
-- Claude Code installed
+- Target platform installed (Claude Code, Gemini CLI, or Continue)
 
-### Claude Code Setup
+### Quick Setup (All Platforms)
 ```bash
 # Install package globally
 npm install -g @superclaude-org/superflag
 
-# Install and configure automatically
+# Interactive installation - choose your platforms
+superflag install
+```
+
+The interactive installer will:
+- Detect installed platforms
+- Let you select which ones to configure
+- **Automatically register MCP servers** for all platforms
+- Set up configuration files and flag detection
+
+### Platform-Specific Installation
+
+#### Claude Code
+```bash
+# Direct installation (MCP server auto-registered)
 superflag install cc
 
-# Verify MCP connection
+# Verify connection
 claude mcp list
 ```
 
-The installer automatically:
-- Registers the MCP server with Claude Code
-- Creates configuration files in `~/.claude/`
-- Sets up flag detection hooks
+Creates:
+- `~/.claude/CLAUDE.md` - References SuperFlag
+- `~/.claude/SUPERFLAG.md` - Flag instructions
+- `~/.claude/hooks/superflag.py` - Flag detection hook
 
-### Manual MCP Registration
-If automatic setup fails:
+**Manual MCP Registration (if auto-registration fails):**
 ```bash
+# Add MCP server manually
 claude mcp add superflag npx @superclaude-org/superflag@latest -s user
+
+# Or add to ~/.claude.json
+{
+  "mcpServers": {
+    "superflag": {
+      "command": "npx",
+      "args": ["@superclaude-org/superflag@latest"],
+      "env": {}
+    }
+  }
+}
+```
+
+#### Gemini CLI
+```bash
+# Direct installation (MCP server auto-registered)
+superflag install gemini
+```
+
+Creates:
+- `~/.gemini/GEMINI.md` - References SuperFlag
+- `~/.gemini/SUPERFLAG.md` - Flag instructions
+
+**Manual MCP Registration (if auto-registration fails):**
+```json
+// Edit ~/.gemini/settings.json
+{
+  "mcpServers": {
+    "superflag": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@superclaude-org/superflag@latest"],
+      "env": {}
+    }
+  }
+}
+```
+
+#### Continue (VS Code Extension)
+```bash
+# Direct installation (MCP server auto-registered)
+superflag install cn
+```
+
+Creates:
+- `~/.continue/config.yaml` - SuperFlag rules
+- `~/.continue/mcpServers/superflag.yaml` - MCP server configuration
+
+**Manual MCP Registration (if auto-registration fails):**
+```yaml
+# Create ~/.continue/mcpServers/superflag.yaml
+name: SuperFlag
+command: npx
+args:
+  - '@superclaude-org/superflag@latest'
+env: {}
+```
+
+### Batch Installation
+```bash
+# Install for all supported platforms
+superflag install all
+
+# Install for specific combinations
+superflag install cc gemini  # Claude Code + Gemini CLI
+superflag install cn         # Continue only
 ```
 
 ## Usage
 
-### In Claude Code Chat
+### Natural Language with Flags
+All platforms support using flags in natural conversation:
+
 ```bash
 # Auto mode - AI selects appropriate flags
 "Optimize this code --auto"
@@ -114,9 +195,35 @@ claude mcp add superflag npx @superclaude-org/superflag@latest -s user
 "Review architecture --discover --analyze --seq"
 ```
 
-### MCP Tool Access
-The MCP server provides:
-- `get_directives(['--flag1', '--flag2'])` - Activate flags and get directives
+### Platform-Specific Usage
+
+#### Claude Code
+```bash
+# Direct chat with flags
+"Fix this bug --analyze --strict"
+"Create documentation --save --explain"
+
+# MCP tool access (advanced)
+get_directives(['--flag1', '--flag2'])
+```
+
+#### Gemini CLI
+```bash
+# Chat with flags
+"Refactor this code --auto --performance"
+
+# MCP server commands
+@superflag --analyze --todo
+```
+
+#### Continue (VS Code)
+```bash
+# In Continue chat
+"Optimize this function --performance --lean"
+
+# Use @ to access MCP tools
+@get_directives(['--strict', '--analyze'])
+```
 
 ### Session Management
 - **Duplicate Detection**: Repeated flags show brief reminders instead of full directives
@@ -137,15 +244,91 @@ The MCP server provides:
 
 ## Configuration Files
 
+### Claude Code
 ```
 ~/.claude/
 ├── CLAUDE.md                    # References @SUPERFLAG.md
 ├── SUPERFLAG.md                 # Flag instructions (auto-updated)
 └── hooks/
     └── superflag.py             # Flag detection hook
+```
 
+### Gemini CLI
+```
+~/.gemini/
+├── GEMINI.md                    # References @SUPERFLAG.md
+├── SUPERFLAG.md                 # Flag instructions (auto-updated)
+└── settings.json                # MCP server configuration (auto-registered)
+```
+
+### Continue
+```
+~/.continue/
+├── config.yaml                  # SuperFlag rules and configuration
+└── mcpServers/
+    └── superflag.yaml           # MCP server settings (auto-registered)
+```
+
+### Shared Configuration
+```
 ~/.superflag/
-└── flags.yaml                  # Flag definitions and directives
+└── flags.yaml                  # Flag definitions and directives (all platforms)
+```
+
+## Configuration File Contents
+
+### What Gets Created
+
+**~/.claude/CLAUDE.md**
+```markdown
+@SUPERFLAG.md
+```
+
+**~/.gemini/GEMINI.md**
+```markdown
+@SUPERFLAG.md
+```
+
+**~/.continue/config.yaml**
+```yaml
+rules:
+  - title: SuperFlag
+    pattern: '--\w+'
+    message: >-
+      Flag detected. Execute MCP: get_directives([detected_flags])
+
+      Available: --analyze, --strict, --performance, --refactor, --lean, --discover, --explain, --save, --parallel,
+      --todo, --seq, --concise, --git, --readonly, --load, --collab, --reset, --auto
+```
+
+**~/.continue/mcpServers/superflag.yaml**
+```yaml
+name: SuperFlag
+command: npx
+args:
+  - '@superclaude-org/superflag@latest'
+env: {}
+```
+
+**~/.gemini/settings.json** (MCP section)
+```json
+{
+  "mcpServers": {
+    "superflag": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@superclaude-org/superflag@latest"],
+      "env": {}
+    }
+  }
+}
+```
+
+**~/.superflag/flags.yaml**
+```yaml
+# Contains all 18 flag definitions and their directives
+# This file is shared across all platforms
+# Auto-updated when SuperFlag package is updated
 ```
 
 ## Development
@@ -172,15 +355,32 @@ Update version in `src/version.ts` - all other files sync automatically during b
 
 ## Uninstallation
 
+### Interactive Uninstallation
 ```bash
-# Remove SuperFlag configuration and MCP registration
+# Interactive removal - choose platforms to remove
 superflag uninstall
+```
 
-# Remove npm package
+### Platform-Specific Removal
+```bash
+# Remove from specific platforms
+superflag uninstall cc          # Claude Code only
+superflag uninstall gemini      # Gemini CLI only
+superflag uninstall cn          # Continue only
+superflag uninstall all         # All platforms
+```
+
+### Complete Removal
+```bash
+# Remove all configurations and package
+superflag uninstall all
 npm uninstall -g @superclaude-org/superflag
 ```
 
-**Safety**: Configuration files are backed up to `~/flags.yaml.backup_YYYYMMDD_HHMMSS` before removal.
+**Safety Features:**
+- Configuration files are backed up to `~/flags.yaml.backup_YYYYMMDD_HHMMSS` before removal
+- Interactive confirmation for each platform
+- Selective removal - keep other platforms intact
 
 ## Migration from Python
 
@@ -208,24 +408,55 @@ npm uninstall -g @superclaude-org/superflag
 
 ### Common Issues
 
-**MCP Connection Failed**
+**Auto-Registration Failed**
+If MCP server wasn't automatically registered during installation:
+
 ```bash
-# Check server status
+# For Claude Code
+claude mcp add superflag npx @superclaude-org/superflag@latest -s user
+
+# For Gemini CLI - manually edit ~/.gemini/settings.json
+{
+  "mcpServers": {
+    "superflag": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@superclaude-org/superflag@latest"],
+      "env": {}
+    }
+  }
+}
+
+# For Continue - create ~/.continue/mcpServers/superflag.yaml
+name: SuperFlag
+command: npx
+args:
+  - '@superclaude-org/superflag@latest'
+env: {}
+```
+
+**MCP Connection Issues**
+```bash
+# Check server status (Claude Code)
 claude mcp list
 
-# Re-register server
+# Re-register if needed
 claude mcp remove superflag
-claude mcp add superflag npx @superclaude-org/superflag@latest -s user
+superflag install cc  # Auto-register again
 ```
 
 **Flags Not Working**
-- Restart Claude Code after installation
-- Verify `~/.claude/SUPERFLAG.md` exists
-- Check `claude mcp list` shows ✓ Connected
+- Restart your AI platform after installation
+- Verify configuration files exist:
+  - Claude Code: `~/.claude/SUPERFLAG.md`
+  - Gemini CLI: `~/.gemini/SUPERFLAG.md`
+  - Continue: `~/.continue/config.yaml`
+- Check MCP server connection (platform-specific)
 
 **Version Conflicts**
 - Ensure Python version is completely removed
 - Use `npm list -g @superclaude-org/superflag` to verify installation
+- Clear platform caches if switching from manual to auto-registration
 
 ## License
 
