@@ -534,7 +534,6 @@ meta_instructions:
     Maintain ALL constraints throughout execution.
     Verify compliance at every checkpoint.
     </enforcement>
-
 # ========================================
 # Hook Messages (Claude Code Only)
 # ========================================

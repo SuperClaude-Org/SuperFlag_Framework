@@ -6,6 +6,7 @@ src/
 tsconfig.json
 .gitignore
 .git/
+.npmrc
 
 # Development files
 *.log

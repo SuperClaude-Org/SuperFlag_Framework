@@ -151,6 +151,7 @@ Args:
     const newFlags: string[] = [];
     const duplicateFlags: string[] = [];
     const validFlags: string[] = [];
+    const notFoundFlags: string[] = [];
 
     for (const flag of flags) {
       if (directives[flag] && directives[flag].brief !== "Unknown flag") {
@@ -160,7 +161,25 @@ Args:
         } else {
           newFlags.push(flag);
         }
+      } else {
+        notFoundFlags.push(flag);
       }
+    }
+
+    // Handle unknown flags
+    if (notFoundFlags.length > 0) {
+      const flagText = notFoundFlags.length === 1 ? "flag" : "flags";
+      const availableFlags = Object.keys(directives)
+        .filter(flag => directives[flag] && directives[flag].brief !== "Unknown flag")
+        .join(", ");
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Unknown ${flagText}: ${notFoundFlags}\n\nAvailable flags: ${availableFlags}\n\nReference <available_flags> section in <system-reminder>'s SUPERFLAG.md`,
+          },
+        ],
+      };
     }
 
     // Build response parts
@@ -214,8 +233,9 @@ Args:
 
     // Add enforcement text if we have directives
     if ((newFlags.length > 0 || (resetRequested && validFlags.length > 0)) && config.meta_instructions?.get_directives) {
-      resultParts.push("");
-      resultParts.push(config.meta_instructions.get_directives);
+      resultParts.push("=".repeat(50));
+      resultParts.push(config.meta_instructions.get_directives.trim());
+      resultParts.push("=".repeat(50));
     }
 
     // Update session only with new flags

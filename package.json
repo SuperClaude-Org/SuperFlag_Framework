@@ -1,6 +1,6 @@
 {
   "name": "@superclaude-org/superflag",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "SuperFlag - MCP-based flag system for AI assistants",
   "type": "module",
   "main": "dist/index.js",
