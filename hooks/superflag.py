@@ -21,7 +21,7 @@ PROFILES_FILE = PROFILES_DIR / "profiles.yaml"
 PACKAGE_PROFILES_FILE = PACKAGE_SUPERFLAG_DIR / "profiles.yaml"
 AUTO_FLAG = '--auto'
 RESET_FLAG = '--reset'
-DEFAULT_PROFILE = "claude"
+DEFAULT_PROFILE = "superclaude"
 
 
 def resolve_profiles():

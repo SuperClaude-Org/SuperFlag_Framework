@@ -117,7 +117,7 @@ claude mcp add superflag npx @superclaude-org/superflag@latest -s user
       "command": "npx",
       "args": ["@superclaude-org/superflag@latest"],
       "env": {
-        "SUPERFLAG_PROFILES": "claude"
+        "SUPERFLAG_PROFILES": "superclaude"
       }
     }
   }
@@ -282,18 +282,18 @@ get_directives(['--flag1', '--flag2'])
 │   │   └── validate.yaml
 │   ├── claude/                     # Claude-only meta / hook definitions
 │   │   └── profile.yaml
-│   ├── codex/
+│   ├── supercodex/
 │   │   └── profile.yaml
 │   ├── continue/
 │   │   └── profile.yaml
-│   └── gemini/                     # Gemini extensions & overrides
+│   └── supergemini/                # Gemini extensions & overrides
 │       ├── profile.yaml
 │       ├── loop.yaml
 │       ├── seq.yaml
 │       └── ...
-└── profiles.yaml                   # Maps profile names to include lists (e.g. superflag, claude, gemini)
+└── profiles.yaml                   # Maps profile names to include lists (e.g. superflag, superclaude, supergemini)
 
-Profile definitions now live in `profiles.yaml`. Each entry lists directories/files to include; pointing at `configs/superflag` loads shared flags, while `configs/<profile>` folders hold per-platform overrides.
+Profile definitions now live in `profiles.yaml`. Each entry lists directories/files to include; pointing at `configs/superflag` loads shared flags, while `configs/<profile>` folders (e.g. `configs/superclaude`) hold per-platform overrides.
 ```
 
 ## Configuration File Contents
@@ -341,16 +341,16 @@ env:
       "command": "npx",
       "args": ["@superclaude-org/superflag@latest"],
       "env": {
-        "SUPERFLAG_PROFILES": "gemini"
+        "SUPERFLAG_PROFILES": "supergemini"
       }
     }
   }
 }
 ```
 
-**~/.superflag/superflag.yaml**
-- Fallback-only profile that pulls in `configs/superflag`; it is not auto-combined with other profiles.
-- Other profiles (`claude.yaml`, `gemini.yaml`, …) reference their own directories so you can chain them manually via `SUPERFLAG_PROFILES`.
+**~/.superflag/profiles.yaml**
+- Fallback-only profile entry `superflag` pulls in `configs/superflag`; it is not auto-combined with other profiles.
+- Other profile entries (`superclaude`, `supergemini`, …) reference their own directories so you can chain them manually via `SUPERFLAG_PROFILES`.
 
 **~/.superflag/configs/superflag/**
 - `profile.yaml` contains shared server/MCP metadata and global meta instructions.
@@ -359,7 +359,7 @@ env:
 **~/.superflag/configs/<profile>/**
 - `profile.yaml` holds per-platform server/MCP/meta/hook configuration.
 - Add extra flag YAMLs in the same folder for profile-specific behavior.
-- Combine profiles explicitly, e.g. `SUPERFLAG_PROFILES="superflag, gemini"`.
+- Combine profiles explicitly, e.g. `SUPERFLAG_PROFILES="superflag, supergemini"`.
 
 ## Development
 

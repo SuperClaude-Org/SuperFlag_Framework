@@ -2,15 +2,15 @@ profiles:
   superflag:
     includes:
       - configs/superflag
-  claude:
+  superclaude:
     includes:
-      - configs/claude
-  codex:
+      - configs/superclaude
+  supercodex:
     includes:
-      - configs/codex
+      - configs/supercodex
   continue:
     includes:
       - configs/continue
-  gemini:
+  supergemini:
     includes:
-      - configs/gemini
+      - configs/supergemini

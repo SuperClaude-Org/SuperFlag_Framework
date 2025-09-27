@@ -1131,7 +1131,7 @@ async function registerClaudeCodeMcp(): Promise<InstallationTask> {
       command: "npx",
       args: ["@superclaude-org/superflag@latest"],
       env: {
-        SUPERFLAG_PROFILES: "claude"
+        SUPERFLAG_PROFILES: "superclaude"
       }
     };
 
@@ -1214,7 +1214,7 @@ async function registerGeminiMcp(): Promise<InstallationTask> {
       command: "npx",
       args: ["@superclaude-org/superflag@latest"],
       env: {
-        SUPERFLAG_PROFILES: "gemini"
+        SUPERFLAG_PROFILES: "supergemini"
       }
     };
 
