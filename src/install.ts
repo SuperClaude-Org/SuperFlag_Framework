@@ -1125,14 +1125,11 @@ async function registerClaudeCodeMcp(): Promise<InstallationTask> {
       config.mcpServers = {};
     }
 
-    // Add SuperFlag MCP server
+    // Add SuperFlag MCP server (default profile fallback)
     config.mcpServers.superflag = {
       type: "stdio",
       command: "npx",
       args: ["@superclaude-org/superflag@latest"],
-      env: {
-        SUPERFLAG_PROFILES: "superclaude"
-      }
     };
 
     // Write back to file
@@ -1208,14 +1205,11 @@ async function registerGeminiMcp(): Promise<InstallationTask> {
       config.mcpServers = {};
     }
 
-    // Add SuperFlag MCP server
+    // Add SuperFlag MCP server (default profile fallback)
     config.mcpServers.superflag = {
       type: "stdio",
       command: "npx",
       args: ["@superclaude-org/superflag@latest"],
-      env: {
-        SUPERFLAG_PROFILES: "supergemini"
-      }
     };
 
     // Write back to file
@@ -1279,10 +1273,7 @@ async function registerContinueMcp(): Promise<InstallationTask> {
     const mcpConfig = {
       name: "SuperFlag",
       command: "npx",
-      args: ["@superclaude-org/superflag@latest"],
-      env: {
-        SUPERFLAG_PROFILES: "continue"
-      }
+      args: ["@superclaude-org/superflag@latest"]
     };
 
     // Write MCP server config
