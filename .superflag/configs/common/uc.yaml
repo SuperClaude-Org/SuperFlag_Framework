@@ -1,5 +1,0 @@
-directives:
-  '--uc, --ultracompressed':
-    brief: Ultracompress output
-    directive: |
-      Use symbol-based shorthand to reduce tokens while retaining essentials.

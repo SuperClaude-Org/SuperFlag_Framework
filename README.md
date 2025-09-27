@@ -291,13 +291,13 @@ get_directives(['--flag1', '--flag2'])
 │       ├── loop.yaml
 │       ├── seq.yaml
 │       └── ...
-├── default.yaml                    # Default profile (includes configs/common)
-├── claude.yaml                     # Includes configs/common + configs/claude
-├── codex.yaml
-├── continue.yaml
-└── gemini.yaml
+├── superflag.yaml                  # Fallback profile (includes configs/superflag); only used when no profile is set
+├── claude.yaml                     # Includes configs/claude
+├── codex.yaml                      # Includes configs/codex
+├── continue.yaml                   # Includes configs/continue
+└── gemini.yaml                     # Includes configs/gemini
 
-Profile YAMLs now support directory-level `includes`. Point to `configs/common` to pull in every shared flag, then add platform folders (e.g. `configs/gemini`) for overrides. You can still reference individual files when you need fine-grained control.
+Profile YAMLs now support directory-level `includes`. Point to `configs/superflag` to pull in every shared flag, then add platform folders (e.g. `configs/gemini`) for overrides. You can still reference individual files when you need fine-grained control.
 ```
 
 ## Configuration File Contents
@@ -352,17 +352,18 @@ env:
 }
 ```
 
-**~/.superflag/default.yaml**
-- Default profile that pulls in `configs/common`
-- Other profiles (`claude.yaml`, `gemini.yaml`, …) reference directories directly, so you can chain includes without editing file lists
+**~/.superflag/superflag.yaml**
+- Fallback-only profile that pulls in `configs/superflag`; it is not auto-combined with other profiles.
+- Other profiles (`claude.yaml`, `gemini.yaml`, …) reference their own directories so you can chain them manually via `SUPERFLAG_PROFILES`.
 
-**~/.superflag/configs/common/*.yaml**
-- Shared flag definitions; drop a new YAML file here to expose it everywhere automatically
-- Each file defines the `brief` and `directive` text for that flag inside a `directives` block
+**~/.superflag/configs/superflag/**
+- `profile.yaml` contains shared server/MCP metadata and global meta instructions.
+- Additional YAML files define the shared flag set; drop new files here to expose them when `superflag` is active.
 
 **~/.superflag/configs/<profile>/**
-- Platform-specific overrides (`configs/gemini/seq.yaml`, `configs/claude/meta.yaml`, …)
-- Files in these folders are only loaded when the matching profile is active
+- `profile.yaml` holds per-platform server/MCP/meta/hook configuration.
+- Add extra flag YAMLs in the same folder for profile-specific behavior.
+- Combine profiles explicitly, e.g. `SUPERFLAG_PROFILES="superflag, gemini"`.
 
 ## Development
 
@@ -449,6 +450,7 @@ If MCP server wasn't automatically registered during installation:
 claude mcp add superflag npx @superclaude-org/superflag@latest -s user
 
 # For Gemini CLI - manually edit ~/.gemini/settings.json
+```json
 {
   "mcpServers": {
     "superflag": {
@@ -459,6 +461,7 @@ claude mcp add superflag npx @superclaude-org/superflag@latest -s user
     }
   }
 }
+```
 
 # For Continue - create ~/.continue/mcpServers/superflag.yaml
 name: SuperFlag

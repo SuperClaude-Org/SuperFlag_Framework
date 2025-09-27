@@ -23,6 +23,7 @@ test/
 docs/
 *.md
 !README.md
+AGENTS.md
 
 # Build artifacts not needed
 *.map

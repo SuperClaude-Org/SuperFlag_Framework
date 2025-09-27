@@ -1,5 +1,0 @@
-directives:
-  '--introspect':
-    brief: Expose reasoning with transparency markers
-    directive: |
-      Narrate your thought process using 🤔 🎯 ⚡ 📊 💡 markers so decisions stay explicit.

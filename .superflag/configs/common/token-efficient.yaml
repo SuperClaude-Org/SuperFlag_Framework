@@ -1,5 +1,0 @@
-directives:
-  '--token-efficient':
-    brief: Reduce tokens while preserving clarity
-    directive: |
-      Compress responses by roughly 30-50% using structured shorthand while keeping meaning intact.

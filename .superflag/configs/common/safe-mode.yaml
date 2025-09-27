@@ -1,5 +1,0 @@
-directives:
-  '--safe-mode':
-    brief: Maximum validation & conservative execution
-    directive: |
-      Engage safe mode: apply strict validation gates, define a rollback plan, and auto-enable --uc.

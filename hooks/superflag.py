@@ -18,7 +18,7 @@ PROFILES_DIR = Path.home() / ".superflag"
 PACKAGE_SUPERFLAG_DIR = Path(__file__).resolve().parent.parent / ".superflag"
 PACKAGE_CONFIGS_DIR = PACKAGE_SUPERFLAG_DIR / "configs"
 PROFILE_FILES = [
-    "default.yaml",
+    "superflag.yaml",
     "claude.yaml",
     "codex.yaml",
     "continue.yaml",

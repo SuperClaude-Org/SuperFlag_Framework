@@ -1,5 +1,0 @@
-directives:
-  '--scope':
-    brief: Define operational scope
-    directive: |
-      Constrain analysis to the requested scope (file/module/project/system) and note boundaries upfront.

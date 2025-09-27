@@ -236,12 +236,12 @@ async function installInteractive(platformNames: string[]): Promise<void> {
   const tasks: InstallationTask[] = [];
 
   // 1. Ensure SuperFlag profile files
-  const flagsPath = path.join(os.homedir(), ".superflag", "default.yaml");
+  const flagsPath = path.join(os.homedir(), ".superflag", "superflag.yaml");
   if (await setupFlagsYaml(flagsPath)) {
     tasks.push({
       name: "Flags config",
       status: "OK",
-      detail: "~/.superflag/default.yaml",
+      detail: "~/.superflag/superflag.yaml",
     });
   } else {
     tasks.push({
@@ -340,12 +340,12 @@ async function install(targetArg: string): Promise<void> {
   const tasks: InstallationTask[] = [];
 
   // 1. Ensure SuperFlag profile files
-  const flagsPath = path.join(os.homedir(), ".superflag", "default.yaml");
+  const flagsPath = path.join(os.homedir(), ".superflag", "superflag.yaml");
   if (await setupFlagsYaml(flagsPath)) {
     tasks.push({
       name: "Flags config",
       status: "OK",
-      detail: "~/.superflag/default.yaml",
+      detail: "~/.superflag/superflag.yaml",
     });
   } else {
     tasks.push({
@@ -732,7 +732,7 @@ async function setupFlagsYaml(defaultProfilePath: string): Promise<boolean> {
 
   const packagedRoot = path.join(__dirname, "..", ".superflag");
   const profileFiles = [
-    "default.yaml",
+    "superflag.yaml",
     "claude.yaml",
     "codex.yaml",
     "continue.yaml",

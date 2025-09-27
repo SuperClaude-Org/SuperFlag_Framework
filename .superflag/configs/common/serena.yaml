@@ -1,5 +1,0 @@
-directives:
-  '--serena':
-    brief: Enable Serena for semantic navigation
-    directive: |
-      Use Serena MCP for symbol navigation and project memory when working in large repositories.

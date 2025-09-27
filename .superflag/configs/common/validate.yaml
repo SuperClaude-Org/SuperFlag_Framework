@@ -1,5 +1,0 @@
-directives:
-  '--validate':
-    brief: Risk assessment before execution
-    directive: |
-      Perform a pre-execution risk assessment. If the score exceeds 0.7, document the mitigation before proceeding.

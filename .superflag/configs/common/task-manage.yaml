@@ -1,5 +1,0 @@
-directives:
-  '--task-manage':
-    brief: Organize multi-step work
-    directive: |
-      Break work into ordered steps (>3) with owners, dependencies, and checkpoints.

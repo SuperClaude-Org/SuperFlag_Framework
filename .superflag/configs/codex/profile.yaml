@@ -1,3 +1,10 @@
+server:
+  name: '@superclaude-org/superflag'
+  description: SuperFlag - MCP-based flag system with scientific optimization
+mcp:
+  tools:
+    - list-available-flags
+    - get-directives
 meta_instructions:
   list_available_flags: |
     <selection_guide>
@@ -12,3 +19,4 @@ meta_instructions:
     Record metrics and artifacts requested by verification steps.
     Re-query get_directives whenever Codex switches agent modes.
     </enforcement>
+

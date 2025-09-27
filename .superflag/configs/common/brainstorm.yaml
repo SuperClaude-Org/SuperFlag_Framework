@@ -1,6 +1,0 @@
-directives:
-  '--brainstorm':
-    brief: Collaborative exploration for vague requests
-    directive: |
-      Activate brainstorming mode for ill-defined or exploratory prompts.
-      Ask clarifying questions, propose multiple avenues, and capture evolving requirements.

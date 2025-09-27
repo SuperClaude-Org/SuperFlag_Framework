@@ -1,5 +1,0 @@
-directives:
-  '--magic':
-    brief: Enable Magic MCP for UI generation
-    directive: |
-      Use Magic MCP when you need UI components, design-system guidance, or 21st.dev patterns.

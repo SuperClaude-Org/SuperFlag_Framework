@@ -1,5 +1,0 @@
-directives:
-  '--iterations':
-    brief: Set explicit iteration count
-    directive: |
-      Execute exactly N refinement passes (1-10) before your final review or summary.

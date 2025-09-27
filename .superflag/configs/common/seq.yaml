@@ -1,5 +1,0 @@
-directives:
-  '--seq, --sequential':
-    brief: Enable Sequential for structured reasoning
-    directive: |
-      Activate Sequential MCP to manage hypotheses, checkpoints, and conclusions.

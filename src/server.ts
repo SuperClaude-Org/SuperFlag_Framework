@@ -23,7 +23,7 @@ export class SuperFlagServer {
   constructor() {
     this.sessionManager = new SessionManager();
     this.directiveLoader = new DirectiveLoader();
-    this.flagsYamlPath = path.join(os.homedir(), ".superflag", "default.yaml");
+    this.flagsYamlPath = path.join(os.homedir(), ".superflag", "superflag.yaml");
     this.profiles = this.resolveProfiles();
   }
 
@@ -278,7 +278,7 @@ Args:
       .filter(profile => profile.length > 0);
 
     if (profiles.length === 0) {
-      return ["default"];
+      return ["superflag"];
     }
 
     const seen = new Set<string>();

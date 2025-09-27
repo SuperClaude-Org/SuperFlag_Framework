@@ -292,7 +292,7 @@ export class DirectiveLoader {
 
   private resolveProfiles(options: LoadOptions, defaultPath: string): string[] {
     const ordered = options.profiles?.slice() ?? this.readProfilesFromEnv();
-    const normalized = ordered.length > 0 ? ordered : [this.profileFromPath(defaultPath) ?? "default"];
+    const normalized = ordered.length > 0 ? ordered : [this.profileFromPath(defaultPath) ?? "superflag"];
 
     const seen = new Set<string>();
     const result: string[] = [];
@@ -358,7 +358,7 @@ export class DirectiveLoader {
 
     const sourceProfileDir = path.join(packageRoot, ".superflag");
     const profileFiles = [
-      "default.yaml",
+      "superflag.yaml",
       "claude.yaml",
       "codex.yaml",
       "continue.yaml",

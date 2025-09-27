@@ -101,6 +101,7 @@ attached_assets/Pasted-*
 # Analysis and optimization documents
 OPTIMIZATION_ANALYSIS.md
 FINAL_VERSION_NOTES.md
+AGENTS.md
 
 # Test files
 test_*.py
