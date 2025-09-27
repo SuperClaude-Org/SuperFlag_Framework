@@ -37,6 +37,14 @@ interface LoadOptions {
   profiles?: string[];
 }
 
+interface ProfileDefinition {
+  includes?: unknown;
+}
+
+interface ProfilesFile {
+  profiles?: Record<string, ProfileDefinition>;
+}
+
 export class DirectiveLoader {
   /**
    * Load directives for specified flags from YAML file
@@ -71,9 +79,22 @@ export class DirectiveLoader {
   async loadYamlConfig(yamlPath: string, options: LoadOptions = {}): Promise<FlagsYaml> {
     const profilesDir = path.dirname(yamlPath);
     const profiles = this.resolveProfiles(options, yamlPath);
-    
+
+    let profileDefinitions: Record<string, ProfileDefinition> = {};
+
     try {
-      const config = await this.buildConfigFromProfiles(profilesDir, profiles);
+      profileDefinitions = await this.loadProfileDefinitions(yamlPath);
+    } catch (error) {
+      if (!this.isMissingConfigError(error)) {
+        throw error;
+      }
+
+      await this.copyBundledStructure(profilesDir);
+      profileDefinitions = await this.loadProfileDefinitions(yamlPath);
+    }
+
+    try {
+      const config = await this.buildConfigFromProfiles(yamlPath, profileDefinitions, profiles);
       this.normalizeDirectives(config);
       return config;
     } catch (error) {
@@ -82,7 +103,8 @@ export class DirectiveLoader {
       }
 
       await this.copyBundledStructure(profilesDir);
-      const config = await this.buildConfigFromProfiles(profilesDir, profiles);
+      const refreshedDefinitions = await this.loadProfileDefinitions(yamlPath);
+      const config = await this.buildConfigFromProfiles(yamlPath, refreshedDefinitions, profiles);
       this.normalizeDirectives(config);
       return config;
     }
@@ -168,31 +190,30 @@ export class DirectiveLoader {
     }
   }
 
-  private async buildConfigFromProfiles(profilesDir: string, profiles: string[]): Promise<FlagsYaml> {
+  private async buildConfigFromProfiles(
+    profilesFilePath: string,
+    definitions: Record<string, ProfileDefinition>,
+    profiles: string[]
+  ): Promise<FlagsYaml> {
     if (profiles.length === 0) {
       throw new Error("No profiles specified for SuperFlag configuration");
     }
 
     const visited = new Set<string>();
     const config: FlagsYaml = {};
+    const baseDir = path.dirname(profilesFilePath);
 
     for (const profile of profiles) {
-      const profilePath = this.resolveProfilePath(profile, profilesDir);
-      const profileConfig = await this.loadConfigTree(profilePath, visited);
-      this.mergeConfig(config, profileConfig);
+      await this.applyProfileDefinition(
+        profile,
+        profilesFilePath,
+        definitions,
+        visited,
+        config
+      );
     }
 
     return config;
-  }
-
-  private resolveProfilePath(profile: string, profilesDir: string): string {
-    const trimmed = profile.trim();
-    if (!trimmed) {
-      throw new Error("Empty profile name in configuration");
-    }
-
-    const fileName = /\.ya?ml$/i.test(trimmed) ? trimmed : `${trimmed}.yaml`;
-    return path.resolve(profilesDir, fileName);
   }
 
   private async loadConfigTree(filePath: string, visited: Set<string>): Promise<FlagsYaml> {
@@ -225,6 +246,83 @@ export class DirectiveLoader {
 
     this.mergeConfig(combined, parsed);
     return combined;
+  }
+
+  private async loadProfileDefinitions(profilesPath: string): Promise<Record<string, ProfileDefinition>> {
+    const baseName = path.basename(profilesPath).toLowerCase();
+    if (baseName !== "profiles.yaml" && baseName !== "profiles.yml") {
+      return {};
+    }
+
+    const content = await fs.readFile(profilesPath, "utf-8");
+    const parsed = (yaml.load(content) as ProfilesFile) ?? {};
+    const profiles = parsed.profiles ?? {};
+
+    return Object.fromEntries(
+      Object.entries(profiles).map(([name, definition]) => [name.trim(), definition ?? {}])
+    );
+  }
+
+  private async applyProfileDefinition(
+    profile: string,
+    profilesFilePath: string,
+    definitions: Record<string, ProfileDefinition>,
+    visited: Set<string>,
+    target: FlagsYaml
+  ): Promise<void> {
+    const definition = definitions[profile];
+
+    if (definition) {
+      const includesRaw = Array.isArray(definition.includes)
+        ? definition.includes
+        : definition.includes !== undefined
+        ? [definition.includes]
+        : [];
+
+      if (includesRaw.length === 0) {
+        throw new Error(`Profile '${profile}' has no includes defined in profiles.yaml`);
+      }
+
+      for (const includeRef of includesRaw) {
+        if (typeof includeRef !== "string" || includeRef.trim().length === 0) {
+          continue;
+        }
+
+        const applied = await this.applyIncludeReference(includeRef, profilesFilePath, visited, target);
+        if (!applied) {
+          throw new Error(`Unable to resolve include '${includeRef}' for profile '${profile}'`);
+        }
+      }
+
+      return;
+    }
+
+    const applied = await this.applyIncludeReference(profile, profilesFilePath, visited, target);
+    if (applied) {
+      return;
+    }
+
+    throw new Error(`Unknown profile '${profile}'`);
+  }
+
+  private async applyIncludeReference(
+    includeRef: string,
+    fromPath: string,
+    visited: Set<string>,
+    target: FlagsYaml
+  ): Promise<boolean> {
+    try {
+      const includeTargets = await this.resolveIncludeTargets(includeRef, fromPath);
+      let applied = false;
+      for (const includePath of includeTargets) {
+        const includeConfig = await this.loadConfigTree(includePath, visited);
+        this.mergeConfig(target, includeConfig);
+        applied = true;
+      }
+      return applied;
+    } catch {
+      return false;
+    }
   }
 
   private async resolveIncludeTargets(includeRef: string, fromPath: string): Promise<string[]> {
@@ -321,6 +419,11 @@ export class DirectiveLoader {
   }
 
   private profileFromPath(filePath: string): string | null {
+    const baseName = path.basename(filePath).toLowerCase();
+    if (baseName === "profiles.yaml" || baseName === "profiles.yml") {
+      return null;
+    }
+
     const base = path.basename(filePath);
     if (!base) return null;
     const removed = base.replace(/\.ya?ml$/i, "");
@@ -357,22 +460,12 @@ export class DirectiveLoader {
     await fs.mkdir(targetDir, { recursive: true });
 
     const sourceProfileDir = path.join(packageRoot, ".superflag");
-    const profileFiles = [
-      "superflag.yaml",
-      "claude.yaml",
-      "codex.yaml",
-      "continue.yaml",
-      "gemini.yaml",
-    ];
-
-    for (const file of profileFiles) {
-      const source = path.join(sourceProfileDir, file);
-      const destination = path.join(targetDir, file);
-      try {
-        await fs.access(destination);
-      } catch {
-        await fs.copyFile(source, destination);
-      }
+    const profilesFile = path.join(sourceProfileDir, "profiles.yaml");
+    const destinationProfilesFile = path.join(targetDir, "profiles.yaml");
+    try {
+      await fs.access(destinationProfilesFile);
+    } catch {
+      await fs.copyFile(profilesFile, destinationProfilesFile);
     }
 
     const sourceConfigs = path.join(sourceProfileDir, "configs");

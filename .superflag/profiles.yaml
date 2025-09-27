@@ -1,0 +1,16 @@
+profiles:
+  superflag:
+    includes:
+      - configs/superflag
+  claude:
+    includes:
+      - configs/claude
+  codex:
+    includes:
+      - configs/codex
+  continue:
+    includes:
+      - configs/continue
+  gemini:
+    includes:
+      - configs/gemini

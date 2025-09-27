@@ -23,7 +23,7 @@ export class SuperFlagServer {
   constructor() {
     this.sessionManager = new SessionManager();
     this.directiveLoader = new DirectiveLoader();
-    this.flagsYamlPath = path.join(os.homedir(), ".superflag", "superflag.yaml");
+    this.flagsYamlPath = path.join(os.homedir(), ".superflag", "profiles.yaml");
     this.profiles = this.resolveProfiles();
   }
 

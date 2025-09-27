@@ -236,12 +236,12 @@ async function installInteractive(platformNames: string[]): Promise<void> {
   const tasks: InstallationTask[] = [];
 
   // 1. Ensure SuperFlag profile files
-  const flagsPath = path.join(os.homedir(), ".superflag", "superflag.yaml");
+  const flagsPath = path.join(os.homedir(), ".superflag", "profiles.yaml");
   if (await setupFlagsYaml(flagsPath)) {
     tasks.push({
       name: "Flags config",
       status: "OK",
-      detail: "~/.superflag/superflag.yaml",
+      detail: "~/.superflag/profiles.yaml",
     });
   } else {
     tasks.push({
@@ -340,12 +340,12 @@ async function install(targetArg: string): Promise<void> {
   const tasks: InstallationTask[] = [];
 
   // 1. Ensure SuperFlag profile files
-  const flagsPath = path.join(os.homedir(), ".superflag", "superflag.yaml");
+  const flagsPath = path.join(os.homedir(), ".superflag", "profiles.yaml");
   if (await setupFlagsYaml(flagsPath)) {
     tasks.push({
       name: "Flags config",
       status: "OK",
-      detail: "~/.superflag/superflag.yaml",
+      detail: "~/.superflag/profiles.yaml",
     });
   } else {
     tasks.push({
@@ -731,13 +731,7 @@ async function setupFlagsYaml(defaultProfilePath: string): Promise<boolean> {
   let created = false;
 
   const packagedRoot = path.join(__dirname, "..", ".superflag");
-  const profileFiles = [
-    "superflag.yaml",
-    "claude.yaml",
-    "codex.yaml",
-    "continue.yaml",
-    "gemini.yaml",
-  ];
+  const profileFiles = ["profiles.yaml"];
 
   for (const file of profileFiles) {
     const targetPath = path.join(configDir, file);

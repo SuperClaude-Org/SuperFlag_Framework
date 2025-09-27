@@ -17,13 +17,8 @@ from pathlib import Path
 PROFILES_DIR = Path.home() / ".superflag"
 PACKAGE_SUPERFLAG_DIR = Path(__file__).resolve().parent.parent / ".superflag"
 PACKAGE_CONFIGS_DIR = PACKAGE_SUPERFLAG_DIR / "configs"
-PROFILE_FILES = [
-    "superflag.yaml",
-    "claude.yaml",
-    "codex.yaml",
-    "continue.yaml",
-    "gemini.yaml",
-]
+PROFILES_FILE = PROFILES_DIR / "profiles.yaml"
+PACKAGE_PROFILES_FILE = PACKAGE_SUPERFLAG_DIR / "profiles.yaml"
 AUTO_FLAG = '--auto'
 RESET_FLAG = '--reset'
 DEFAULT_PROFILE = "claude"
@@ -57,12 +52,8 @@ def ensure_bundled_files():
     """Ensure packaged profiles and configs exist in the user directory."""
     PROFILES_DIR.mkdir(parents=True, exist_ok=True)
 
-    for file_name in PROFILE_FILES:
-        destination = PROFILES_DIR / file_name
-        if not destination.exists():
-            source = PACKAGE_SUPERFLAG_DIR / file_name
-            if source.exists():
-                shutil.copy2(source, destination)
+    if PACKAGE_PROFILES_FILE.exists() and not PROFILES_FILE.exists():
+        shutil.copy2(PACKAGE_PROFILES_FILE, PROFILES_FILE)
 
     target_configs = PROFILES_DIR / "configs"
     target_configs.mkdir(parents=True, exist_ok=True)
@@ -75,15 +66,6 @@ def ensure_bundled_files():
                 shutil.copytree(entry, destination)
             else:
                 shutil.copy2(entry, destination)
-
-
-def resolve_profile_path(profile: str) -> Path:
-    name = profile.strip()
-    if not name:
-        raise ValueError("Empty profile name")
-    if not name.lower().endswith(('.yaml', '.yml')):
-        name = f"{name}.yaml"
-    return (PROFILES_DIR / name).resolve()
 
 
 def is_yaml_file(path: Path) -> bool:
@@ -194,24 +176,73 @@ def load_profile_tree(profile_path: Path, visited: set[Path]) -> dict:
     return combined
 
 
+def load_profiles_definition() -> dict[str, dict]:
+    if not PROFILES_FILE.exists():
+        return {}
+
+    with PROFILES_FILE.open('r', encoding='utf-8') as f:
+        data = yaml.safe_load(f) or {}
+
+    profiles = data.get('profiles')
+    if isinstance(profiles, dict):
+        return {name.strip(): definition or {} for name, definition in profiles.items()}
+    return {}
+
+
+def load_include_configs(reference: str, base_path: Path, visited: set[Path]) -> list[dict]:
+    targets = resolve_include_targets(reference, base_path)
+    return [load_profile_tree(include_path, visited) for include_path in targets]
+
+
+def load_profile(profile: str, definitions: dict[str, dict], visited: set[Path]) -> dict:
+    definition = definitions.get(profile)
+    combined: dict = {}
+
+    if definition:
+        includes = definition.get('includes') or []
+        if isinstance(includes, str):
+            includes = [includes]
+
+        if not includes:
+            raise ValueError(f"Profile '{profile}' has no includes defined in profiles.yaml")
+
+        for ref in includes:
+            if not isinstance(ref, str) or not ref.strip():
+                continue
+            try:
+                include_configs = load_include_configs(ref, PROFILES_FILE, visited)
+            except FileNotFoundError as exc:
+                raise FileNotFoundError(f"Unable to resolve include '{ref}' for profile '{profile}'") from exc
+            for include_config in include_configs:
+                combined = merge_configs(combined, include_config)
+
+        return combined
+
+    try:
+        include_configs = load_include_configs(profile, PROFILES_FILE, visited)
+        for include_config in include_configs:
+            combined = merge_configs(combined, include_config)
+        return combined
+    except FileNotFoundError as exc:
+        raise ValueError(f"Unknown profile '{profile}'") from exc
+
+
 def load_config():
     """Load YAML configuration using profile includes."""
     ensure_bundled_files()
 
-    profiles = resolve_profiles()
-    if not profiles:
+    definitions = load_profiles_definition()
+    if not definitions:
         return None
 
     config: dict = {}
     visited: set[Path] = set()
 
     try:
-        for profile in profiles:
-            profile_path = resolve_profile_path(profile)
-            if not profile_path.exists():
-                raise FileNotFoundError(f"Missing profile file: {profile_path}")
-            config = merge_configs(config, load_profile_tree(profile_path, visited))
-    except (FileNotFoundError, yaml.YAMLError):
+        for profile in resolve_profiles():
+            profile_config = load_profile(profile, definitions, visited)
+            config = merge_configs(config, profile_config)
+    except (FileNotFoundError, ValueError, yaml.YAMLError):
         return None
 
     normalize_directives(config)

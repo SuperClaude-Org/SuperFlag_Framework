@@ -281,23 +281,19 @@ get_directives(['--flag1', '--flag2'])
 │   │   ├── ...
 │   │   └── validate.yaml
 │   ├── claude/                     # Claude-only meta / hook definitions
-│   │   └── meta.yaml
+│   │   └── profile.yaml
 │   ├── codex/
-│   │   └── meta.yaml
+│   │   └── profile.yaml
 │   ├── continue/
-│   │   └── meta.yaml
+│   │   └── profile.yaml
 │   └── gemini/                     # Gemini extensions & overrides
-│       ├── meta.yaml
+│       ├── profile.yaml
 │       ├── loop.yaml
 │       ├── seq.yaml
 │       └── ...
-├── superflag.yaml                  # Fallback profile (includes configs/superflag); only used when no profile is set
-├── claude.yaml                     # Includes configs/claude
-├── codex.yaml                      # Includes configs/codex
-├── continue.yaml                   # Includes configs/continue
-└── gemini.yaml                     # Includes configs/gemini
+└── profiles.yaml                   # Maps profile names to include lists (e.g. superflag, claude, gemini)
 
-Profile YAMLs now support directory-level `includes`. Point to `configs/superflag` to pull in every shared flag, then add platform folders (e.g. `configs/gemini`) for overrides. You can still reference individual files when you need fine-grained control.
+Profile definitions now live in `profiles.yaml`. Each entry lists directories/files to include; pointing at `configs/superflag` loads shared flags, while `configs/<profile>` folders hold per-platform overrides.
 ```
 
 ## Configuration File Contents
