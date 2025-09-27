@@ -1,0 +1,5 @@
+directives:
+  '--c7, --context7':
+    brief: Enable Context7 documentation lookup
+    directive: |
+      Use Context7 MCP for official documentation, APIs, and best practices; cite relevant sources.

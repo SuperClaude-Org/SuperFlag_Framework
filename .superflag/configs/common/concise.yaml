@@ -1,0 +1,38 @@
+directives:
+  '--concise':
+    brief: Write professionally neutral code and documentation
+    directive: |
+      <task>
+      Create timeless, culturally neutral content that remains professional across years and contexts.
+      </task>
+
+      <approach>
+      For CODE:
+      • Comments explain WHY, not WHAT
+      • Self-documenting through clear naming
+      • Structure reveals intent
+
+      For DOCUMENTATION:
+      • Professional neutrality - no marketing language or exclamations
+      • Temporal independence - no "modern", "latest", "cutting-edge"
+      • Cultural neutrality - globally appropriate
+      • Zero personal attribution or signatures
+      </approach>
+
+      <examples>
+      AVOID: "SOTA optimization", "revolutionary approach", "🚀 blazing fast"
+      USE: "optimized algorithm", "revised approach", "improved performance"
+
+      AVOID: "latest 2024 technology", "modern best practices", "Amazing!"
+      USE: "current implementation", "established practices", "Completed"
+
+      AVOID: "We/I developed", "Our amazing solution", "Awesome results!"
+      USE: "This implementation", "The solution", "Results achieved"
+      </examples>
+
+      <verify>
+      ☐ Would this be appropriate in 5 years?
+      ☐ Would this be professional in any culture?
+      ☐ Is this free from marketing language?
+      ☐ No emojis or decorative elements?
+      </verify>

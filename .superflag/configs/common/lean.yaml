@@ -1,0 +1,32 @@
+directives:
+  '--lean':
+    brief: Eliminate waste through minimal essential implementation
+    directive: |
+      <task>
+      Build only what's needed, nothing more.
+      </task>
+
+      <approach>
+      YAGNI Principle: You Aren't Gonna Need It
+      • Implement current requirements only
+      • Simplest solution that works
+      • Avoid speculative features
+
+      Seven Wastes to Eliminate:
+      1. Unused features
+      2. Waiting/blocking
+      3. Unnecessary data movement
+      4. Over-engineering
+      5. Dead code
+      </approach>
+
+      <warning>
+      Lean ≠ Destruction. Don't remove core frameworks.
+      Simplify HOW, maintain WHAT.
+      </warning>
+
+      <verify>
+      ☐ Zero unused code
+      ☐ Minimal dependencies
+      ☐ No future-proofing
+      </verify>

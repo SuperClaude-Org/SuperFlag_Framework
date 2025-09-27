@@ -1,5 +1,4 @@
 import * as fs from "fs/promises";
-import * as fsSync from "fs";
 import * as path from "path";
 import * as os from "os";
 import chalk from "chalk";
@@ -236,13 +235,13 @@ async function checkInstalledPlatforms(): Promise<string[]> {
 async function installInteractive(platformNames: string[]): Promise<void> {
   const tasks: InstallationTask[] = [];
 
-  // 1. Setup flags.yaml
-  const flagsPath = path.join(os.homedir(), ".superflag", "flags.yaml");
+  // 1. Ensure SuperFlag profile files
+  const flagsPath = path.join(os.homedir(), ".superflag", "default.yaml");
   if (await setupFlagsYaml(flagsPath)) {
     tasks.push({
       name: "Flags config",
       status: "OK",
-      detail: "~/.superflag/flags.yaml",
+      detail: "~/.superflag/default.yaml",
     });
   } else {
     tasks.push({
@@ -340,13 +339,13 @@ async function install(targetArg: string): Promise<void> {
 
   const tasks: InstallationTask[] = [];
 
-  // 1. Setup flags.yaml
-  const flagsPath = path.join(os.homedir(), ".superflag", "flags.yaml");
+  // 1. Ensure SuperFlag profile files
+  const flagsPath = path.join(os.homedir(), ".superflag", "default.yaml");
   if (await setupFlagsYaml(flagsPath)) {
     tasks.push({
       name: "Flags config",
       status: "OK",
-      detail: "~/.superflag/flags.yaml",
+      detail: "~/.superflag/default.yaml",
     });
   } else {
     tasks.push({
@@ -712,26 +711,96 @@ async function uninstallYamlPlatform(platform: Platform): Promise<InstallationTa
   };
 }
 
-async function setupFlagsYaml(flagsPath: string): Promise<boolean> {
-  try {
-    // Check if already exists
-    await fs.access(flagsPath);
-    return false; // Already exists
-  } catch {
-    // Create directory
-    await fs.mkdir(path.dirname(flagsPath), { recursive: true });
+async function setupFlagsYaml(defaultProfilePath: string): Promise<boolean> {
+  const configDir = path.dirname(defaultProfilePath);
+  const legacyFlagsPath = path.join(configDir, "flags.yaml");
+  const legacySuperflagPath = path.join(configDir, "superflag.yaml");
 
-    // Copy from package
-    const sourcePath = path.join(__dirname, "..", "flags.yaml");
+  await fs.mkdir(configDir, { recursive: true });
+
+  // Handle legacy files
+  try {
+    await fs.access(legacyFlagsPath);
+    const backupPath = path.join(configDir, `flags.yaml.backup_${Date.now()}`);
+    await fs.rename(legacyFlagsPath, backupPath);
+    console.log(chalk.gray(`Legacy flags.yaml backed up to ${backupPath}`));
+  } catch {
+    // No legacy flags.yaml to migrate
+  }
+
+  let created = false;
+
+  const packagedRoot = path.join(__dirname, "..", ".superflag");
+  const profileFiles = [
+    "default.yaml",
+    "claude.yaml",
+    "codex.yaml",
+    "continue.yaml",
+    "gemini.yaml",
+  ];
+
+  for (const file of profileFiles) {
+    const targetPath = path.join(configDir, file);
     try {
-      await fs.copyFile(sourcePath, flagsPath);
+      await fs.access(targetPath);
     } catch {
-      // Create from bundled content if copy fails
-      const defaultContent = getDefaultFlagsYaml();
-      await fs.writeFile(flagsPath, defaultContent, "utf-8");
+      const sourcePath = path.join(packagedRoot, file);
+      await fs.copyFile(sourcePath, targetPath);
+      created = true;
+    }
+  }
+
+  const packagedConfigsDir = path.join(packagedRoot, "configs");
+  const targetConfigsDir = path.join(configDir, "configs");
+  await fs.mkdir(targetConfigsDir, { recursive: true });
+
+  if (await exists(legacySuperflagPath)) {
+    const backupPath = path.join(configDir, `superflag.yaml.legacy_${Date.now()}`);
+    await fs.rename(legacySuperflagPath, backupPath);
+    console.log(chalk.gray(`Legacy superflag.yaml backed up to ${backupPath}`));
+  }
+
+  const entries = await fs.readdir(packagedConfigsDir, { withFileTypes: true });
+  for (const entry of entries) {
+    const source = path.join(packagedConfigsDir, entry.name);
+    const destination = path.join(targetConfigsDir, entry.name);
+
+    if (await exists(destination)) {
+      continue;
     }
 
+    if (entry.isDirectory()) {
+      await copyDirectoryRecursive(source, destination);
+    } else {
+      await fs.copyFile(source, destination);
+    }
+    created = true;
+  }
+
+  return created;
+}
+
+async function exists(targetPath: string): Promise<boolean> {
+  try {
+    await fs.access(targetPath);
     return true;
+  } catch {
+    return false;
+  }
+}
+
+async function copyDirectoryRecursive(source: string, destination: string): Promise<void> {
+  await fs.mkdir(destination, { recursive: true });
+  const entries = await fs.readdir(source, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const srcPath = path.join(source, entry.name);
+    const destPath = path.join(destination, entry.name);
+    if (entry.isDirectory()) {
+      await copyDirectoryRecursive(srcPath, destPath);
+    } else {
+      await fs.copyFile(srcPath, destPath);
+    }
   }
 }
 
@@ -884,16 +953,6 @@ function displayResults(tasks: InstallationTask[]): void {
     );
   }
   console.log("─".repeat(60));
-}
-
-function getDefaultFlagsYaml(): string {
-  // Copy from bundled flags.yaml
-  const packageFlagsPath = path.join(__dirname, '..', 'flags.yaml');
-  try {
-    return fsSync.readFileSync(packageFlagsPath, 'utf-8');
-  } catch (error) {
-    throw new Error('Cannot find bundled flags.yaml. Package installation is corrupted.');
-  }
 }
 
 function getSuperflagMdContent(): string {
@@ -1077,7 +1136,9 @@ async function registerClaudeCodeMcp(): Promise<InstallationTask> {
       type: "stdio",
       command: "npx",
       args: ["@superclaude-org/superflag@latest"],
-      env: {}
+      env: {
+        SUPERFLAG_PROFILES: "claude"
+      }
     };
 
     // Write back to file
@@ -1158,7 +1219,9 @@ async function registerGeminiMcp(): Promise<InstallationTask> {
       type: "stdio",
       command: "npx",
       args: ["@superclaude-org/superflag@latest"],
-      env: {}
+      env: {
+        SUPERFLAG_PROFILES: "gemini"
+      }
     };
 
     // Write back to file
@@ -1223,7 +1286,9 @@ async function registerContinueMcp(): Promise<InstallationTask> {
       name: "SuperFlag",
       command: "npx",
       args: ["@superclaude-org/superflag@latest"],
-      env: {}
+      env: {
+        SUPERFLAG_PROFILES: "continue"
+      }
     };
 
     // Write MCP server config

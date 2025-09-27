@@ -1,0 +1,22 @@
+server:
+  name: '@superclaude-org/superflag'
+  description: SuperFlag - MCP-based flag system with scientific optimization
+mcp:
+  tools:
+    - list-available-flags
+    - get-directives
+meta_instructions:
+  list_available_flags: |
+    <selection_guide>
+    Match flags to your task's core needs.
+    Combine complementary flags for synergy.
+    Start with --analyze when uncertain.
+    Use --auto for AI-optimized selection.
+    </selection_guide>
+  get_directives: |
+    <enforcement>
+    Directives are contracts, not suggestions.
+    Apply each method completely and in order.
+    Maintain ALL constraints throughout execution.
+    Verify compliance at every checkpoint.
+    </enforcement>

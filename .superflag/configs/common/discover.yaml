@@ -1,0 +1,27 @@
+directives:
+  '--discover':
+    brief: Discover existing solutions before building new
+    directive: |
+      <task>
+      Research existing solutions with Context7 verification.
+      </task>
+
+      <approach>
+      1. Discovery: Search awesome-lists, GitHub, npm/PyPI
+      2. Documentation: Use Context7 for API verification
+      3. Evaluation: Stars, commits, license, community
+      4. Decision: Reuse, fork, or build from scratch
+      </approach>
+
+      <example>
+      Need auth → Discover: Auth0, Supabase, NextAuth
+      Context7 → Verify: APIs current, docs complete
+      Evaluate → Choose: NextAuth (10k stars, MIT, fits stack)
+      </example>
+
+      <verify>
+      ☐ 3+ alternatives reviewed
+      ☐ Context7 verification done
+      ☐ License compatible
+      ☐ Production usage confirmed
+      </verify>

@@ -1,0 +1,27 @@
+directives:
+  '--explain':
+    brief: Explain progressively from overview to details
+    directive: |
+      <task>
+      Build understanding through progressive disclosure.
+      </task>
+
+      <approach>
+      1. Forest View - overall architecture
+      2. Tree View - major components
+      3. Branch View - specific modules
+      4. Leaf View - implementation details
+      </approach>
+
+      <technique>
+      • Start broad, zoom in gradually
+      • Connect details to big picture
+      • Use analogies for complex parts
+      • Adjust depth to audience
+      </technique>
+
+      <verify>
+      ☐ Started from overview
+      ☐ Progressive detail levels
+      ☐ Examples provided
+      </verify>

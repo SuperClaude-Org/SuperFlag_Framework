@@ -1,0 +1,5 @@
+directives:
+  '--orchestrate':
+    brief: Plan multi-tool execution
+    directive: |
+      Map tasks to tools, balancing sequential and parallel execution, and note performance constraints plus fallbacks.

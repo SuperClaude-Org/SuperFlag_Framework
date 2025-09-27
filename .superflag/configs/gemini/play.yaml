@@ -1,0 +1,5 @@
+directives:
+  '--play, --playwright':
+    brief: Enable Playwright MCP
+    directive: |
+      Use Playwright MCP for end-to-end browser testing, accessibility checks, or visual validation.

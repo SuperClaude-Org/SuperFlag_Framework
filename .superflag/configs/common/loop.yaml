@@ -1,0 +1,5 @@
+directives:
+  '--loop':
+    brief: Iterative improvement cycles
+    directive: |
+      Perform iterative refinement cycles, validating results between each pass.

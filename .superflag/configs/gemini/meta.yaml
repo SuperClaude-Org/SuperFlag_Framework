@@ -1,0 +1,15 @@
+meta_instructions:
+  list_available_flags: |
+    <selection_guide>
+    Gemini CLI profile active.
+    Select flags that balance analysis depth with execution speed.
+    Prefer pairs that surface diagnostics (--analyze) plus delivery (--refactor/--strict).
+    Use --auto when running scripted workflows needing adaptive coverage.
+    </selection_guide>
+  get_directives: |
+    <enforcement>
+    Insert directives directly into Gemini CLI task buffers.
+    Maintain every checklist item before emitting final output.
+    Document deviations explicitly in the response footer.
+    Re-run get_directives after significant context or repository changes.
+    </enforcement>

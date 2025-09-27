@@ -1,0 +1,32 @@
+directives:
+  '--parallel':
+    brief: Execute independent tasks simultaneously with agents
+    directive: |
+      <task>
+      Run multiple agents concurrently for speed.
+      </task>
+
+      <approach>
+      Claude Code Task tool usage:
+      • Identify independent subtasks
+      • Launch appropriate agents simultaneously
+      • Single message with multiple Task invokes
+      • NEVER sequential Task calls for independent work
+      </approach>
+
+      <agents>
+      refactoring-expert, performance-engineer,
+      system-architect, root-cause-analyst,
+      security-engineer, requirements-analyst
+      </agents>
+
+      <usage>
+      --parallel: Auto-select agent count
+      --parallel n: Use n agents
+      </usage>
+
+      <verify>
+      ☐ Independent tasks identified
+      ☐ Agents launched in parallel
+      ☐ No unnecessary sequencing
+      </verify>

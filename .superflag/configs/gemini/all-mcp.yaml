@@ -1,0 +1,5 @@
+directives:
+  '--all-mcp':
+    brief: Enable all MCP servers
+    directive: |
+      Activate every configured MCP server to maximize capabilities. Document any server that fails to start.

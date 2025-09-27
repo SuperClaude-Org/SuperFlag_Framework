@@ -1,0 +1,5 @@
+directives:
+  '--focus':
+    brief: Target specific optimization domain
+    directive: |
+      Center work on the requested domain: performance, security, quality, architecture, accessibility, or testing.

@@ -1,0 +1,20 @@
+directives:
+  '--load':
+    brief: Load context from previous handoff documents
+    directive: |
+      <task>
+      Restore project context from handoff documents.
+      </task>
+
+      <approach>
+      1. Find HANDOFF_REPORT_*.md in project root
+      2. Load most recent by timestamp
+      3. Parse system state, architecture, tasks
+      4. Resume from last stopping point
+      </approach>
+
+      <verify>
+      ☐ Document loaded
+      ☐ Context restored
+      ☐ Ready to continue
+      </verify>

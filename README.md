@@ -116,7 +116,9 @@ claude mcp add superflag npx @superclaude-org/superflag@latest -s user
     "superflag": {
       "command": "npx",
       "args": ["@superclaude-org/superflag@latest"],
-      "env": {}
+      "env": {
+        "SUPERFLAG_PROFILES": "claude"
+      }
     }
   }
 }
@@ -272,7 +274,30 @@ get_directives(['--flag1', '--flag2'])
 ### Shared Configuration
 ```
 ~/.superflag/
-└── flags.yaml                  # Flag definitions and directives (all platforms)
+├── configs/
+│   ├── common/                     # Shared directives for every profile
+│   │   ├── core.yaml
+│   │   ├── analyze.yaml
+│   │   ├── ...
+│   │   └── validate.yaml
+│   ├── claude/                     # Claude-only meta / hook definitions
+│   │   └── meta.yaml
+│   ├── codex/
+│   │   └── meta.yaml
+│   ├── continue/
+│   │   └── meta.yaml
+│   └── gemini/                     # Gemini extensions & overrides
+│       ├── meta.yaml
+│       ├── loop.yaml
+│       ├── seq.yaml
+│       └── ...
+├── default.yaml                    # Default profile (includes configs/common)
+├── claude.yaml                     # Includes configs/common + configs/claude
+├── codex.yaml
+├── continue.yaml
+└── gemini.yaml
+
+Profile YAMLs now support directory-level `includes`. Point to `configs/common` to pull in every shared flag, then add platform folders (e.g. `configs/gemini`) for overrides. You can still reference individual files when you need fine-grained control.
 ```
 
 ## Configuration File Contents
@@ -307,7 +332,8 @@ name: SuperFlag
 command: npx
 args:
   - '@superclaude-org/superflag@latest'
-env: {}
+env:
+  SUPERFLAG_PROFILES: "continue"
 ```
 
 **~/.gemini/settings.json** (MCP section)
@@ -318,18 +344,25 @@ env: {}
       "type": "stdio",
       "command": "npx",
       "args": ["@superclaude-org/superflag@latest"],
-      "env": {}
+      "env": {
+        "SUPERFLAG_PROFILES": "gemini"
+      }
     }
   }
 }
 ```
 
-**~/.superflag/flags.yaml**
-```yaml
-# Contains all 18 flag definitions and their directives
-# This file is shared across all platforms
-# Auto-updated when SuperFlag package is updated
-```
+**~/.superflag/default.yaml**
+- Default profile that pulls in `configs/common`
+- Other profiles (`claude.yaml`, `gemini.yaml`, …) reference directories directly, so you can chain includes without editing file lists
+
+**~/.superflag/configs/common/*.yaml**
+- Shared flag definitions; drop a new YAML file here to expose it everywhere automatically
+- Each file defines the `brief` and `directive` text for that flag inside a `directives` block
+
+**~/.superflag/configs/<profile>/**
+- Platform-specific overrides (`configs/gemini/seq.yaml`, `configs/claude/meta.yaml`, …)
+- Files in these folders are only loaded when the matching profile is active
 
 ## Development
 
@@ -378,7 +411,7 @@ npm uninstall -g @superclaude-org/superflag
 ```
 
 **Safety Features:**
-- Configuration files are backed up to `~/flags.yaml.backup_YYYYMMDD_HHMMSS` before removal
+- Legacy configs (`flags.yaml`, `superflag.yaml`) are backed up with timestamped `.backup` / `.legacy` filenames before replacement
 - Interactive confirmation for each platform
 - Selective removal - keep other platforms intact
 

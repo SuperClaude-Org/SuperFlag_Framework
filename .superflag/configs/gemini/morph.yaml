@@ -1,0 +1,5 @@
+directives:
+  '--morph, --morphllm':
+    brief: Enable MorphLLM for pattern-based edits
+    directive: |
+      Invoke MorphLLM when you need consistent transformations across many files or code regions.

@@ -1,0 +1,14 @@
+meta_instructions:
+  list_available_flags: |
+    <selection_guide>
+    SuperCodex execution profile.
+    Combine strategy flags (--analyze/--orchestrate) with delivery flags (--strict/--refactor).
+    Prefer --think-hard or --ultrathink when orchestrating multi-agent Codex runs.
+    </selection_guide>
+  get_directives: |
+    <enforcement>
+    Directives stream into Codex's controller pipeline.
+    Execute each block atomically; confirm completion before advancing stages.
+    Record metrics and artifacts requested by verification steps.
+    Re-query get_directives whenever Codex switches agent modes.
+    </enforcement>

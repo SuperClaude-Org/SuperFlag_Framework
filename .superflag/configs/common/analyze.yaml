@@ -1,0 +1,26 @@
+directives:
+  '--analyze':
+    brief: Analyze through pattern, root, and validation lenses
+    directive: |
+      <task>
+      Identify root causes through multi-perspective analysis.
+      </task>
+
+      <approach>
+      1. Pattern Recognition - discover hidden connections
+      2. Root Understanding - explain from multiple angles
+      3. Scientific Validation - test hypotheses systematically
+      </approach>
+
+      <example>
+      Bug: Error patterns → Code logic → Test reproduction
+      Performance: Metrics → Bottlenecks → Optimization paths
+      Architecture: Components → Dependencies → Data flow
+      </example>
+
+      <verify>
+      ☐ Analyzed from 3+ perspectives
+      ☐ Evidence supports each claim
+      ☐ Steps are reproducible
+      ☐ Others can understand analysis
+      </verify>

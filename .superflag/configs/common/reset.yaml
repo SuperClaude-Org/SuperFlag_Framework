@@ -1,0 +1,6 @@
+directives:
+  '--reset':
+    brief: Clear session cache and force fresh directives
+    directive: |
+      Flag session reset completed.
+      Use when context lost or directives not recognized.

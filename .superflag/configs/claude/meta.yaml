@@ -1,0 +1,38 @@
+meta_instructions:
+  list_available_flags: |
+    <selection_guide>
+    Claude Code workspace detected.
+    Match flags to the current file set and desired toolchains.
+    Combine complementary flags for synthesis, diagnostics, and delivery.
+    Start with --analyze or --brainstorm when requirements are unclear.
+    </selection_guide>
+  get_directives: |
+    <enforcement>
+    These directives populate Claude's <system-reminder> verbatim.
+    Execute each step fully before responding in the chat pane.
+    Preserve transparency markers and verification checklists.
+    Re-run get_directives when context changes or after --reset.
+    </enforcement>
+hook_messages:
+  auto_authority:
+    flags:
+      - '--auto'
+    message: |
+      Activating FULL CONTEXTUAL AUTHORITY for autonomous flag selection.
+      Review <available_flags> and <flag_selection_strategy> in SUPERFLAG.md.
+
+      Execute: get_directives([...selected_flags])
+  auto_with_context:
+    message: |
+      Enhancing {other_flags} with contextual flags.
+      Review <available_flags> and <flag_selection_strategy> in SUPERFLAG.md.
+
+      Execute: get_directives({other_flags}, ...additional_flags)
+  reset_protocol:
+    flags:
+      - '--reset'
+    message: Execute get_directives({flag_list}) to reset session state and apply directives.
+  standard_execution:
+    message: Execute get_directives({flag_list}) for systematic implementation.
+  reset_with_others:
+    message: Execute get_directives({flag_list}) for systematic implementation and to reset session state.

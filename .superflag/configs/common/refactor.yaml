@@ -1,0 +1,29 @@
+directives:
+  '--refactor':
+    brief: Refactor code for quality and maintainability
+    directive: |
+      <task>
+      Improve code structure without changing functionality.
+      </task>
+
+      <approach>
+      Martin Fowler's Safe Refactoring:
+      • Small steps with continuous testing
+      • Structure improvement, not features
+      • Express intent through naming
+      • Eliminate duplication (Rule of Three)
+      </approach>
+
+      <priorities>
+      1. Duplicate code (highest risk)
+      2. Long methods/classes
+      3. Excessive parameters
+      4. Feature envy
+      </priorities>
+
+      <verify>
+      ☐ Tests still pass
+      ☐ Cyclomatic complexity ≤ 10
+      ☐ Method length ≤ 20 lines
+      ☐ Code duplication < 3%
+      </verify>

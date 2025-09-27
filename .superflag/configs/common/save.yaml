@@ -1,0 +1,25 @@
+directives:
+  '--save':
+    brief: Create handoff documents for seamless continuation
+    directive: |
+      <task>
+      Document project state for perfect handoff.
+      </task>
+
+      <structure>
+      HANDOFF_REPORT_[Topic]_YYYY_MM_DD_HHMM.md
+
+      Required sections:
+      • System Status: Current state
+      • Critical Issues: Problems and causes
+      • Architecture: Components and flow
+      • Completed: What's done
+      • Next Actions: Priority tasks
+      • Key Files: Essential locations
+      </structure>
+
+      <verify>
+      ☐ Can newcomer start immediately?
+      ☐ Current state clear?
+      ☐ Next steps specified?
+      </verify>

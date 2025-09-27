@@ -1,0 +1,19 @@
+directives:
+  '--readonly':
+    brief: Analyze and review without modifying files
+    directive: |
+      Read-only operations:
+      • Code review and analysis
+      • Performance profiling
+      • Dependency analysis
+      • Documentation review
+
+      Restrictions:
+      • No file modifications
+      • No commits or pushes
+
+      <verify>
+      ☐ Deep analysis done
+      ☐ All perspectives considered
+      ☐ Zero modifications
+      </verify>

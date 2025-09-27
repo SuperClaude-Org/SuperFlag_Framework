@@ -1,0 +1,6 @@
+directives:
+  '--auto':
+    brief: 'META FLAG: Grants autonomous flag selection authority (reference <available_flags> and <flag_selection_strategy> in SUPERFLAG.md)'
+    directive: |
+      META FLAG: Skip get_directives(['--auto']). Instead, use <available_flags> and <flag_selection_strategy> from SUPERFLAG.md.
+      Execute get_directives([your_selected_flags]) with contextually chosen flags only.

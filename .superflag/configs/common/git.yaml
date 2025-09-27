@@ -1,0 +1,38 @@
+directives:
+  '--git':
+    brief: Anonymous commit messages with technical precision
+    directive: |
+      <task>
+      Professional commits with complete anonymity and ASCII-only text.
+      </task>
+
+      <approach>
+      Core Principles:
+      • Complete anonymity - no attribution or origin references
+      • Focus on WHAT changed, never WHO made changes
+      • ASCII text only - no Unicode decorations
+      • Pure technical content - no marketing or emotions
+      • NEVER push unless user explicitly requests
+
+      Format: <type>(<scope>): <subject>
+      Types: feat, fix, docs, style, refactor, test, chore
+      </approach>
+
+      <examples>
+      BAD: "🚀 feat: Add amazing new feature"
+      GOOD: "feat: Add user authentication"
+
+      BAD: "fix: Fixed bug (by Claude/AI/Bot)"
+      GOOD: "fix: Resolve null pointer exception"
+
+      BAD: "✨ style: Make code beautiful"
+      GOOD: "style: Format according to ESLint rules"
+      </examples>
+
+      <verify>
+      ☐ Atomic commits (one logical change)
+      ☐ ASCII text only (no emojis)
+      ☐ Zero attribution or signatures
+      ☐ Professional technical language
+      ☐ No push without explicit request
+      </verify>

@@ -1,0 +1,5 @@
+directives:
+  '--no-mcp':
+    brief: Disable all MCP servers
+    directive: |
+      Run with native tools only. If a task requires an MCP server, provide an alternative approach.

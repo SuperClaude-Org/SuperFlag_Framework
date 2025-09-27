@@ -1,0 +1,22 @@
+directives:
+  '--todo':
+    brief: Track task progress with structured todos
+    directive: |
+      <task>
+      Manage complex tasks with TodoWrite tool.
+      </task>
+
+      <approach>
+      • Break into measurable units
+      • One task in_progress at a time
+      • Update status in real-time
+      • Mark complete immediately
+
+      States: pending → in_progress → completed
+      </approach>
+
+      <verify>
+      ☐ Clear completion criteria
+      ☐ Single active task
+      ☐ Real-time updates
+      </verify>

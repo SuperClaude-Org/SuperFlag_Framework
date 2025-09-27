@@ -18,11 +18,13 @@ export class SuperFlagServer {
   private sessionManager: SessionManager;
   private directiveLoader: DirectiveLoader;
   private flagsYamlPath: string;
+  private profiles: string[];
 
   constructor() {
     this.sessionManager = new SessionManager();
     this.directiveLoader = new DirectiveLoader();
-    this.flagsYamlPath = path.join(os.homedir(), ".superflag", "flags.yaml");
+    this.flagsYamlPath = path.join(os.homedir(), ".superflag", "default.yaml");
+    this.profiles = this.resolveProfiles();
   }
 
   getTools(): Tool[] {
@@ -142,10 +144,14 @@ Args:
     resetRequested: boolean
   ): Promise<DirectiveResult> {
     // Load directives
-    const directives = await this.directiveLoader.loadDirectives(flags, this.flagsYamlPath);
+    const directives = await this.directiveLoader.loadDirectives(flags, this.flagsYamlPath, {
+      profiles: this.profiles,
+    });
 
     // Load YAML configuration for enforcement text
-    const config = await this.directiveLoader.loadYamlConfig(this.flagsYamlPath);
+    const config = await this.directiveLoader.loadYamlConfig(this.flagsYamlPath, {
+      profiles: this.profiles,
+    });
 
     // Categorize flags
     const newFlags: string[] = [];
@@ -258,5 +264,34 @@ Args:
         },
       ],
     };
+  }
+
+  private resolveProfiles(): string[] {
+    const envProfiles =
+      process.env.SUPERFLAG_PROFILES ??
+      process.env.SUPERFLAG_PROFILE ??
+      process.env.SUPERFLAG_PLATFORM ?? "";
+
+    const profiles = envProfiles
+      .split(/[,\s]+/)
+      .map(profile => profile.trim())
+      .filter(profile => profile.length > 0);
+
+    if (profiles.length === 0) {
+      return ["default"];
+    }
+
+    const seen = new Set<string>();
+    const result: string[] = [];
+    for (const profile of profiles) {
+      const normalized = profile.replace(/\.ya?ml$/i, "");
+      if (!normalized || seen.has(normalized)) {
+        continue;
+      }
+      seen.add(normalized);
+      result.push(normalized);
+    }
+
+    return result;
   }
 }

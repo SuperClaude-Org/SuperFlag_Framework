@@ -1,0 +1,31 @@
+directives:
+  '--performance':
+    brief: Optimize performance through measurement and profiling
+    directive: |
+      <task>
+      Optimize for measurable performance improvements.
+      </task>
+
+      <philosophy>
+      Knuth's Law: "Premature optimization is the root of all evil"
+      Measure first, optimize the proven bottlenecks.
+      </philosophy>
+
+      <approach>
+      1. Measure baseline performance
+      2. Profile to find actual bottlenecks
+      3. Optimize the 10% causing 90% slowdown
+      4. Verify improvements quantitatively
+      </approach>
+
+      <example>
+      GOOD: Profile → DB query 2s → Add index → 50ms (-97%)
+      BAD: "Feels slow" → Random micro-optimizations
+      </example>
+
+      <verify>
+      ☐ Baseline measured
+      ☐ Bottleneck identified with data
+      ☐ Improvement quantified
+      ☐ No premature optimization
+      </verify>
