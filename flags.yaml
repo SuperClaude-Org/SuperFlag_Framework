@@ -224,28 +224,112 @@ directives:
       </verify>
 
   "--save":
-    brief: "Create handoff documents for seamless continuation"
+    brief: "Document SuperFlag development for seamless continuation"
     directive: |
       <task>
-      Document project state for perfect handoff.
+      Document SuperFlag project state with idempotent upsert semantics.
       </task>
 
-      <structure>
-      HANDOFF_REPORT_[Topic]_YYYY_MM_DD_HHMM.md
+      <scope>
+      🚨 CRITICAL: This applies ONLY to SuperFlag project.
+      • File: ./HANDOFF.md (SuperFlag repository root)
+      • DO NOT create .omc/handoffs/ structure (reserved for other projects)
+      • DO NOT mix with project-memory.json or other project metadata
+      • SuperFlag is a single MCP project - maintain clear boundaries
+      </scope>
 
-      Required sections:
-      • System Status: Current state
-      • Critical Issues: Problems and causes
-      • Architecture: Components and flow
-      • Completed: What's done
-      • Next Actions: Priority tasks
-      • Key Files: Essential locations
+      <structure>
+      ---
+      project: "superflag"
+      last_updated: YYYY-MM-DDTHH:MM:SSZ
+      version: x.y.z
+      status: in_progress | completed | blocked
+      tech_stack: [TypeScript, Node.js, MCP]
+      primary_goal: "Current development objective"
+      ---
+
+      # SuperFlag Development Handoff
+
+      ## State (current phase snapshot)
+      - **Phase:** Component/Feature being worked on
+      - **Working branch:** Branch name or commit reference
+      - **Last commit:** Commit hash + message
+      - **Blocker:** None or description
+
+      ## History (append-only work log - TABLE FORMAT)
+      | When | What | Commit | Notes |
+      |------|------|--------|-------|
+      | 2026-02-15T04:30Z | Action taken | hash | Details |
+
+      ## Decisions Made (rationale for choices)
+      - **Decision**: Rationale and trade-offs
+      - Format: key decision at top, trade-offs documented
+
+      ## Lessons Learned (discoveries preventing repeated mistakes)
+      - Technical finding and implications
+      - One per bullet, concise
+
+      ## Code Changes Summary (file-level impact overview)
+      | File | Action | Purpose |
+      |------|--------|---------|
+      | path/file.ts | Created/Modified/Deleted | Why changed |
+
+      ## Dependencies & Tools (non-obvious tool versions)
+      - Only record dependencies not obvious from package.json
+      - Include rationale if choosing over alternatives
+
+      ## Blockers & Resolutions (current impediments)
+      - [x] Resolved: Blocker description → Solution → Commit ref
+      - [ ] Open: Blocker description → Current status
+
+      ## Final Implementation (when status: completed)
+      Concise summary of what was built, architecture snapshot.
+      Entry points and configuration references only.
+
+      ## Testing Notes (verification evidence for handoff)
+      | Claim | Evidence | Status |
+      |-------|----------|--------|
+      | Feature works | Test output/command | PASS/PENDING |
+
+      ## Configuration (only if non-standard setup required)
+      - Variable name: description and constraints
+      - Include any environment-specific setup
+
+      ## Next Actions (prioritized handoff tasks)
+      1. Next concrete action
+      2. Next concrete action
       </structure>
 
+      <idempotency>
+      UPSERT Semantics:
+      • Filename: ./HANDOFF.md (NO timestamps in filename)
+      • Internal timestamps: Record in each section row (History, Blockers, etc)
+      • Each --save updates the SAME file
+      • Append to History table, update State section
+      • Result: Always 1 current document (idempotent + memento)
+      </idempotency>
+
+      <git_integration>
+      • Reference commits by hash in History table rows
+      • When git-master creates commits, manually append row to History
+      • Use actual commit SHAs (immutable, survive rebases)
+      </git_integration>
+
+      <yaml_frontmatter>
+      • Manage manually (no hooks or scripts needed for SuperFlag)
+      • Update last_updated timestamp on each --save
+      • Update version field (x.y.z) when releasing
+      • Update status field (in_progress | completed | blocked)
+      </yaml_frontmatter>
+
       <verify>
-      ☐ Can newcomer start immediately?
-      ☐ Current state clear?
-      ☐ Next steps specified?
+      ☐ File: ./HANDOFF.md exists in SuperFlag root?
+      ☐ YAML frontmatter present and valid?
+      ☐ Boundary check: SuperFlag scope only (no cross-project data)?
+      ☐ History table entries have timestamps?
+      ☐ All sections appropriate to current phase?
+      ☐ Next session can start immediately from State + Next Actions?
+      ☐ Idempotent: Same file updated, no new timestamp files created?
       </verify>
 
   "--parallel":
