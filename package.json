@@ -36,6 +36,7 @@
     "dist",
     "hooks",
     "flags.yaml",
+    "SUPERFLAG.md",
     "README.md"
   ],
   "dependencies": {

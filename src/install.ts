@@ -897,69 +897,13 @@ function getDefaultFlagsYaml(): string {
 }
 
 function getSuperflagMdContent(): string {
-  return `# SuperFlag
-MCP Protocol: get_directives([flags])
-
-## Core Workflow
-<core_workflow>
-When flags detected in user input:
-1. Execute MCP tool: get_directives([detected_flags])
-2. Apply directives completely and in order
-3. Verify compliance at checkpoints
-</core_workflow>
-
-## Available Flags
-
-### Analysis & Optimization
-- **--analyze**: Multi-perspective root cause analysis
-- **--performance**: Measure and optimize bottlenecks
-- **--refactor**: Safe code structure improvements
-- **--strict**: Zero-error execution with transparency
-- **--lean**: Eliminate waste with minimal implementation
-
-### Discovery & Documentation
-- **--discover**: Research existing solutions first
-- **--explain**: Progressive disclosure from overview to details
-- **--save**: Create handoff documents for continuity
-- **--load**: Restore context from handoff documents
-
-### Workflow Management
-- **--parallel**: Execute independent tasks simultaneously
-- **--todo**: Track progress with structured task management
-- **--seq**: Sequential step-by-step problem solving
-- **--collab**: Co-develop with quantitative validation
-
-### Output Control
-- **--concise**: Professional, culturally neutral content
-- **--git**: Anonymous, ASCII-only commit messages
-- **--readonly**: Analysis without file modifications
-
-### Meta Control
-- **--reset**: Clear session and force fresh directives
-- **--auto**: Grant autonomous flag selection authority
-
-## Flag Selection Strategy
-<flag_selection_strategy>
-When --auto is used:
-1. Analyze user intent and task requirements
-2. Select complementary flags that work together
-3. Avoid conflicting flags (e.g., --readonly with --git)
-4. Prioritize based on task type:
-   - Bugs: --analyze, --strict, --todo
-   - Performance: --performance, --lean
-   - Features: --discover, --parallel, --todo
-   - Documentation: --explain, --save, --concise
-</flag_selection_strategy>
-
-## Examples
-\`\`\`
-"Fix this bug --analyze --strict"
-"Optimize the code --performance --lean"
-"Refactor safely --refactor --git"
-"Research alternatives --discover --parallel"
-"Track complex task --todo --seq"
-\`\`\`
-`;
+  // Read SUPERFLAG.md from the package root
+  const superflagPath = path.join(__dirname, "..", "SUPERFLAG.md");
+  try {
+    return fsSync.readFileSync(superflagPath, "utf-8");
+  } catch {
+    throw new Error(`SUPERFLAG.md not found at ${superflagPath}`);
+  }
 }
 
 function getPythonHookContent(): string {
