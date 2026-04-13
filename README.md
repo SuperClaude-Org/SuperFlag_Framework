@@ -1,29 +1,12 @@
 # SuperFlag
 
-> **🚀 TYPESCRIPT MIGRATION COMPLETE**: SuperFlag has been fully migrated to TypeScript/Node.js with MCP support!
-
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-supported-F37435)
-![NPM](https://img.shields.io/badge/NPM-latest-CB3837)
+![NPM](https://img.shields.io/badge/NPM-v3.1.4-CB3837)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6)
 
 > **Note**: This project was inspired by the pioneering work in [SuperClaude Framework](https://github.com/SuperClaude-Org/SuperClaude_Framework) and [SuperGemini Framework](https://github.com/SuperClaude-Org/SuperGemini_Framework). Special thanks to [SuperClaude-Org](https://github.com/SuperClaude-Org) team members [@NomenAK](https://github.com/NomenAK) and [@mithun50](https://github.com/mithun50) whose work made this possible.
 
-SuperFlag provides 18 contextual flags that guide AI assistant behavior through precise directives. It exposes an MCP stdio server for seamless integration with modern AI development tools.
-
-## Migration Notice
-
-**Python version is DEPRECATED** - All users should migrate to the TypeScript version:
-
-### For Existing Python Users
-```bash
-# 1. Uninstall old Python version
-superflag uninstall  # Remove configurations
-pip uninstall superflag  # Remove package
-
-# 2. Install new TypeScript version
-npm install -g @superclaude-org/superflag
-superflag install cc  # Configure Claude Code
-```
+SuperFlag provides 21 contextual flags that guide AI assistant behavior through precise directives. It exposes an MCP stdio server for seamless integration with modern AI development tools.
 
 ## Quick Start
 
@@ -36,37 +19,60 @@ superflag install
 
 # Direct installation for Claude Code
 superflag install cc
-
-# MCP server automatically registered during installation
 ```
 
 Then use flags in your AI assistant:
 - "Fix this bug --analyze --strict"
 - "Refactor --auto" (auto-select optimal flags)
 - "--save" (create handoff documentation)
+- "Run with 3 agents --team-3"
 
-## 18 Available Flags
+## 21 Available Flags
 
+### Analysis & Optimization
 | Flag | Purpose |
 |------|---------|
-| `--analyze` | Multi-perspective systematic analysis |
-| `--auto` | AI selects optimal flag combination |
-| `--collab` | Co-develop solutions through trust-based iteration |
-| `--concise` | Minimal, professional communication |
-| `--discover` | Research existing solutions before building |
-| `--explain` | Progressive disclosure explanations |
-| `--git` | Version control best practices |
-| `--lean` | Essential focus only, eliminate waste |
-| `--load` | Load handoff documentation context |
-| `--parallel` | Multi-agent concurrent processing |
-| `--performance` | Speed and efficiency optimization |
-| `--readonly` | Analysis only, no modifications |
-| `--refactor` | Safe code structure improvements |
-| `--reset` | Reset session state, clear flag cache |
-| `--save` | Create handoff documentation |
-| `--seq` | Sequential step-by-step thinking |
-| `--strict` | Zero-error enforcement with transparency |
-| `--todo` | Structured task management |
+| `--analyze` | Multi-perspective evidence-based analysis with 3+ independent perspectives |
+| `--performance` | Measure-first optimization with baseline metrics and ROI calculation |
+| `--refactor` | Safe atomic refactoring with continuous test verification |
+| `--strict` | Zero-error transparent execution with verify-before-claim |
+| `--lean` | Minimal resource-efficient implementation eliminating waste |
+
+### Discovery & Documentation
+| Flag | Purpose |
+|------|---------|
+| `--discover` | Research-first solution selection with 3+ alternatives comparison |
+| `--explain` | Progressive domain-expert disclosure from overview to details |
+| `--save` | Document development context for seamless continuation |
+| `--load` | Load and verify handoff context against git reality |
+
+### Workflow Management
+| Flag | Purpose |
+|------|---------|
+| `--team` | Multi-agent coordination with optional count (`--team-N`) |
+| `--skill` | Context-aware skill invocation — auto-selects appropriate skill |
+| `--todo` | Scope-locked task tracking with real-time progress |
+| `--seq` | Dependency-ordered sequential execution with checkpoints |
+| `--collab` | Evidence-anchored peer collaboration with quantitative validation |
+
+### Output Control
+| Flag | Purpose |
+|------|---------|
+| `--concise` | Precise professional content prioritizing accuracy over brevity |
+| `--git` | Anonymous atomic commits with ASCII-only WHY-focused messages |
+| `--readonly` | Analysis-only mode with absolute no-modification guarantee |
+
+### Execution Discipline
+| Flag | Purpose |
+|------|---------|
+| `--integrity` | Verification-before-claim with evidence for every assertion |
+| `--evolve` | Monotonic forward improvement with regression prevention |
+
+### Meta Control
+| Flag | Purpose |
+|------|---------|
+| `--reset` | Clear session and force fresh directives |
+| `--auto` | Grant autonomous flag selection authority |
 
 ## Installation
 
@@ -101,7 +107,7 @@ claude mcp list
 ```
 
 Creates:
-- `~/.claude/CLAUDE.md` - References SuperFlag
+- `~/.claude/CLAUDE.md` - References @SUPERFLAG.md
 - `~/.claude/SUPERFLAG.md` - Flag instructions
 - `~/.claude/hooks/superflag.py` - Flag detection hook
 
@@ -129,7 +135,7 @@ superflag install gemini
 ```
 
 Creates:
-- `~/.gemini/GEMINI.md` - References SuperFlag
+- `~/.gemini/GEMINI.md` - References @SUPERFLAG.md
 - `~/.gemini/SUPERFLAG.md` - Flag instructions
 
 **Manual MCP Registration (if auto-registration fails):**
@@ -187,12 +193,14 @@ All platforms support using flags in natural conversation:
 "Optimize this code --auto"
 
 # Specific flag combinations
-"--analyze --strict"  # Thorough analysis with zero-error enforcement
-"--save --explain"    # Create documentation with detailed explanations
-"--reset --todo"      # Reset session and start task tracking
+"--analyze --strict"       # Thorough analysis with zero-error enforcement
+"--save --explain"         # Create documentation with detailed explanations
+"--reset --todo"           # Reset session and start task tracking
+"--team-3 --todo"          # Multi-agent work with 3 agents + task tracking
 
-# Sequential workflows
-"Review architecture --discover --analyze --seq"
+# Parametric flags
+"--team-5"                 # Spawn 5 role-specialized agents
+"--team"                   # Auto-determine team size from task complexity
 ```
 
 ### Platform-Specific Usage
@@ -248,7 +256,7 @@ get_directives(['--flag1', '--flag2'])
 ```
 ~/.claude/
 ├── CLAUDE.md                    # References @SUPERFLAG.md
-├── SUPERFLAG.md                 # Flag instructions (auto-updated)
+├── SUPERFLAG.md                 # Flag instructions
 └── hooks/
     └── superflag.py             # Flag detection hook
 ```
@@ -257,7 +265,7 @@ get_directives(['--flag1', '--flag2'])
 ```
 ~/.gemini/
 ├── GEMINI.md                    # References @SUPERFLAG.md
-├── SUPERFLAG.md                 # Flag instructions (auto-updated)
+├── SUPERFLAG.md                 # Flag instructions
 └── settings.json                # MCP server configuration (auto-registered)
 ```
 
@@ -275,69 +283,13 @@ get_directives(['--flag1', '--flag2'])
 └── flags.yaml                  # Flag definitions and directives (all platforms)
 ```
 
-## Configuration File Contents
-
-### What Gets Created
-
-**~/.claude/CLAUDE.md**
-```markdown
-@SUPERFLAG.md
-```
-
-**~/.gemini/GEMINI.md**
-```markdown
-@SUPERFLAG.md
-```
-
-**~/.continue/config.yaml**
-```yaml
-rules:
-  - title: SuperFlag
-    pattern: '--\w+'
-    message: >-
-      Flag detected. Execute MCP: get_directives([detected_flags])
-
-      Available: --analyze, --strict, --performance, --refactor, --lean, --discover, --explain, --save, --parallel,
-      --todo, --seq, --concise, --git, --readonly, --load, --collab, --reset, --auto
-```
-
-**~/.continue/mcpServers/superflag.yaml**
-```yaml
-name: SuperFlag
-command: npx
-args:
-  - '@superclaude-org/superflag@latest'
-env: {}
-```
-
-**~/.gemini/settings.json** (MCP section)
-```json
-{
-  "mcpServers": {
-    "superflag": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["@superclaude-org/superflag@latest"],
-      "env": {}
-    }
-  }
-}
-```
-
-**~/.superflag/flags.yaml**
-```yaml
-# Contains all 18 flag definitions and their directives
-# This file is shared across all platforms
-# Auto-updated when SuperFlag package is updated
-```
-
 ## Development
 
 ### Local Development
 ```bash
 # Clone repository
-git clone <repository>
-cd superflag
+git clone https://github.com/SuperClaude-Org/SuperFlag_Framework.git
+cd SuperFlag_Framework
 
 # Install dependencies
 npm install
@@ -352,6 +304,13 @@ superflag --version
 
 ### Version Management
 Update version in `src/version.ts` - all other files sync automatically during build.
+
+### Project Structure
+- `flags.yaml` - All 21 flag definitions and directives (3-Layer architecture)
+- `SUPERFLAG.md` - Flag instructions installed to user config directories
+- `src/server.ts` - MCP stdio server
+- `src/install.ts` - Interactive installer/uninstaller
+- `src/directives.ts` - Flag parsing from flags.yaml
 
 ## Uninstallation
 
@@ -378,31 +337,9 @@ npm uninstall -g @superclaude-org/superflag
 ```
 
 **Safety Features:**
-- Configuration files are backed up to `~/flags.yaml.backup_YYYYMMDD_HHMMSS` before removal
+- Configuration files are backed up before removal
 - Interactive confirmation for each platform
 - Selective removal - keep other platforms intact
-
-## Migration from Python
-
-### What Changed
-- ✅ **Language**: Python → TypeScript/Node.js
-- ✅ **Performance**: Faster startup and execution
-- ✅ **Installation**: `pip` → `npm`
-- ✅ **Dependencies**: No Python runtime required
-- ✅ **MCP Integration**: Native TypeScript MCP support
-
-### Breaking Changes
-- Python package completely deprecated
-- `pip install superflag` no longer supported
-- Configuration file locations remain the same
-- Flag behavior and directives unchanged
-
-### Migration Steps
-1. **Backup**: Export any custom configurations
-2. **Uninstall**: Remove Python version completely
-3. **Install**: Set up TypeScript version
-4. **Verify**: Test flag functionality
-5. **Cleanup**: Remove Python environments if no longer needed
 
 ## Troubleshooting
 
@@ -453,15 +390,10 @@ superflag install cc  # Auto-register again
   - Continue: `~/.continue/config.yaml`
 - Check MCP server connection (platform-specific)
 
-**Version Conflicts**
-- Ensure Python version is completely removed
-- Use `npm list -g @superclaude-org/superflag` to verify installation
-- Clear platform caches if switching from manual to auto-registration
-
 ## License
 
 MIT
 
 ---
 
-**Need Help?** File issues at: [GitHub Repository](https://github.com/superclaude-org/superflag)
+**Need Help?** File issues at: [GitHub Repository](https://github.com/SuperClaude-Org/SuperFlag_Framework)
