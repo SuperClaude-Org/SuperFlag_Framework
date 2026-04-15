@@ -28,6 +28,7 @@ if (args[0] === "--help" || args[0] === "-h" || args[0] === "help") {
   console.log("  superflag --help, -h                 Show help");
   console.log("  superflag install [--target TARGET]  Install SuperFlag");
   console.log("  superflag uninstall [--target TARGET] Uninstall SuperFlag");
+  console.log("  superflag update                     Update ~/.superflag/flags.yaml (auto-backup)");
   console.log("  superflag                            Run as MCP server");
   console.log("\nTargets:");
   console.log("  claude-code  Claude Code platform");
@@ -37,7 +38,7 @@ if (args[0] === "--help" || args[0] === "-h" || args[0] === "help") {
   process.exit(0);
 }
 
-if (args[0] === "install" || args[0] === "uninstall") {
+if (args[0] === "install" || args[0] === "uninstall" || args[0] === "update") {
   // Delegate to install script
   import("./install.js").then(module => {
     module.handleCommand(args[0], args.slice(1));
