@@ -71,6 +71,8 @@ export async function handleCommand(command: string, args: string[] = []): Promi
       await install(target);
     } else if (command === "uninstall") {
       await uninstall(target);
+    } else if (command === "update") {
+      await updateFlagsYaml();
     } else {
       console.error(chalk.red(`Unknown command: ${command}`));
       showUsage();
@@ -82,6 +84,8 @@ export async function handleCommand(command: string, args: string[] = []): Promi
       await interactiveInstall();
     } else if (command === "uninstall") {
       await interactiveUninstall();
+    } else if (command === "update") {
+      await updateFlagsYaml();
     } else {
       console.error(chalk.red(`Unknown command: ${command}`));
       showUsage();
@@ -733,6 +737,52 @@ async function setupFlagsYaml(flagsPath: string): Promise<boolean> {
 
     return true;
   }
+}
+
+export async function updateFlagsYaml(): Promise<void> {
+  const flagsPath = path.join(os.homedir(), ".superflag", "flags.yaml");
+  const bundledPath = path.join(__dirname, "..", "flags.yaml");
+
+  // Verify bundled source exists
+  try {
+    await fs.access(bundledPath);
+  } catch {
+    console.error(chalk.red(`Bundled flags.yaml not found at: ${bundledPath}`));
+    console.error(chalk.red("Package installation may be corrupted. Try reinstalling."));
+    process.exit(1);
+  }
+
+  // Ensure ~/.superflag/ exists
+  await fs.mkdir(path.dirname(flagsPath), { recursive: true });
+
+  // Backup existing file with timestamp suffix
+  let backupPath: string | null = null;
+  try {
+    await fs.access(flagsPath);
+    const timestamp = new Date()
+      .toISOString()
+      .replace(/[:.]/g, "-")
+      .slice(0, 19); // e.g. 2026-04-16T05-45-12
+    backupPath = `${flagsPath}.${timestamp}.bak`;
+    await fs.copyFile(flagsPath, backupPath);
+  } catch {
+    // No existing file — skip backup
+  }
+
+  // Overwrite with bundled version
+  await fs.copyFile(bundledPath, flagsPath);
+
+  // Report
+  console.log(chalk.cyan.bold(`\nSuperFlag v${VERSION} - Update`));
+  console.log(chalk.cyan("============================================================\n"));
+  if (backupPath) {
+    console.log(chalk.yellow(`✓ Backup created: ${backupPath}`));
+  } else {
+    console.log(chalk.gray("  No existing flags.yaml — fresh install."));
+  }
+  console.log(chalk.green(`✓ Updated:       ${flagsPath}`));
+  console.log(chalk.gray(`  Source:        ${bundledPath}\n`));
+  console.log(chalk.yellow("⚠ Restart your MCP client (Claude Code/Gemini CLI) to reload flags."));
 }
 
 async function unregisterHookFromSettings(): Promise<boolean> {
